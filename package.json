@@ -8,7 +8,7 @@
     "script": "node src/script1.ts",
     "build": "NODE_ENV=production webpack --config ./config/webpack/webpack.config.prod.js --progress --colors",
     "test": "eslint .",
-    "dev": "NODE_ENV=development webpack-dev-server --config ./config/webpack/webpack.config.dev.js"
+    "dev": "NODE_OPTIONS=--openssl-legacy-provider NODE_ENV=development webpack-dev-server --config ./config/webpack/webpack.config.dev.js"
   },
   "repository": {
     "type": "git",
@@ -27,7 +27,7 @@
     "@babel/preset-env": "^7.4.5",
     "@babel/preset-react": "^7.0.0",
     "@babel/runtime-corejs3": "^7.4.5",
-    "aqueduct-components": "^0.3.19",
+    "aqueduct-components": "^0.3.20",
     "autoprefixer": "^9.6.0",
     "axios": "^0.18.0",
     "babel-core": "^7.0.0-bridge.0",
