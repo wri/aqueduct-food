@@ -21,7 +21,7 @@ Authorization: {{token}}
   "info": {
     "sources": [
       {
-        "source-url": "https://ebrary.ifpri.org/digital/collection/p15738coll2/id/129825/",
+        "source-url": "https://cgspace.cgiar.org/items/7b88a53b-5f32-4405-a7d5-a0e25677b9a8",
         "source-name": "IFPRI IMPACT Model 3.4"
       },
       {
