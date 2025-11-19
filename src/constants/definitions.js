@@ -113,7 +113,7 @@ export const APP_DEFINITIONS = {
         <li>Kilocalories per person represents the availability of calories per person.</li>
         <li>Share of population at risk of hunger represents the percentage of the population at risk of suffering from malnourishment.</li>
       </ul>`,
-    source: '<a href="https://ebrary.ifpri.org/digital/collection/p15738coll2/id/129825/" target="_blank" rel="noopener noreferrer">IFPRI IMPACT Model 3.4</a> & <a href="https://doi.org/10.1016/j.gfs.2024.100755" target="_blank" rel="noopener noreferrer">Research paper</a>'
+    source: '<a href="https://cgspace.cgiar.org/items/7b88a53b-5f32-4405-a7d5-a0e25677b9a8" target="_blank" rel="noopener noreferrer">IFPRI IMPACT Model 3.4</a> & <a href="https://doi.org/10.1016/j.gfs.2024.100755" target="_blank" rel="noopener noreferrer">Research paper</a>'
   },
   timeframe: {
     title: 'Timeframe',
@@ -122,7 +122,7 @@ export const APP_DEFINITIONS = {
       <p>Baseline reflects different years depending on the dataset. Crop area baseline data are from 2020, food security baseline data are from 2020, and water risk baseline data are based on 1979 to 2019. Future projections are not available if water risk indicators without future projections have been selected (i.e., interannual variability, drought risk, groundwater table decline, and coastal eutrophication potential).</p>
       <p>In future years, select "absolute value" to see the projected water risk in the selected year. Future projections are based on business-as-usual climate change and water demand projections.</p>
     `,
-    source: 'For baseline and future water risk indicators & methodology, see <a href="https://mapspam.info/data/" target="_blank" rel="noopener noreferrer">Aqueduct 4.0</a>. For Food Security projections see <a href="https://ebrary.ifpri.org/digital/collection/p15738coll2/id/129825/" target="_blank" rel="noopener noreferrer">IFPRI IMPACT Model 3.4</a>.'
+    source: 'For baseline and future water risk indicators & methodology, see <a href="https://mapspam.info/data/" target="_blank" rel="noopener noreferrer">Aqueduct 4.0</a>. For Food Security projections see <a href="https://cgspace.cgiar.org/items/7b88a53b-5f32-4405-a7d5-a0e25677b9a8" target="_blank" rel="noopener noreferrer">IFPRI IMPACT Model 3.4</a>.'
   },
   area: {
     title: 'Area',
