@@ -20,7 +20,7 @@ FOOD_OPTIONS.unshift({
 export const SCOPE_OPTIONS = [
   { value: 'global', label: 'Global' },
   { value: 'country', label: 'Country' },
-  // { value: 'supply_chain', label: 'Supply Chain' }
+  { value: 'supply_chain', label: 'Supply Chain' }
 ];
 
 export const CATEGORIES = {

@@ -35,6 +35,7 @@ import {
 // utils
 import { logEvent } from 'utils/analytics';
 import CropSelect from './filter-items/crops/crop-select';
+import InputPanel from './filter-items/input-panel';
 
 class Filters extends PureComponent {
   constructor(props) {
@@ -280,7 +281,7 @@ class Filters extends PureComponent {
           )}
         >
           {withScope && filters.scope === 'supply_chain' && (
-            <div className="filters-section">
+            <div className="filters-section" style={{ paddingRight: 32 }}>
               <h2>Supply Chain</h2>
               <p>
                 Highlight basins exceeding desired condition threshold{' '}
@@ -295,6 +296,11 @@ class Filters extends PureComponent {
                   />
                 </button>
               </p>
+              <InputPanel
+                onSubmit={(entries) => {
+                  this.updateFilters(entries, 'supplyChainLocations');
+                }}
+              />
             </div>
           )}
           <div>
