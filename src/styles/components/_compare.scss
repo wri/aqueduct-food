@@ -96,10 +96,10 @@
   display: flex;
 
   .compareitem-column {
+    width: 100%;
     @include only-desktop {
       width: 50%;
     }
-    width: 100%;
   }
 }
 
@@ -110,12 +110,11 @@
 }
 
 .compareitem-map {
+  position: relative;
+  width: 100%;
   @include only-mobile {
     height: calc(100vh - 212px);
   }
-
-  position: relative;
-  width: 100%;
   & > div {
     height: 100%;
   }

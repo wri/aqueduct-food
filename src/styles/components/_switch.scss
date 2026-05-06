@@ -1,3 +1,5 @@
+@use 'sass:color';
+
 .c-switch {
   display: flex;
 
@@ -16,7 +18,7 @@
     color: $color-deactivate;
 
     &:hover {
-      color: lighten($color-deactivate, 12.5%);
+      color: color.adjust($color-deactivate, $lightness: 12.5%);
     }
 
     &.-selected {

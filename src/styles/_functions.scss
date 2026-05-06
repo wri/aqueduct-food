@@ -1,3 +1,5 @@
+@use 'sass:map';
+
 @function palette($palette, $tone: 'primary') {
-    @return map-get(map-get($palettes, $palette), $tone);
+    @return map.get(map.get($palettes, $palette), $tone);
 }

@@ -42,7 +42,24 @@ const config = {
       },
       {
         test: /\.(scss|sass)$/,
-        use: ['style-loader', 'css-loader', 'sass-loader', 'postcss-loader']
+        use: [
+          'style-loader',
+          'css-loader',
+          {
+            loader: 'sass-loader',
+            options: {
+              sassOptions: {
+                // Suppress deprecation warnings from node_modules (aqueduct-components etc.)
+                quietDeps: true,
+                // Silence deprecations that require major refactors to fix:
+                // - legacy-js-api: needs webpack 5 + sass-loader v13+ to use modern API
+                // - import: @import→@use migration requires full SCSS module system rewrite
+                silenceDeprecations: ['legacy-js-api', 'import'],
+              },
+            },
+          },
+          'postcss-loader',
+        ]
       },
       {
         test: /\.(eot|ttf|woff2|woff)$/,

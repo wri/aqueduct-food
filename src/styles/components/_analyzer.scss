@@ -1,3 +1,5 @@
+@use 'sass:color';
+
 .analyzer {
   padding: ($space-1 * 4);
   color: $color-text-1;
@@ -108,7 +110,7 @@
 }
 
 // Might make sense to move this to aqueduct-components eventually
-$dark-sand: darken(palette(sand, primary), 8%);
+$dark-sand: color.adjust(palette(sand, primary), $lightness: -8%);
 
 .analyzer-tabs {
   width: 100%;
@@ -175,14 +177,14 @@ $dark-sand: darken(palette(sand, primary), 8%);
     margin: $space-1 * 2 0 0;
 
     > .apply-analysis-btn {
-      padding: ($space-1 / 2) $space-1 * 2;
+      padding: calc($space-1 / 2) $space-1 * 2;
       background: palette(blue, dark);
       font-size: $font-size-big;
       color: palette(white);
       text-transform: none;
 
       &:hover {
-        background: darken(palette(blue, dark), 10%);
+        background: color.adjust(palette(blue, dark), $lightness: -10%);
       }
     }
   }
@@ -210,7 +212,7 @@ $dark-sand: darken(palette(sand, primary), 8%);
   }
 
   &:hover {
-    background-color: lighten($color-primary, 20%);
+    background-color: color.adjust($color-primary, $lightness: 20%);
   }
 }
 
@@ -295,7 +297,7 @@ $dark-sand: darken(palette(sand, primary), 8%);
       height: 20px;
       width: 100%;
       overflow: hidden;
-      background-color: lighten($color-primary, 50%);
+      background-color: color.adjust($color-primary, $lightness: 50%);
   
       .value {
         position: absolute;
@@ -307,7 +309,7 @@ $dark-sand: darken(palette(sand, primary), 8%);
         &.indeterminate {
           transform-origin: 0% 50%;
           animation: indeterminateAnimation 1s infinite linear;
-          background-color: lighten($color-primary, 20%);
+          background-color: color.adjust($color-primary, $lightness: 20%);
         }
       }
     }
