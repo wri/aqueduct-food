@@ -33,7 +33,7 @@ import MapHeader from './header';
 import Legend from './legend';
 
 // helpers
-import { prepareMarkerLayer, updateCartoCSS } from './helpers';
+import { prepareMarkerLayer, updateCartoCSS, getSupplyChainLocationsLayer } from './helpers';
 import { parseMetadataLayer } from './utils';
 
 // constants
@@ -58,14 +58,16 @@ class Map extends PureComponent {
       filters,
       foodLayers,
       mapState,
-      parametrization
+      parametrization,
+      supplyChainLocations
     } = this.props;
     const {
       layers: nextLayers,
       filters: nextFilters,
       foodLayers: nextFoodLayers,
       mapState: nextMapState,
-      parametrization: nextParametrization
+      parametrization: nextParametrization,
+      supplyChainLocations: nextSupplyChainLocations
     } = nextProps;
     const { zoom } = mapState;
     const { zoom: nextZoom } = nextMapState;
@@ -74,6 +76,7 @@ class Map extends PureComponent {
     const foodLayersChanged = !isEqual(foodLayers, nextFoodLayers);
     const zoomChanged = zoom !== nextZoom;
     const parametrizationChanged = !isEqual(parametrization, nextParametrization);
+    const supplyChainLocationsChanged = !isEqual(supplyChainLocations, nextSupplyChainLocations);
     const isSingleCropLayer = '383f2ae6-6925-49e8-9e56-e5a84b38fd4a';
     const isAllCropsLayer = 'dcffe68a-2c51-4847-aa08-0f9e471a8ceb';
 
@@ -124,6 +127,13 @@ class Map extends PureComponent {
         layers: nextLayers,
         loading: true
       });
+    }
+
+    if (supplyChainLocationsChanged) {
+      const scLayer = getSupplyChainLocationsLayer(nextSupplyChainLocations);
+      const { layers: currentLayers } = this.state;
+      const withoutSCLayer = currentLayers.filter(_layer => !_layer.isSupplyChainLayer);
+      this.setState({ layers: scLayer ? [...withoutSCLayer, scLayer] : withoutSCLayer });
     }
   }
 
@@ -409,6 +419,7 @@ Map.propTypes = {
   legend: PropTypes.bool,
   foodLayers: PropTypes.array.isRequired,
   countries: PropTypes.array.isRequired,
+  supplyChainLocations: PropTypes.array.isRequired,
   toggleModal: PropTypes.func.isRequired,
   setMapLocation: PropTypes.func.isRequired,
   setLayerParametrization: PropTypes.func.isRequired

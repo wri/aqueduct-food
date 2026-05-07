@@ -9,7 +9,11 @@ import {
 function generateTemplateCSV() {
   const rows = [
     ['type', 'latitude', 'longitude', 'radius_km', 'country_iso', 'state', 'crop', 'irrigation', 'volume'],
-    ['latlong', '-1.2921', '36.8219', '50', '', '', 'wheat', 'irrigated', '1000'],
+    ['latlong', '1.2921', '-76.8219', '50', '', '', 'wheat', 'irrigated', '1000'],
+    ['latlong', '-1.2921', '-74.8219', '50', '', '', 'wheat', 'irrigated', '1000'],
+    ['latlong', '0.2921', '-72.8219', '50', '', '', 'wheat', 'irrigated', '1000'],
+    ['latlong', '3.2921', '-70.8219', '50', '', '', 'wheat', 'irrigated', '1000'],
+    ['latlong', '-3.2921', '-68.8219', '50', '', '', 'wheat', 'irrigated', '1000'],
     ['country', '', '', '', 'KEN', 'Nairobi', '', 'rainfed', ''],
   ];
   return rows.map(r => r.join(',')).join('\n');

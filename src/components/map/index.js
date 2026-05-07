@@ -12,7 +12,8 @@ import {
   getActiveLayers,
   getFoodLayers,
   getCountryBounds,
-  getLayerGroup
+  getLayerGroup,
+  getSupplyChainLocations
 } from './selectors';
 
 // component
@@ -29,7 +30,8 @@ export default connect(
     countries: state.countries.list,
     filters: state.filters,
     analysis: state.analysis,
-    parametrization: state.map.parametrization
+    parametrization: state.map.parametrization,
+    supplyChainLocations: getSupplyChainLocations(state)
   }),
   dispatch => ({
     setMapLocation: (props) => { dispatch(setMapLocation(props)); },

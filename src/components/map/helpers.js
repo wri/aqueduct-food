@@ -10,6 +10,7 @@ import { fetchQuery } from 'services/query';
 // utils
 import { reduceParams, reduceSqlParams } from 'utils/layers/params-parser';
 import { getMarkerLayer } from 'utils/layers/markers/bubble-layer';
+import { validateEntry, entryStatus } from 'utils/supply-analyzer';
 
 // constants
 import { CROP_OPTIONS } from 'constants/crops';
@@ -146,7 +147,79 @@ export const prepareMarkerLayer = async (_layer = {}, _params = {}, _zoom) => {
   return getMarkerLayer(markers, _layer);
 };
 
+const SUPPLY_CHAIN_LAYER_STYLE = {
+  color: '#e84040',
+  fillColor: '#e84040',
+  weight: 1.5,
+  opacity: 0.9,
+  fillOpacity: 0.35,
+};
+
+/**
+ * Converts valid (non-erroring) lat/long supply-chain entries into a
+ * Leaflet geoJSON layer spec ready for LayerManager.
+ *
+ * Uses `window.L` (consistent with how PluginLeaflet itself accesses Leaflet)
+ * inside `pointToLayer` so that L.circle / L.circleMarker are always the
+ * runtime instances, not a module-scoped import that could differ.
+ *
+ * A timestamp is appended to the id on every call so that LayerManager always
+ * mounts a fresh <Layer> when entries change (same pattern as getMarkerLayer).
+ *
+ * @param {Object[]} entries - InputPanel entry objects
+ * @returns {Object|null} layer spec or null when there are no valid entries
+ */
+export const getSupplyChainLocationsLayer = (entries = []) => {
+  const valid = entries.filter(
+    e => e.type === 'latlong' && entryStatus(validateEntry(e)) !== 'error'
+  );
+
+  if (!valid.length) return null;
+
+  const features = valid.map(entry => ({
+    type: 'Feature',
+    geometry: {
+      type: 'Point',
+      coordinates: [parseFloat(entry.longitude), parseFloat(entry.latitude)],
+    },
+    properties: {
+      radiusM: entry.radius ? parseFloat(entry.radius) * 1000 : null,
+      crop: entry.crop,
+      irrigation: entry.irrigation,
+    },
+  }));
+
+  return {
+    id: `supply-chain-locations-${Date.now()}`,
+    provider: 'leaflet',
+    isSupplyChainLayer: true,
+    layerConfig: {
+      type: 'geoJSON',
+      parse: false,
+      body: { type: 'FeatureCollection', features },
+      options: {
+        // pointToLayer is kept as a live function so it is NOT JSON-serialised.
+        // window.L mirrors what PluginLeaflet uses internally.
+        pointToLayer: (feature, latlng) => {
+          const { L } = window;
+          const { radiusM } = feature.properties;
+          if (radiusM) {
+            return L.circle(latlng, { ...SUPPLY_CHAIN_LAYER_STYLE, radius: radiusM });
+          }
+          return L.circleMarker(latlng, {
+            ...SUPPLY_CHAIN_LAYER_STYLE,
+            radius: 7,
+            fillOpacity: 0.85,
+          });
+        },
+      },
+    },
+    legendConfig: {},
+  };
+};
+
 export default {
   updateCartoCSS,
-  prepareMarkerLayer
+  prepareMarkerLayer,
+  getSupplyChainLocationsLayer
 };
