@@ -481,6 +481,365 @@
       color: #f87171;
     }
   }
+
+  // ── Status dot (in entries list) ───────────────────────────────────────
+  .entry-status-dot {
+    flex-shrink: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+
+    &.-valid   { background-color: #4ade80; }
+    &.-warning { background-color: #fbbf24; }
+    &.-error   { background-color: #f87171; }
+  }
+
+  // ── Review button ──────────────────────────────────────────────────────
+  .review-btn {
+    flex: 1;
+    padding: ($space-1 * 0.75) ($space-1 * 2);
+    border-radius: 4px;
+    font-size: $font-size-small;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    background-color: palette(blue, primary);
+    color: #fff;
+    transition: background-color 0.15s;
+    text-align: center;
+
+    &:hover {
+      background-color: palette(blue, dark);
+    }
+  }
+
+  // ── Review screen ──────────────────────────────────────────────────────
+  .review-screen {
+    display: flex;
+    flex-direction: column;
+    gap: $space-1 * 1.5;
+  }
+
+  .review-header {
+    display: flex;
+    align-items: center;
+    gap: $space-1;
+    padding-bottom: $space-1;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+
+    .review-back-btn {
+      font-size: $font-size-small;
+      color: rgba(255, 255, 255, 0.55);
+      transition: color 0.12s;
+
+      &:hover { color: #fff; }
+    }
+
+    .review-title {
+      font-size: $font-size-small;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: rgba(255, 255, 255, 0.85);
+    }
+  }
+
+  .review-summary-bar {
+    display: flex;
+    align-items: center;
+    gap: $space-1;
+    padding: ($space-1) ($space-1 * 1.5);
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 4px;
+
+    .summary-stat {
+      display: flex;
+      align-items: baseline;
+      gap: 5px;
+      font-size: $font-size-small;
+      color: rgba(255, 255, 255, 0.6);
+
+      .stat-count {
+        font-size: 20px;
+        font-weight: 700;
+        line-height: 1;
+      }
+
+      &.-valid   { .stat-count { color: #4ade80; } }
+      &.-warning { .stat-count { color: #fbbf24; } }
+      &.-error   { .stat-count { color: #f87171; } }
+    }
+
+    .summary-divider {
+      width: 1px;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.15);
+      margin: 0 ($space-1 * 0.5);
+    }
+  }
+
+  .review-body {
+    display: flex;
+    flex-direction: column;
+    gap: $space-1 * 1.5;
+    max-height: 340px;
+    overflow-y: auto;
+    padding-right: 4px;
+
+    &::-webkit-scrollbar { width: 4px; }
+    &::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.04); }
+    &::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.18); border-radius: 2px; }
+  }
+
+  .review-section {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .review-section-title {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    color: rgba(255, 255, 255, 0.4);
+    margin-bottom: 2px;
+  }
+
+  .review-entry {
+    border-radius: 4px;
+    overflow: hidden;
+    border-left: 3px solid transparent;
+
+    &.-error   { border-left-color: #f87171; background: rgba(248, 113, 113, 0.07); }
+    &.-warning { border-left-color: #fbbf24; background: rgba(251, 191, 36, 0.07); }
+    &.-valid   { border-left-color: #4ade80; background: rgba(74, 222, 128, 0.05); }
+  }
+
+  .review-entry-header {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 10px;
+  }
+
+  .review-status-icon {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: 800;
+    line-height: 1;
+
+    &.-valid   { background: #4ade80; color: #14532d; }
+    &.-warning { background: #fbbf24; color: #78350f; }
+    &.-error   { background: #f87171; color: #7f1d1d; }
+  }
+
+  .review-entry-summary {
+    flex: 1;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.82);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .entry-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .edit-entry-btn {
+    font-size: 11px;
+    padding: 2px 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    color: rgba(255, 255, 255, 0.6);
+    transition: border-color 0.12s, color 0.12s;
+
+    &:hover {
+      border-color: rgba(255, 255, 255, 0.5);
+      color: #fff;
+    }
+  }
+
+  .remove-review-btn {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.12s, color 0.12s;
+
+    &:hover {
+      background-color: rgba(248, 113, 113, 0.25);
+      color: #f87171;
+    }
+  }
+
+  // ── Issues list (within review entry) ─────────────────────────────────
+  .issues-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 0 10px ($space-1) 36px;
+
+    .issue-item {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+      font-size: 11px;
+
+      &.-error   { color: rgba(255, 255, 255, 0.75); }
+      &.-warning { color: rgba(255, 255, 255, 0.65); }
+    }
+
+    .issue-tag {
+      flex-shrink: 0;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 1px 5px;
+      border-radius: 3px;
+
+      &.-error   { background: rgba(248, 113, 113, 0.25); color: #fca5a5; }
+      &.-warning { background: rgba(251, 191, 36, 0.25);  color: #fde68a; }
+    }
+
+    .issue-message { flex: 1; }
+
+    .fix-btn {
+      flex-shrink: 0;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 3px;
+      border: 1px solid;
+      transition: background-color 0.12s;
+
+      &.-error {
+        border-color: rgba(248, 113, 113, 0.6);
+        color: #fca5a5;
+        &:hover { background-color: rgba(248, 113, 113, 0.15); }
+      }
+
+      &.-warning {
+        border-color: rgba(251, 191, 36, 0.6);
+        color: #fde68a;
+        &:hover { background-color: rgba(251, 191, 36, 0.15); }
+      }
+    }
+  }
+
+  // ── Inline edit form ───────────────────────────────────────────────────
+  .inline-edit-form {
+    padding: $space-1 * 1.5 $space-1 * 1.5 $space-1;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.25);
+
+    .entry-form {
+      gap: $space-1;
+
+      .form-row.-two-col { gap: $space-1 * 0.75; }
+    }
+  }
+
+  .inline-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: $space-1;
+    margin-top: $space-1;
+  }
+
+  .save-edit-btn {
+    padding: ($space-1 * 0.6) ($space-1 * 1.5);
+    background-color: palette(blue, primary);
+    color: #fff;
+    border-radius: 3px;
+    font-size: $font-size-small;
+    font-weight: 500;
+    transition: background-color 0.12s;
+
+    &:hover { background-color: palette(blue, dark); }
+  }
+
+  .cancel-edit-btn {
+    padding: ($space-1 * 0.6) ($space-1 * 1.5);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 3px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: $font-size-small;
+    transition: border-color 0.12s, color 0.12s;
+
+    &:hover {
+      border-color: rgba(255, 255, 255, 0.5);
+      color: #fff;
+    }
+  }
+
+  // ── Review footer ──────────────────────────────────────────────────────
+  .review-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    padding-top: $space-1 * 1.5;
+  }
+
+  .review-footer-note {
+    font-size: 11px;
+    color: #fca5a5;
+    margin-bottom: $space-1;
+  }
+
+  .review-footer-actions {
+    display: flex;
+    gap: $space-1;
+
+    .submit-btn {
+      flex: 1;
+      padding: ($space-1 * 0.75) ($space-1 * 2);
+      border-radius: 4px;
+      font-size: $font-size-small;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      transition: background-color 0.15s;
+      text-align: center;
+      background-color: palette(blue, primary);
+      color: #fff;
+
+      &:hover { background-color: palette(blue, dark); }
+
+      &[disabled] {
+        background-color: rgba(255, 255, 255, 0.15);
+        color: rgba(255, 255, 255, 0.35);
+        cursor: not-allowed;
+      }
+
+      &.-all {
+        flex: 0 0 auto;
+        background-color: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: rgba(255, 255, 255, 0.65);
+
+        &:hover {
+          border-color: rgba(255, 255, 255, 0.6);
+          color: #fff;
+          background-color: transparent;
+        }
+      }
+    }
+  }
 }
 
 .c-icon {

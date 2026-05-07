@@ -1,169 +1,210 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import { CustomSelect, RadioGroup, IRRIGATION_OPTIONS } from 'aqueduct-components';
-import { CROP_OPTIONS } from 'constants/crops';
+import { CustomSelect, RadioGroup } from 'aqueduct-components';
 import CountrySelect from 'components/country-select';
+import {
+  PANEL_MODES,
+  ENTRY_MODES,
+  INITIAL_LATLONG_FORM,
+  INITIAL_COUNTRY_FORM,
+  SORTED_CROP_OPTIONS,
+  FILTERED_IRRIGATION_OPTIONS,
+} from 'constants/supply-analyzer';
+import {
+  downloadTemplate,
+  parseCSVText,
+  summariseEntry,
+  validateEntry,
+  entryStatus,
+  validateLatlongFields,
+  validateCountryFields,
+} from 'utils/supply-analyzer';
 
-const PANEL_MODES = [
-  { value: 'manual', label: 'Manual Entry' },
-  { value: 'bulk', label: 'Bulk Upload' },
-];
+// ─── Shared field-set renderers (module-level, no `this`) ────────────────────
 
-const ENTRY_MODES = [
-  { value: 'latlong', label: 'Lat / Long' },
-  { value: 'country', label: 'Country + State' },
-];
+function renderLatlongFields(form, setField, errs) {
+  return (
+    <div className="entry-form">
+      <div className="form-row -two-col">
+        <div className={`form-field${errs.latitude ? ' -invalid' : ''}`}>
+          <span className="field-label">
+            Latitude <span className="required-mark">*</span>
+          </span>
+          <input
+            type="number"
+            className="field-input"
+            placeholder="-90 to 90"
+            min="-90"
+            max="90"
+            step="any"
+            value={form.latitude}
+            onChange={e => setField('latitude', e.target.value)}
+          />
+          {errs.latitude && <span className="field-error">{errs.latitude}</span>}
+        </div>
+        <div className={`form-field${errs.longitude ? ' -invalid' : ''}`}>
+          <span className="field-label">
+            Longitude <span className="required-mark">*</span>
+          </span>
+          <input
+            type="number"
+            className="field-input"
+            placeholder="-180 to 180"
+            min="-180"
+            max="180"
+            step="any"
+            value={form.longitude}
+            onChange={e => setField('longitude', e.target.value)}
+          />
+          {errs.longitude && <span className="field-error">{errs.longitude}</span>}
+        </div>
+      </div>
 
-const INITIAL_LATLONG_FORM = {
-  latitude: '',
-  longitude: '',
-  radius: '',
-  crop: null,
-  irrigation: null,
-  volume: '',
-};
+      <div className="form-row">
+        <div className="form-field">
+          <span className="field-label">
+            Radius <span className="optional-mark">(km — optional)</span>
+          </span>
+          <input
+            type="number"
+            className="field-input"
+            placeholder="e.g. 50"
+            min="0"
+            step="any"
+            value={form.radius}
+            onChange={e => setField('radius', e.target.value, false)}
+          />
+        </div>
+      </div>
 
-const INITIAL_COUNTRY_FORM = {
-  country: null,
-  countryName: '',
-  state: '',
-  irrigation: null,
-  volume: '',
-};
+      <div className={`form-row${errs.crop ? ' -invalid' : ''}`}>
+        <div className="form-field">
+          <span className="field-label">
+            Crop <span className="required-mark">*</span>
+          </span>
+          <CustomSelect
+            search
+            options={SORTED_CROP_OPTIONS}
+            value={form.crop}
+            onValueChange={selected => setField('crop', selected ? selected.value : null)}
+          />
+          {errs.crop && <span className="field-error">{errs.crop}</span>}
+        </div>
+      </div>
 
-const SORTED_CROP_OPTIONS = CROP_OPTIONS
-  .filter(c => c.value !== 'all')
-  .sort((a, b) => (a.label > b.label ? 1 : -1));
+      <div className={`form-row${errs.irrigation ? ' -invalid' : ''}`}>
+        <div className="form-field">
+          <span className="field-label">
+            Irrigation <span className="required-mark">*</span>
+          </span>
+          <RadioGroup
+            name={`irrigation-${form.latitude || 'new'}`}
+            items={FILTERED_IRRIGATION_OPTIONS}
+            selected={form.irrigation}
+            onChange={({ value }) => setField('irrigation', value)}
+            className="-inline"
+          />
+          {errs.irrigation && <span className="field-error">{errs.irrigation}</span>}
+        </div>
+      </div>
 
-const FILTERED_IRRIGATION_OPTIONS = IRRIGATION_OPTIONS.filter(i => i.value !== 'all');
-
-const VALID_IRRIGATION_VALUES = new Set(IRRIGATION_OPTIONS.map(i => i.value));
-const VALID_CROP_VALUES = new Set(CROP_OPTIONS.map(c => c.value));
-
-function generateTemplateCSV() {
-  const rows = [
-    ['type', 'latitude', 'longitude', 'radius_km', 'country_iso', 'state', 'crop', 'irrigation', 'volume'],
-    ['latlong', '-1.2921', '36.8219', '50', '', '', 'wheat', 'irrigated', '1000'],
-    ['country', '', '', '', 'KEN', 'Nairobi', '', 'rainfed', ''],
-  ];
-  return rows.map(r => r.join(',')).join('\n');
+      <div className="form-row">
+        <div className="form-field">
+          <span className="field-label">
+            Volume <span className="optional-mark">(optional)</span>
+          </span>
+          <input
+            type="number"
+            className="field-input"
+            placeholder="e.g. 1000"
+            min="0"
+            step="any"
+            value={form.volume}
+            onChange={e => setField('volume', e.target.value, false)}
+          />
+        </div>
+      </div>
+    </div>
+  );
 }
 
-function downloadTemplate() {
-  const csv = generateTemplateCSV();
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'location-input-template.csv';
-  a.click();
-  URL.revokeObjectURL(url);
+function renderCountryFields(form, setField, errs) {
+  return (
+    <div className="entry-form">
+      <div className={`form-row${errs.country ? ' -invalid' : ''}`}>
+        <div className="form-field">
+          <span className="field-label">
+            Country <span className="required-mark">*</span>
+          </span>
+          <CountrySelect
+            value={form.country !== null ? form.country : undefined}
+            onValueChange={(selected) => {
+              setField('country', selected ? selected.value : null);
+              setField('countryName', selected ? selected.label : '');
+            }}
+          />
+          {errs.country && <span className="field-error">{errs.country}</span>}
+        </div>
+      </div>
+
+      <div className="form-row">
+        <div className="form-field">
+          <span className="field-label">
+            State <span className="optional-mark">(optional)</span>
+          </span>
+          <input
+            type="text"
+            className="field-input"
+            placeholder="e.g. Nairobi County"
+            value={form.state}
+            onChange={e => setField('state', e.target.value, false)}
+          />
+        </div>
+      </div>
+
+      <div className={`form-row${errs.irrigation ? ' -invalid' : ''}`}>
+        <div className="form-field">
+          <span className="field-label">
+            Irrigation <span className="required-mark">*</span>
+          </span>
+          <RadioGroup
+            name={`country-irrigation-${form.country || 'new'}`}
+            items={FILTERED_IRRIGATION_OPTIONS}
+            selected={form.irrigation}
+            onChange={({ value }) => setField('irrigation', value)}
+            className="-inline"
+          />
+          {errs.irrigation && <span className="field-error">{errs.irrigation}</span>}
+        </div>
+      </div>
+
+      <div className="form-row">
+        <div className="form-field">
+          <span className="field-label">
+            Volume <span className="optional-mark">(optional)</span>
+          </span>
+          <input
+            type="number"
+            className="field-input"
+            placeholder="e.g. 1000"
+            min="0"
+            step="any"
+            value={form.volume}
+            onChange={e => setField('volume', e.target.value, false)}
+          />
+        </div>
+      </div>
+    </div>
+  );
 }
 
-function parseCSVText(text) {
-  const lines = text.trim().split('\n').map(l => l.trim()).filter(Boolean);
-  if (lines.length < 2) return { parsed: [], skipped: [] };
-
-  const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
-  const idx = col => headers.indexOf(col);
-  const parsed = [];
-  const skipped = [];
-  const base = Date.now();
-
-  lines.slice(1).forEach((line, i) => {
-    const cols = line.split(',').map(c => c.trim());
-    const get = col => (idx(col) >= 0 ? cols[idx(col)] || '' : '');
-    const rowNum = i + 2;
-    const type = get('type').toLowerCase();
-
-    if (type === 'latlong') {
-      const lat = parseFloat(get('latitude'));
-      const lng = parseFloat(get('longitude'));
-      const crop = get('crop');
-      const irrigation = get('irrigation');
-
-      const latOk = !Number.isNaN(lat) && lat >= -90 && lat <= 90;
-      const lngOk = !Number.isNaN(lng) && lng >= -180 && lng <= 180;
-      const cropOk = VALID_CROP_VALUES.has(crop);
-      const irrigOk = VALID_IRRIGATION_VALUES.has(irrigation);
-
-      if (!latOk || !lngOk || !cropOk || !irrigOk) {
-        const reasons = [];
-        if (!latOk) reasons.push('latitude');
-        if (!lngOk) reasons.push('longitude');
-        if (!cropOk) reasons.push('crop');
-        if (!irrigOk) reasons.push('irrigation');
-        skipped.push({ row: rowNum, reasons });
-        return;
-      }
-
-      parsed.push({
-        id: base + i,
-        type: 'latlong',
-        latitude: String(lat),
-        longitude: String(lng),
-        radius: get('radius_km'),
-        crop,
-        irrigation,
-        volume: get('volume'),
-      });
-    } else if (type === 'country') {
-      const country = get('country_iso');
-      const irrigation = get('irrigation');
-
-      const countryOk = !!country;
-      const irrigOk = VALID_IRRIGATION_VALUES.has(irrigation);
-
-      if (!countryOk || !irrigOk) {
-        const reasons = [];
-        if (!countryOk) reasons.push('country_iso');
-        if (!irrigOk) reasons.push('irrigation');
-        skipped.push({ row: rowNum, reasons });
-        return;
-      }
-
-      parsed.push({
-        id: base + i,
-        type: 'country',
-        country,
-        countryName: country,
-        state: get('state'),
-        irrigation,
-        volume: get('volume'),
-      });
-    } else {
-      skipped.push({ row: rowNum, reasons: ['unknown type'] });
-    }
-  });
-
-  return { parsed, skipped };
-}
-
-function summariseEntry(entry) {
-  if (entry.type === 'latlong') {
-    const lat = parseFloat(entry.latitude).toFixed(4);
-    const lng = parseFloat(entry.longitude).toFixed(4);
-    const cropLabel = CROP_OPTIONS.find(c => c.value === entry.crop)?.label || entry.crop;
-    return [
-      `${lat}, ${lng}`,
-      entry.radius ? `${entry.radius} km radius` : null,
-      cropLabel,
-      entry.irrigation,
-      entry.volume ? `Vol: ${entry.volume}` : null,
-    ].filter(Boolean).join(' · ');
-  }
-  return [
-    entry.countryName,
-    entry.state || null,
-    entry.irrigation,
-    entry.volume ? `Vol: ${entry.volume}` : null,
-  ].filter(Boolean).join(' · ');
-}
+// ─── Component ────────────────────────────────────────────────────────────────
 
 class InputPanel extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
+      // Input phase
       panelMode: 'manual',
       entryMode: 'latlong',
       latlongForm: { ...INITIAL_LATLONG_FORM },
@@ -173,53 +214,41 @@ class InputPanel extends PureComponent {
       isDragging: false,
       errors: {},
       bulkResult: null,
+      // Review phase
+      screen: 'input', // 'input' | 'review'
+      editingId: null,
+      editDraft: null,
+      editDraftErrors: {},
     };
 
     this.fileInputRef = React.createRef();
+
     this.addEntry = this.addEntry.bind(this);
     this.removeEntry = this.removeEntry.bind(this);
     this.handleDrop = this.handleDrop.bind(this);
     this.handleFileChange = this.handleFileChange.bind(this);
     this.processUpload = this.processUpload.bind(this);
+    this.openReview = this.openReview.bind(this);
+    this.startEdit = this.startEdit.bind(this);
+    this.cancelEdit = this.cancelEdit.bind(this);
+    this.saveEdit = this.saveEdit.bind(this);
+    this.applyValidEntries = this.applyValidEntries.bind(this);
   }
 
-  validateLatlongForm() {
-    const { latlongForm } = this.state;
-    const errors = {};
-    const lat = parseFloat(latlongForm.latitude);
-    const lng = parseFloat(latlongForm.longitude);
-
-    if (latlongForm.latitude === '' || Number.isNaN(lat)) errors.latitude = 'Required';
-    else if (lat < -90 || lat > 90) errors.latitude = 'Must be between -90 and 90';
-
-    if (latlongForm.longitude === '' || Number.isNaN(lng)) errors.longitude = 'Required';
-    else if (lng < -180 || lng > 180) errors.longitude = 'Must be between -180 and 180';
-
-    if (!latlongForm.crop) errors.crop = 'Required';
-    if (!latlongForm.irrigation) errors.irrigation = 'Required';
-    return errors;
-  }
-
-  validateCountryForm() {
-    const { countryForm } = this.state;
-    const errors = {};
-    if (!countryForm.country) errors.country = 'Required';
-    if (!countryForm.irrigation) errors.irrigation = 'Required';
-    return errors;
-  }
+  // ── Form submission ──────────────────────────────────────────────────────
 
   addEntry() {
     const { entryMode } = this.state;
-    const errors = entryMode === 'latlong'
-      ? this.validateLatlongForm()
-      : this.validateCountryForm();
+    const { latlongForm: llForm, countryForm: coForm } = this.state;
+    const formErrors = entryMode === 'latlong'
+      ? validateLatlongFields(llForm)
+      : validateCountryFields(coForm);
 
-    if (Object.keys(errors).length > 0) {
-      this.setState({ errors });
+    if (Object.keys(formErrors).length > 0) {
+      this.setState({ errors: formErrors });
       return;
     }
 
-    const { latlongForm: llForm, countryForm: coForm } = this.state;
     const entry = entryMode === 'latlong'
       ? { type: 'latlong', ...llForm }
       : { type: 'country', ...coForm };
@@ -233,10 +262,10 @@ class InputPanel extends PureComponent {
   }
 
   removeEntry(id) {
-    this.setState(({ entries }) => ({
-      entries: entries.filter(e => e.id !== id),
-    }));
+    this.setState(({ entries }) => ({ entries: entries.filter(e => e.id !== id) }));
   }
+
+  // ── Bulk upload ──────────────────────────────────────────────────────────
 
   handleFileChange(file) {
     if (file) this.setState({ uploadFile: file, bulkResult: null });
@@ -268,224 +297,86 @@ class InputPanel extends PureComponent {
     reader.readAsText(uploadFile);
   }
 
+  // ── Review screen ────────────────────────────────────────────────────────
+
+  openReview() {
+    this.setState({ screen: 'review', editingId: null, editDraft: null, editDraftErrors: {} });
+  }
+
+  startEdit(entry) {
+    this.setState({ editingId: entry.id, editDraft: { ...entry }, editDraftErrors: {} });
+  }
+
+  cancelEdit() {
+    this.setState({ editingId: null, editDraft: null, editDraftErrors: {} });
+  }
+
+  saveEdit() {
+    const { editDraft, editingId } = this.state;
+    const formErrors = editDraft.type === 'latlong'
+      ? validateLatlongFields(editDraft)
+      : validateCountryFields(editDraft);
+
+    if (Object.keys(formErrors).length > 0) {
+      this.setState({ editDraftErrors: formErrors });
+      return;
+    }
+
+    this.setState(({ entries }) => ({
+      entries: entries.map(e => (e.id === editingId ? { ...editDraft, id: editingId } : e)),
+      editingId: null,
+      editDraft: null,
+      editDraftErrors: {},
+    }));
+  }
+
+  applyQuickFix(id, fix, fixValue) {
+    this.setState(({ entries }) => ({
+      entries: entries.map((entry) => {
+        if (entry.id !== id) return entry;
+        if (fix === 'swap') {
+          return { ...entry, latitude: entry.longitude, longitude: entry.latitude };
+        }
+        if (fix === 'crop') {
+          return { ...entry, crop: fixValue };
+        }
+        return entry;
+      }),
+    }));
+  }
+
+  applyValidEntries() {
+    const { entries } = this.state;
+    const { onSubmit } = this.props;
+    const valid = entries.filter(e => entryStatus(validateEntry(e)) !== 'error');
+    onSubmit(valid);
+  }
+
+  // ── Form renderers ───────────────────────────────────────────────────────
+
   renderLatlongForm() {
     const { latlongForm, errors } = this.state;
-
     const setField = (field, value, clearError = true) => {
       this.setState(({ latlongForm: form, errors: errs }) => ({
         latlongForm: { ...form, [field]: value },
         errors: clearError ? { ...errs, [field]: undefined } : errs,
       }));
     };
-
-    return (
-      <div className="entry-form">
-        <div className="form-row -two-col">
-          <div className={`form-field${errors.latitude ? ' -invalid' : ''}`}>
-            <span className="field-label">
-              Latitude
-              <span className="required-mark">*</span>
-            </span>
-            <input
-              id="ip-latitude"
-              type="number"
-              className="field-input"
-              placeholder="-90 to 90"
-              min="-90"
-              max="90"
-              step="any"
-              value={latlongForm.latitude}
-              onChange={e => setField('latitude', e.target.value)}
-            />
-            {errors.latitude && <span className="field-error">{errors.latitude}</span>}
-          </div>
-
-          <div className={`form-field${errors.longitude ? ' -invalid' : ''}`}>
-            <span className="field-label">
-              Longitude
-              <span className="required-mark">*</span>
-            </span>
-            <input
-              id="ip-longitude"
-              type="number"
-              className="field-input"
-              placeholder="-180 to 180"
-              min="-180"
-              max="180"
-              step="any"
-              value={latlongForm.longitude}
-              onChange={e => setField('longitude', e.target.value)}
-            />
-            {errors.longitude && <span className="field-error">{errors.longitude}</span>}
-          </div>
-        </div>
-
-        <div className="form-row">
-          <div className="form-field">
-            <span className="field-label">
-              Radius
-              <span className="optional-mark">(km &mdash; optional)</span>
-            </span>
-            <input
-              id="ip-radius"
-              type="number"
-              className="field-input"
-              placeholder="e.g. 50"
-              min="0"
-              step="any"
-              value={latlongForm.radius}
-              onChange={e => setField('radius', e.target.value, false)}
-            />
-          </div>
-        </div>
-
-        <div className={`form-row${errors.crop ? ' -invalid' : ''}`}>
-          <div className="form-field">
-            <span className="field-label">
-              Crop
-              <span className="required-mark">*</span>
-            </span>
-            <CustomSelect
-              search
-              options={SORTED_CROP_OPTIONS}
-              value={latlongForm.crop}
-              onValueChange={selected => setField('crop', selected ? selected.value : null)}
-            />
-            {errors.crop && <span className="field-error">{errors.crop}</span>}
-          </div>
-        </div>
-
-        <div className={`form-row${errors.irrigation ? ' -invalid' : ''}`}>
-          <div className="form-field">
-            <span className="field-label">
-              Irrigation
-              <span className="required-mark">*</span>
-            </span>
-            <RadioGroup
-              name="latlong-irrigation"
-              items={FILTERED_IRRIGATION_OPTIONS}
-              selected={latlongForm.irrigation}
-              onChange={({ value }) => setField('irrigation', value)}
-              className="-inline"
-            />
-            {errors.irrigation && <span className="field-error">{errors.irrigation}</span>}
-          </div>
-        </div>
-
-        <div className="form-row">
-          <div className="form-field">
-            <span className="field-label">
-              Volume
-              <span className="optional-mark">(optional)</span>
-            </span>
-            <input
-              id="ip-ll-volume"
-              type="number"
-              className="field-input"
-              placeholder="e.g. 1000"
-              min="0"
-              step="any"
-              value={latlongForm.volume}
-              onChange={e => setField('volume', e.target.value, false)}
-            />
-          </div>
-        </div>
-      </div>
-    );
+    return renderLatlongFields(latlongForm, setField, errors);
   }
 
   renderCountryForm() {
     const { countryForm, errors } = this.state;
-
     const setField = (field, value, clearError = true) => {
       this.setState(({ countryForm: form, errors: errs }) => ({
         countryForm: { ...form, [field]: value },
         errors: clearError ? { ...errs, [field]: undefined } : errs,
       }));
     };
-
-    return (
-      <div className="entry-form">
-        <div className={`form-row${errors.country ? ' -invalid' : ''}`}>
-          <div className="form-field">
-            <span className="field-label">
-              Country
-              <span className="required-mark">*</span>
-            </span>
-            <CountrySelect
-              value={countryForm.country !== null ? countryForm.country : undefined}
-              onValueChange={(selected) => {
-                this.setState(({ errors: errs }) => ({
-                  countryForm: {
-                    country: selected ? selected.value : null,
-                    countryName: selected ? selected.label : '',
-                    state: countryForm.state,
-                    irrigation: countryForm.irrigation,
-                    volume: countryForm.volume,
-                  },
-                  errors: { ...errs, country: undefined },
-                }));
-              }}
-            />
-            {errors.country && <span className="field-error">{errors.country}</span>}
-          </div>
-        </div>
-
-        <div className="form-row">
-          <div className="form-field">
-            <span className="field-label">
-              State
-              <span className="optional-mark">(optional)</span>
-            </span>
-            <input
-              id="ip-state"
-              type="text"
-              className="field-input"
-              placeholder="e.g. Nairobi County"
-              value={countryForm.state}
-              onChange={e => setField('state', e.target.value, false)}
-            />
-          </div>
-        </div>
-
-        <div className={`form-row${errors.irrigation ? ' -invalid' : ''}`}>
-          <div className="form-field">
-            <span className="field-label">
-              Irrigation
-              <span className="required-mark">*</span>
-            </span>
-            <RadioGroup
-              name="country-irrigation"
-              items={FILTERED_IRRIGATION_OPTIONS}
-              selected={countryForm.irrigation}
-              onChange={({ value }) => setField('irrigation', value)}
-              className="-inline"
-            />
-            {errors.irrigation && <span className="field-error">{errors.irrigation}</span>}
-          </div>
-        </div>
-
-        <div className="form-row">
-          <div className="form-field">
-            <span className="field-label">
-              Volume
-              <span className="optional-mark">(optional)</span>
-            </span>
-            <input
-              id="ip-co-volume"
-              type="number"
-              className="field-input"
-              placeholder="e.g. 1000"
-              min="0"
-              step="any"
-              value={countryForm.volume}
-              onChange={e => setField('volume', e.target.value, false)}
-            />
-          </div>
-        </div>
-      </div>
-    );
+    return renderCountryFields(countryForm, setField, errors);
   }
+
+  // ── Bulk result banner ───────────────────────────────────────────────────
 
   renderBulkResult() {
     const { bulkResult } = this.state;
@@ -518,15 +409,232 @@ class InputPanel extends PureComponent {
     );
   }
 
+  // ── Review screen ────────────────────────────────────────────────────────
+
+  renderInlineEditForm() {
+    const { editDraft, editDraftErrors } = this.state;
+    if (!editDraft) return null;
+
+    const setDraft = (field, value) => {
+      this.setState(({ editDraft: draft }) => ({
+        editDraft: { ...draft, [field]: value },
+        editDraftErrors: {},
+      }));
+    };
+
+    return (
+      <div className="inline-edit-form">
+        {editDraft.type === 'latlong'
+          ? renderLatlongFields(editDraft, setDraft, editDraftErrors)
+          : renderCountryFields(editDraft, setDraft, editDraftErrors)}
+        <div className="inline-form-actions">
+          <button type="button" className="cancel-edit-btn" onClick={this.cancelEdit}>
+            Cancel
+          </button>
+          <button type="button" className="save-edit-btn" onClick={this.saveEdit}>
+            Save changes
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  renderReviewEntry(entry, issues) {
+    const { editingId } = this.state;
+    const status = entryStatus(issues);
+    const isEditing = editingId === entry.id;
+
+    const ICON = { valid: '✓', warning: '!', error: '✕' };
+
+    return (
+      <div key={entry.id} className={`review-entry -${status}`}>
+        <div className="review-entry-header">
+          <span className={`review-status-icon -${status}`} aria-hidden="true">
+            {ICON[status]}
+          </span>
+          <span className={`entry-type-badge -${entry.type}`}>
+            {entry.type === 'latlong' ? 'LL' : 'CO'}
+          </span>
+          <span className="review-entry-summary">{summariseEntry(entry)}</span>
+          <div className="entry-actions">
+            <button
+              type="button"
+              className="edit-entry-btn"
+              onClick={() => (isEditing ? this.cancelEdit() : this.startEdit(entry))}
+            >
+              {isEditing ? 'Cancel' : 'Edit'}
+            </button>
+            <button
+              type="button"
+              className="remove-review-btn"
+              aria-label="Remove entry"
+              onClick={() => this.removeEntry(entry.id)}
+            >
+              &times;
+            </button>
+          </div>
+        </div>
+
+        {/* Issues list (only when not editing) */}
+        {!isEditing && issues.length > 0 && (
+          <ul className="issues-list">
+            {issues.map((issue, i) => (
+              // eslint-disable-next-line react/no-array-index-key
+              <li key={i} className={`issue-item -${issue.severity}`}>
+                <span className={`issue-tag -${issue.severity}`}>
+                  {issue.severity === 'error' ? 'Error' : 'Warning'}
+                </span>
+                <span className="issue-message">{issue.message}</span>
+                {issue.fix === 'swap' && (
+                  <button
+                    type="button"
+                    className={`fix-btn -${issue.severity}`}
+                    onClick={() => this.applyQuickFix(entry.id, 'swap')}
+                  >
+                    Swap ↔
+                  </button>
+                )}
+                {issue.fix === 'crop' && issue.suggestion && (
+                  <button
+                    type="button"
+                    className={`fix-btn -${issue.severity}`}
+                    onClick={() => this.applyQuickFix(entry.id, 'crop', issue.suggestion.value)}
+                  >
+                    Use &ldquo;{issue.suggestion.label}&rdquo;
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {isEditing && this.renderInlineEditForm()}
+      </div>
+    );
+  }
+
+  renderReviewScreen() {
+    const { entries } = this.state;
+    const { onSubmit } = this.props;
+
+    const validated = entries.map(e => ({ entry: e, issues: validateEntry(e) }));
+    const errors = validated.filter(({ issues }) => entryStatus(issues) === 'error');
+    const warnings = validated.filter(({ issues }) => entryStatus(issues) === 'warning');
+    const valid = validated.filter(({ issues }) => entryStatus(issues) === 'valid');
+    const validCount = entries.filter(e => entryStatus(validateEntry(e)) !== 'error').length;
+
+    return (
+      <div className="review-screen">
+        {/* Header */}
+        <div className="review-header">
+          <button
+            type="button"
+            className="review-back-btn"
+            onClick={() => this.setState({ screen: 'input', editingId: null, editDraft: null })}
+          >
+            &#8592; Back
+          </button>
+          <span className="review-title">Review &amp; Validate</span>
+        </div>
+
+        {/* Summary bar */}
+        <div className="review-summary-bar">
+          <span className="summary-stat -valid">
+            <span className="stat-count">{valid.length}</span> valid
+          </span>
+          <span className="summary-divider" />
+          <span className="summary-stat -warning">
+            <span className="stat-count">{warnings.length}</span> warning{warnings.length !== 1 ? 's' : ''}
+          </span>
+          <span className="summary-divider" />
+          <span className="summary-stat -error">
+            <span className="stat-count">{errors.length}</span> error{errors.length !== 1 ? 's' : ''}
+          </span>
+        </div>
+
+        <div className="review-body">
+          {/* Errors */}
+          {errors.length > 0 && (
+            <div className="review-section">
+              <p className="review-section-title">Errors — must fix before applying</p>
+              {errors.map(({ entry, issues }) => this.renderReviewEntry(entry, issues))}
+            </div>
+          )}
+
+          {/* Warnings */}
+          {warnings.length > 0 && (
+            <div className="review-section">
+              <p className="review-section-title">Warnings — review recommended</p>
+              {warnings.map(({ entry, issues }) => this.renderReviewEntry(entry, issues))}
+            </div>
+          )}
+
+          {/* Valid */}
+          {valid.length > 0 && (
+            <div className="review-section">
+              <p className="review-section-title">Valid</p>
+              {valid.map(({ entry, issues }) => this.renderReviewEntry(entry, issues))}
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="review-footer">
+          {errors.length > 0 && (
+            <p className="review-footer-note">
+              {errors.length} location{errors.length !== 1 ? 's' : ''} with errors will be excluded.
+            </p>
+          )}
+          <div className="review-footer-actions">
+            <button
+              type="button"
+              className="submit-btn"
+              disabled={validCount === 0}
+              onClick={this.applyValidEntries}
+            >
+              Apply {validCount} valid location{validCount !== 1 ? 's' : ''}
+            </button>
+            {validCount === entries.length && (
+              <button
+                type="button"
+                className="submit-btn -all"
+                onClick={() => onSubmit(entries)}
+              >
+                Apply all
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Main render ──────────────────────────────────────────────────────────
+
   render() {
     const {
+      screen,
       panelMode,
       entryMode,
       entries,
       uploadFile,
       isDragging,
     } = this.state;
-    const { onSubmit } = this.props;
+
+    if (screen === 'review') {
+      return (
+        <div className="c-input-panel">
+          {this.renderReviewScreen()}
+        </div>
+      );
+    }
+
+    // Compute live validation for the entries list status dots
+    const validatedEntries = entries.map(e => ({
+      entry: e,
+      status: entryStatus(validateEntry(e)),
+    }));
+    const errorCount = validatedEntries.filter(v => v.status === 'error').length;
 
     return (
       <div className="c-input-panel">
@@ -582,11 +690,7 @@ class InputPanel extends PureComponent {
               Valid rows will be appended to the current locations list.
             </p>
 
-            <button
-              type="button"
-              className="template-btn"
-              onClick={downloadTemplate}
-            >
+            <button type="button" className="template-btn" onClick={downloadTemplate}>
               <span className="template-btn-icon">&#8595;</span> Download Template
             </button>
 
@@ -624,11 +728,7 @@ class InputPanel extends PureComponent {
 
             {uploadFile && (
               <div className="panel-footer">
-                <button
-                  type="button"
-                  className="upload-btn"
-                  onClick={this.processUpload}
-                >
+                <button type="button" className="upload-btn" onClick={this.processUpload}>
                   Process Upload
                 </button>
                 <button
@@ -645,12 +745,12 @@ class InputPanel extends PureComponent {
           </div>
         )}
 
-        {/* Entries list — visible from both tabs */}
+        {/* Entries list with live validation status */}
         {entries.length > 0 && (
           <div className="entries-list">
             <div className="entries-list-header">
               <span className="entries-count">
-                {entries.length} location{entries.length !== 1 ? 's' : ''} added
+                {entries.length} location{entries.length !== 1 ? 's' : ''}
               </span>
               <button
                 type="button"
@@ -662,8 +762,9 @@ class InputPanel extends PureComponent {
             </div>
 
             <ul className="entries-ul">
-              {entries.map(entry => (
+              {validatedEntries.map(({ entry, status }) => (
                 <li key={entry.id} className="entry-item">
+                  <span className={`entry-status-dot -${status}`} aria-label={status} />
                   <span className={`entry-type-badge -${entry.type}`}>
                     {entry.type === 'latlong' ? 'LL' : 'CO'}
                   </span>
@@ -683,10 +784,12 @@ class InputPanel extends PureComponent {
             <div className="panel-footer -submit">
               <button
                 type="button"
-                className="submit-btn"
-                onClick={() => onSubmit(entries)}
+                className="review-btn"
+                onClick={this.openReview}
               >
-                Apply Locations
+                {errorCount > 0
+                  ? `Review & Fix (${errorCount} error${errorCount !== 1 ? 's' : ''})`
+                  : 'Review & Validate'}
               </button>
             </div>
           </div>
