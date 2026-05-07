@@ -20,6 +20,8 @@ import {
   validateCountryFields,
 } from 'utils/supply-analyzer';
 
+const LS_KEY = 'inputPanel_entries';
+
 // ─── Shared field-set renderers (module-level, no `this`) ────────────────────
 
 function renderLatlongFields(form, setField, errs) {
@@ -203,13 +205,20 @@ function renderCountryFields(form, setField, errs) {
 class InputPanel extends PureComponent {
   constructor(props) {
     super(props);
+
+    let savedEntries = [];
+    try {
+      const raw = localStorage.getItem(LS_KEY);
+      if (raw) savedEntries = JSON.parse(raw);
+    } catch (_) { /* ignore corrupt data */ }
+
     this.state = {
       // Input phase
       panelMode: 'manual',
       entryMode: 'latlong',
       latlongForm: { ...INITIAL_LATLONG_FORM },
       countryForm: { ...INITIAL_COUNTRY_FORM },
-      entries: [],
+      entries: savedEntries,
       uploadFile: null,
       isDragging: false,
       errors: {},
@@ -233,6 +242,15 @@ class InputPanel extends PureComponent {
     this.cancelEdit = this.cancelEdit.bind(this);
     this.saveEdit = this.saveEdit.bind(this);
     this.applyValidEntries = this.applyValidEntries.bind(this);
+  }
+
+  componentDidUpdate(_, prevState) {
+    const { entries } = this.state;
+    if (prevState.entries !== entries) {
+      try {
+        localStorage.setItem(LS_KEY, JSON.stringify(entries));
+      } catch (_err) { /* storage quota exceeded or private mode */ }
+    }
   }
 
   // ── Form submission ──────────────────────────────────────────────────────
