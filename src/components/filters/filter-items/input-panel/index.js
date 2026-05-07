@@ -18,7 +18,9 @@ import {
   entryStatus,
   validateLatlongFields,
   validateCountryFields,
+  findDuplicateCoordIssues,
 } from 'utils/supply-analyzer';
+import { checkPointsOutsideLand } from 'services/analysis';
 
 const LS_KEY = 'inputPanel_entries';
 
@@ -228,6 +230,9 @@ class InputPanel extends PureComponent {
       editingId: null,
       editDraft: null,
       editDraftErrors: {},
+      outsideLandIds: new Set(),
+      spatialCheckLoading: false,
+      spatialCheckError: false,
     };
 
     this.fileInputRef = React.createRef();
@@ -318,7 +323,31 @@ class InputPanel extends PureComponent {
   // ── Review screen ────────────────────────────────────────────────────────
 
   openReview() {
-    this.setState({ screen: 'review', editingId: null, editDraft: null, editDraftErrors: {} });
+    const { entries } = this.state;
+    const latlngEntries = entries.filter(e => e.type === 'latlong');
+
+    const openWithIds = (outsideLandIds, spatialCheckError = false) => {
+      this.setState({
+        screen: 'review',
+        editingId: null,
+        editDraft: null,
+        editDraftErrors: {},
+        outsideLandIds,
+        spatialCheckLoading: false,
+        spatialCheckError,
+      });
+    };
+
+    if (!latlngEntries.length) {
+      openWithIds(new Set());
+      return;
+    }
+
+    this.setState({ spatialCheckLoading: true, spatialCheckError: false });
+
+    checkPointsOutsideLand(latlngEntries)
+      .then(outsideLandIds => openWithIds(outsideLandIds))
+      .catch(() => openWithIds(new Set(), true));
   }
 
   startEdit(entry) {
@@ -330,7 +359,7 @@ class InputPanel extends PureComponent {
   }
 
   saveEdit() {
-    const { editDraft, editingId } = this.state;
+    const { editDraft, editingId, outsideLandIds } = this.state;
     const formErrors = editDraft.type === 'latlong'
       ? validateLatlongFields(editDraft)
       : validateCountryFields(editDraft);
@@ -340,33 +369,56 @@ class InputPanel extends PureComponent {
       return;
     }
 
+    // Coordinates may have changed — remove from outsideLandIds so the
+    // next review run will re-check against the API.
+    const newOutsideLandIds = new Set(outsideLandIds);
+    if (editDraft.type === 'latlong') newOutsideLandIds.delete(editingId);
+
     this.setState(({ entries }) => ({
       entries: entries.map(e => (e.id === editingId ? { ...editDraft, id: editingId } : e)),
       editingId: null,
       editDraft: null,
       editDraftErrors: {},
+      outsideLandIds: newOutsideLandIds,
     }));
   }
 
   applyQuickFix(id, fix, fixValue) {
-    this.setState(({ entries }) => ({
-      entries: entries.map((entry) => {
-        if (entry.id !== id) return entry;
-        if (fix === 'swap') {
-          return { ...entry, latitude: entry.longitude, longitude: entry.latitude };
-        }
-        if (fix === 'crop') {
-          return { ...entry, crop: fixValue };
-        }
-        return entry;
-      }),
-    }));
+    this.setState(({ entries, outsideLandIds }) => {
+      // Swapping coordinates changes the position — invalidate the spatial check for this entry.
+      const newOutsideLandIds = new Set(outsideLandIds);
+      if (fix === 'swap') newOutsideLandIds.delete(id);
+
+      return {
+        entries: entries.map((entry) => {
+          if (entry.id !== id) return entry;
+          if (fix === 'swap') {
+            return { ...entry, latitude: entry.longitude, longitude: entry.latitude };
+          }
+          if (fix === 'crop') {
+            return { ...entry, crop: fixValue };
+          }
+          return entry;
+        }),
+        outsideLandIds: newOutsideLandIds,
+      };
+    });
   }
 
   applyValidEntries() {
-    const { entries } = this.state;
+    const { entries, outsideLandIds } = this.state;
     const { onSubmit } = this.props;
-    const valid = entries.filter(e => entryStatus(validateEntry(e)) !== 'error');
+    const duplicateIssues = findDuplicateCoordIssues(entries);
+    const valid = entries.filter((e) => {
+      const issues = [
+        ...validateEntry(e),
+        ...(outsideLandIds.has(e.id)
+          ? [{ field: 'coordinates', severity: 'error' }]
+          : []),
+        ...(duplicateIssues.has(e.id) ? [duplicateIssues.get(e.id)] : []),
+      ];
+      return entryStatus(issues) !== 'error';
+    });
     onSubmit(valid);
   }
 
@@ -532,14 +584,30 @@ class InputPanel extends PureComponent {
   }
 
   renderReviewScreen() {
-    const { entries } = this.state;
+    const { entries, outsideLandIds, spatialCheckError } = this.state;
     const { onSubmit } = this.props;
 
-    const validated = entries.map(e => ({ entry: e, issues: validateEntry(e) }));
+    const duplicateIssues = findDuplicateCoordIssues(entries);
+
+    const getIssues = (entry) => {
+      const issues = validateEntry(entry);
+      if (entry.type === 'latlong' && outsideLandIds.has(entry.id)) {
+        issues.push({
+          field: 'coordinates',
+          severity: 'error',
+          message: 'Coordinates are outside land boundaries',
+        });
+      }
+      const dupIssue = duplicateIssues.get(entry.id);
+      if (dupIssue) issues.push(dupIssue);
+      return issues;
+    };
+
+    const validated = entries.map(e => ({ entry: e, issues: getIssues(e) }));
     const errors = validated.filter(({ issues }) => entryStatus(issues) === 'error');
     const warnings = validated.filter(({ issues }) => entryStatus(issues) === 'warning');
     const valid = validated.filter(({ issues }) => entryStatus(issues) === 'valid');
-    const validCount = entries.filter(e => entryStatus(validateEntry(e)) !== 'error').length;
+    const validCount = validated.filter(({ issues }) => entryStatus(issues) !== 'error').length;
 
     return (
       <div className="review-screen">
@@ -554,6 +622,12 @@ class InputPanel extends PureComponent {
           </button>
           <span className="review-title">Review &amp; Validate</span>
         </div>
+
+        {spatialCheckError && (
+          <div className="spatial-check-notice">
+            Land-boundary check unavailable — spatial errors may not be shown.
+          </div>
+        )}
 
         {/* Summary bar */}
         <div className="review-summary-bar">
@@ -637,6 +711,7 @@ class InputPanel extends PureComponent {
       entries,
       uploadFile,
       isDragging,
+      spatialCheckLoading,
     } = this.state;
 
     if (screen === 'review') {
@@ -802,12 +877,15 @@ class InputPanel extends PureComponent {
             <div className="panel-footer -submit">
               <button
                 type="button"
-                className="review-btn"
+                className={`review-btn${spatialCheckLoading ? ' -loading' : ''}`}
+                disabled={spatialCheckLoading}
                 onClick={this.openReview}
               >
-                {errorCount > 0
-                  ? `Review & Fix (${errorCount} error${errorCount !== 1 ? 's' : ''})`
-                  : 'Review & Validate'}
+                {spatialCheckLoading
+                  ? 'Checking locations\u2026'
+                  : errorCount > 0
+                    ? `Review & Fix (${errorCount} error${errorCount !== 1 ? 's' : ''})`
+                    : 'Review & Validate'}
               </button>
             </div>
           </div>

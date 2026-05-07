@@ -104,3 +104,37 @@ export const fakeAnalysis = async (
 }
 
 export default { fetchAnalysis };
+
+/**
+ * Checks which of the provided lat/lng entries fall outside land boundaries.
+ *
+ * @param {Object[]} entries - lat/lng InputPanel entries (must have .id, .latitude, .longitude)
+ * @returns {Promise<Set<number|string>>} set of entry ids whose coordinates are outside land
+ */
+export const checkPointsOutsideLand = (entries) => {
+  const locations = entries.map(e => ({
+    lat: parseFloat(e.latitude),
+    lng: parseFloat(e.longitude),
+  }));
+
+  return axios
+    .post(
+      `${config.ANALYSIS_API_URL}/api/v1/aqueduct/analysis/points-outside-land`,
+      { locations },
+      { headers: { 'Content-Type': 'application/json' } },
+    )
+    .then(({ data }) => {
+      const outside = data.outside || [];
+      const outsideIds = new Set();
+
+      entries.forEach((entry) => {
+        const lat = parseFloat(entry.latitude);
+        const lng = parseFloat(entry.longitude);
+        if (outside.some(o => o.lat === lat && o.lng === lng)) {
+          outsideIds.add(entry.id);
+        }
+      });
+
+      return outsideIds;
+    });
+};

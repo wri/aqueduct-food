@@ -14,6 +14,7 @@ function generateTemplateCSV() {
     ['latlong', '0.2921', '-72.8219', '50', '', '', 'wheat', 'irrigated', '1000'],
     ['latlong', '3.2921', '-70.8219', '50', '', '', 'wheat', 'irrigated', '1000'],
     ['latlong', '-3.2921', '-68.8219', '50', '', '', 'wheat', 'irrigated', '1000'],
+    ['latlong', '12.2921', '-73', '50', '', '', 'wheat', 'irrigated', '1000'],
     ['country', '', '', '', 'KEN', 'Nairobi', '', 'rainfed', ''],
   ];
   return rows.map(r => r.join(',')).join('\n');
@@ -341,6 +342,53 @@ export function validateCountryFields(form) {
   return errors;
 }
 
+/**
+ * Detects duplicate lat/lng coordinates across a list of entries.
+ *
+ * For each set of entries that share the same coordinate:
+ *   - The first occurrence receives a `warning` issue.
+ *   - Every subsequent occurrence receives an `error` issue.
+ *
+ * Entries that are not lat/lng type, or whose coordinates are not yet valid
+ * numbers, are ignored.
+ *
+ * @param {Object[]} entries - InputPanel entry objects
+ * @returns {Map<id, Issue>} map from entry id to its duplicate issue (only
+ *   entries involved in a duplicate are present in the map)
+ */
+export function findDuplicateCoordIssues(entries) {
+  const coordGroups = new Map(); // `${lat},${lng}` → [id, ...]
+
+  entries.forEach((entry) => {
+    if (entry.type !== 'latlong') return;
+    const lat = parseFloat(entry.latitude);
+    const lng = parseFloat(entry.longitude);
+    if (Number.isNaN(lat) || Number.isNaN(lng)) return;
+
+    const key = `${lat},${lng}`;
+    if (!coordGroups.has(key)) coordGroups.set(key, []);
+    coordGroups.get(key).push(entry.id);
+  });
+
+  const result = new Map(); // id → Issue
+
+  coordGroups.forEach((ids) => {
+    if (ids.length < 2) return;
+    const others = ids.length - 1;
+    ids.forEach((id, index) => {
+      result.set(id, {
+        field: 'coordinates',
+        severity: index === 0 ? 'warning' : 'error',
+        message: index === 0
+          ? `Duplicate coordinates — ${others} other ${others === 1 ? 'entry shares' : 'entries share'} this location`
+          : 'Duplicate coordinates — already entered above',
+      });
+    });
+  });
+
+  return result;
+}
+
 export default {
   downloadTemplate,
   parseCSVText,
@@ -350,4 +398,5 @@ export default {
   entryStatus,
   validateLatlongFields,
   validateCountryFields,
+  findDuplicateCoordIssues,
 };
