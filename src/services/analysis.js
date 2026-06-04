@@ -1,6 +1,7 @@
 import axios from 'axios';
 import RESULT_DATA from './TEMP_DATA.json' // Comment out when not needed for dev due to bundle size
 import { sleep } from 'utils/general'
+import { entryToApiLocation } from 'utils/supply-analyzer'
 
 export const fetchAnalysis = (
   formData,
@@ -104,6 +105,50 @@ export const fakeAnalysis = async (
 }
 
 export default { fetchAnalysis };
+
+/**
+ * Runs the food-supply-chain analysis against a list of validated InputPanel
+ * entries. Each entry is converted to the API's location shape and POSTed in
+ * a single batch — the server resolves point / state / country modes per row.
+ *
+ * @param {Object[]} entries - InputPanel entries
+ * @param {Object} [options]
+ * @param {'planar'|'geodesic'} [options.buffer] - buffer math for point inputs
+ * @returns {Promise<{ results: Object[], errors: Object[], skipped: Object[] }>}
+ */
+export const runFoodSupplyChainAnalysis = (entries, { buffer } = {}) => {
+  // Filter out entries that can't be mapped (e.g. unknown crop slug) so the
+  // request itself is well-formed; surface them back to the caller as `skipped`.
+  const skipped = [];
+  const locations = [];
+  entries.forEach((entry) => {
+    const location = entryToApiLocation(entry);
+    if (!location) {
+      skipped.push({
+        unique_id: String(entry.id),
+        reason: 'Could not map entry to a commodity_code / irrigation the API understands',
+      });
+      return;
+    }
+    locations.push(location);
+  });
+
+  if (!locations.length) {
+    return Promise.resolve({ results: [], errors: [], skipped });
+  }
+
+  const url = `${config.ANALYSIS_API_URL}/api/v1/aqueduct/analysis/food-supply-chain/locations`;
+  return axios
+    .post(url, { locations }, {
+      headers: { 'Content-Type': 'application/json' },
+      params: buffer ? { buffer } : undefined,
+    })
+    .then(({ data = {} }) => ({
+      results: data.results || [],
+      errors: data.errors || [],
+      skipped,
+    }));
+};
 
 /**
  * Checks which of the provided lat/lng entries fall outside land boundaries.

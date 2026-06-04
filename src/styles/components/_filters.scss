@@ -821,6 +821,7 @@
   .review-footer-actions {
     display: flex;
     gap: $space-1;
+    flex-wrap: wrap;
 
     .submit-btn {
       flex: 1;
@@ -832,15 +833,27 @@
       text-transform: uppercase;
       transition: background-color 0.15s;
       text-align: center;
-      background-color: palette(blue, primary);
-      color: #fff;
+      background-color: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.9);
 
-      &:hover { background-color: palette(blue, dark); }
+      &:hover { background-color: rgba(255, 255, 255, 0.2); }
 
       &[disabled] {
-        background-color: rgba(255, 255, 255, 0.15);
+        background-color: rgba(255, 255, 255, 0.05);
         color: rgba(255, 255, 255, 0.35);
         cursor: not-allowed;
+      }
+
+      &.-primary {
+        background-color: palette(blue, primary);
+        color: #fff;
+
+        &:hover { background-color: palette(blue, dark); }
+
+        &[disabled] {
+          background-color: rgba(255, 255, 255, 0.15);
+          color: rgba(255, 255, 255, 0.35);
+        }
       }
 
       &.-all {
@@ -854,6 +867,306 @@
           color: #fff;
           background-color: transparent;
         }
+      }
+    }
+  }
+
+  // ── Analysis loading / error / results ─────────────────────────────────
+  .analysis-error-notice {
+    margin: ($space-1 * 0.5) $space-1 0;
+    padding: ($space-1 * 0.5) $space-1;
+    border-radius: 4px;
+    font-size: 11px;
+    background: rgba(248, 113, 113, 0.12);
+    border: 1px solid rgba(248, 113, 113, 0.35);
+    color: #fca5a5;
+  }
+
+  .analysis-loading {
+    padding: ($space-1 * 2) $space-1;
+
+    .progress-bar {
+      position: relative;
+      height: 6px;
+      border-radius: 3px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.1);
+
+      .value.indeterminate {
+        position: absolute;
+        top: 0;
+        left: -40%;
+        height: 100%;
+        width: 40%;
+        background: palette(blue, light);
+        animation: input-panel-indeterminate 1.4s ease-in-out infinite;
+      }
+    }
+
+    .progress-text {
+      margin-top: $space-1;
+      font-size: $font-size-small;
+      color: rgba(255, 255, 255, 0.7);
+      text-align: center;
+    }
+  }
+
+  @keyframes input-panel-indeterminate {
+    0%   { left: -40%; }
+    100% { left: 100%; }
+  }
+
+  // ── Indicator selector ────────────────────────────────────────────────
+  .results-indicator-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: $space-1;
+    padding-bottom: $space-1;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .results-indicator-description {
+    margin: 0;
+    font-size: 11px;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  // ── Group-by radio ────────────────────────────────────────────────────
+  .results-grouping {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: $space-1;
+
+    .results-grouping-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: rgba(255, 255, 255, 0.55);
+    }
+
+    // The shared <RadioGroup> component sits inside; tighten its layout
+    // so it reads as a row of compact pills.
+    .c-radio {
+      label {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.85);
+      }
+    }
+  }
+
+  // ── Filter / sort row ──────────────────────────────────────────────────
+  .results-controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 8px;
+    margin-bottom: $space-1;
+  }
+
+  .results-control {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    > span {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: rgba(255, 255, 255, 0.55);
+    }
+
+    select {
+      width: 100%;
+      padding: 5px 8px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      font-size: 12px;
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      option {
+        color: #000;
+      }
+    }
+  }
+
+  .analysis-results-table {
+    overflow-x: auto;
+    overflow-y: visible;
+    margin: 0 (-$space-1 * 0.5);
+    padding: 0 ($space-1 * 0.5);
+    max-height: 360px;
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.85);
+
+      th, td {
+        padding: 6px 8px;
+        text-align: left;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        white-space: nowrap;
+      }
+
+      th {
+        background: palette(blue, dark);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        font-size: 10px;
+        color: rgba(255, 255, 255, 0.85);
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.15);
+      }
+
+      tr:not(.group-header):hover td {
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      tbody.result-group + tbody.result-group .group-header td {
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+      }
+
+      tr.group-header td {
+        background: rgba(255, 255, 255, 0.07);
+        padding: 6px 8px;
+        font-size: 11px;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.9);
+
+        .group-header-tag {
+          display: inline-block;
+          margin-right: 8px;
+          padding: 2px 6px;
+          border-radius: 3px;
+          background: palette(blue, light);
+          color: palette(blue, darkest);
+          font-size: 9px;
+          letter-spacing: 0.5px;
+          text-transform: uppercase;
+          vertical-align: middle;
+        }
+
+        .group-header-value {
+          margin-right: 8px;
+          vertical-align: middle;
+        }
+
+        .group-header-count {
+          font-size: 10px;
+          color: rgba(255, 255, 255, 0.55);
+          font-weight: 500;
+          vertical-align: middle;
+        }
+      }
+
+      td {
+        position: relative;
+
+        .cell-value {
+          margin-right: 4px;
+        }
+
+        .cell-info {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 13px;
+          height: 13px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.18);
+          color: rgba(255, 255, 255, 0.85);
+          font-size: 9px;
+          font-weight: 700;
+          font-style: italic;
+          font-family: serif;
+          cursor: help;
+          vertical-align: middle;
+          transition: background-color 0.15s;
+
+          &:hover,
+          &:focus {
+            background: palette(blue, light);
+            color: palette(blue, darkest);
+            outline: none;
+          }
+
+          // Tooltip rendered from the [data-info] attribute on hover/focus.
+          &:hover::after,
+          &:focus::after {
+            content: attr(data-info);
+            position: absolute;
+            bottom: calc(100% + 4px);
+            left: 50%;
+            transform: translateX(-50%);
+            min-width: 220px;
+            max-width: 320px;
+            padding: 8px 10px;
+            background: #fff;
+            color: palette(blue, darkest);
+            font-size: 11px;
+            font-weight: 400;
+            font-style: normal;
+            font-family: inherit;
+            line-height: 1.4;
+            white-space: normal;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+            pointer-events: none;
+          }
+        }
+      }
+    }
+  }
+
+  .analysis-empty-results {
+    padding: ($space-1 * 2);
+    text-align: center;
+    font-size: $font-size-small;
+    color: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 4px;
+  }
+
+  .analysis-errors {
+    background: rgba(248, 113, 113, 0.08);
+    border: 1px solid rgba(248, 113, 113, 0.25);
+    border-radius: 4px;
+    padding: $space-1;
+
+    .review-section-title {
+      margin-bottom: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #fca5a5;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: $space-1;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.75);
+
+      li {
+        list-style: disc;
+        list-style-position: inside;
+        margin-bottom: 4px;
       }
     }
   }

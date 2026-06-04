@@ -281,21 +281,7 @@ class Filters extends PureComponent {
           )}
         >
           {withScope && filters.scope === 'supply_chain' && (
-            <div className="filters-section" style={{ paddingRight: 32 }}>
-              <h2>Supply Chain</h2>
-              <p>
-                Highlight basins exceeding desired condition threshold{' '}
-                <button
-                  type="button"
-                  className="icon-container"
-                  onClick={() => this.openModal('desired-condition-thresholds')}
-                >
-                  <Icon
-                    name="icon-question"
-                    className="-info -primary"
-                  />
-                </button>
-              </p>
+            <div className="filters-section" style={{ paddingRight: 32, paddingTop: 0 }}>
               <InputPanel
                 onSubmit={(entries) => {
                   this.updateFilters(entries, 'supplyChainLocations');

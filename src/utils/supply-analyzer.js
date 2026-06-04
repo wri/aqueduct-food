@@ -2,7 +2,84 @@ import { CROP_OPTIONS } from 'constants/crops';
 import {
   VALID_CROP_VALUES,
   VALID_IRRIGATION_VALUES,
+  CROP_COMMODITY_CODES,
+  IRRIGATION_API_VALUES,
+  DEFAULT_RADIUS_KM,
 } from 'constants/supply-analyzer';
+
+// ─── Business unit auto-population ────────────────────────────────────────────
+
+function slugifyForBusinessUnit(str) {
+  return String(str || '')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase().trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+/**
+ * Computes the auto-generated business_unit for a single entry, given the
+ * set of business_units already taken by other entries. Convention:
+ *
+ *   - latlong entries → `point1`, `point2`, … (next index after the current max)
+ *   - country entries → `<country>` (e.g. `argentina`)
+ *   - country + state → `<country>-<state>` (e.g. `colombia-santander`)
+ *
+ * Country/state slugs that clash with an existing entry get a `-2`, `-3`, …
+ * suffix so each entry stays uniquely addressable.
+ */
+export function defaultBusinessUnitFor(entry, taken) {
+  if (!entry) return '';
+  const takenSet = taken instanceof Set ? taken : new Set(taken);
+
+  if (entry.type === 'latlong') {
+    let max = 0;
+    takenSet.forEach((bu) => {
+      const match = /^point(\d+)$/.exec(bu);
+      if (match) {
+        const n = parseInt(match[1], 10);
+        if (n > max) max = n;
+      }
+    });
+    return `point${max + 1}`;
+  }
+
+  if (entry.type === 'country') {
+    const country = slugifyForBusinessUnit(entry.countryName || entry.country);
+    const state = slugifyForBusinessUnit(entry.state);
+    const base = state ? `${country}-${state}` : country;
+    if (!base) return '';
+    if (!takenSet.has(base)) return base;
+    let n = 2;
+    while (takenSet.has(`${base}-${n}`)) n += 1;
+    return `${base}-${n}`;
+  }
+
+  return '';
+}
+
+/**
+ * Returns the entry list with every entry's `businessUnit` populated:
+ *   - existing non-empty values are preserved (CSV uploads, hand edits, etc.),
+ *   - missing values are filled in using `defaultBusinessUnitFor`.
+ *
+ * Pass this through `addEntry`, `processUpload`, and the localStorage
+ * hydration step so the table always has a stable identifier per row.
+ */
+export function fillMissingBusinessUnits(entries) {
+  const taken = new Set();
+  entries.forEach((e) => {
+    if (e.businessUnit && String(e.businessUnit).trim()) {
+      taken.add(String(e.businessUnit).trim());
+    }
+  });
+  return entries.map((e) => {
+    if (e.businessUnit && String(e.businessUnit).trim()) return e;
+    const bu = defaultBusinessUnitFor(e, taken);
+    if (bu) taken.add(bu);
+    return { ...e, businessUnit: bu };
+  });
+}
 
 // ─── CSV template ─────────────────────────────────────────────────────────────
 
@@ -15,7 +92,14 @@ function generateTemplateCSV() {
     ['latlong', '3.2921', '-70.8219', '50', '', '', 'wheat', 'irrigated', '1000'],
     ['latlong', '-3.2921', '-68.8219', '50', '', '', 'wheat', 'irrigated', '1000'],
     ['latlong', '12.2921', '-73', '50', '', '', 'wheat', 'irrigated', '1000'],
-    ['country', '', '', '', 'KEN', 'Nairobi', '', 'rainfed', ''],
+    ['latlong', '36', '-119', '50', '', '', 'wheat', 'irrigated', '1000'],
+    ['latlong', '36', '-119', '30', '', '', 'wheat', 'irrigated', '1000'],
+    ['latlong', '36', '-119', '10', '', '', 'wheat', 'irrigated', '1000'],
+    ['latlong', '38.898992', '-77.007986', '100', '', '', 'wheat', 'rainfed', '450'],
+    ['latlong', '-23.568232', '-46.693983', '20', '', '', 'wheat', 'all', '0.1'],
+    ['country', '', '', '', 'USA', 'California', 'maize', 'irrigated', '500'],
+    ['country', '', '', '', 'ARG', '', 'soybean', 'all', '1000'],
+    ['country', '', '', '', 'KEN', 'Nairobi', 'maize', 'rainfed', ''],
   ];
   return rows.map(r => r.join(',')).join('\n');
 }
@@ -88,12 +172,17 @@ export function parseCSVText(text) {
       });
     } else if (type === 'country') {
       const country = get('country_iso');
+      const crop = get('crop');
       const irrigation = get('irrigation');
 
-      if (!country || !VALID_IRRIGATION_VALUES.has(irrigation)) {
+      const cropOk = VALID_CROP_VALUES.has(crop);
+      const irrigOk = VALID_IRRIGATION_VALUES.has(irrigation);
+
+      if (!country || !cropOk || !irrigOk) {
         const reasons = [];
         if (!country) reasons.push('country_iso');
-        if (!VALID_IRRIGATION_VALUES.has(irrigation)) reasons.push('irrigation');
+        if (!cropOk) reasons.push('crop');
+        if (!irrigOk) reasons.push('irrigation');
         skipped.push({ row: rowNum, reasons });
         return;
       }
@@ -104,6 +193,7 @@ export function parseCSVText(text) {
         country,
         countryName: country,
         state: get('state'),
+        crop,
         irrigation,
         volume: get('volume'),
       });
@@ -136,9 +226,11 @@ export function summariseEntry(entry) {
       entry.volume ? `Vol: ${entry.volume}` : null,
     ].filter(Boolean).join(' · ');
   }
+  const cropLabel = CROP_OPTIONS.find(c => c.value === entry.crop)?.label || entry.crop;
   return [
     entry.countryName || entry.country,
     entry.state || null,
+    cropLabel || null,
     entry.irrigation || null,
     entry.volume ? `Vol: ${entry.volume}` : null,
   ].filter(Boolean).join(' · ');
@@ -287,6 +379,17 @@ export function validateEntry(entry) {
     if (!entry.country) {
       issues.push({ field: 'country', severity: 'error', message: 'Country is required (SBTN)' });
     }
+    if (!entry.crop) {
+      issues.push({ field: 'crop', severity: 'error', message: 'Crop is required (SBTN)' });
+    } else if (!VALID_CROP_VALUES.has(entry.crop)) {
+      const suggestion = findClosestCrop(entry.crop);
+      issues.push({
+        field: 'crop',
+        severity: 'error',
+        message: `Unknown crop "${entry.crop}"${suggestion ? ` — did you mean "${suggestion.label}"?` : ''}`,
+        ...(suggestion && { fix: 'crop', suggestion }),
+      });
+    }
     if (!entry.irrigation) {
       issues.push({ field: 'irrigation', severity: 'error', message: 'Irrigation type is required (SBTN)' });
     }
@@ -338,14 +441,20 @@ export function validateLatlongFields(form) {
 export function validateCountryFields(form) {
   const errors = {};
   if (!form.country) errors.country = 'Required';
+  if (!form.crop) errors.crop = 'Required';
   if (!form.irrigation) errors.irrigation = 'Required';
   return errors;
 }
 
 /**
- * Detects duplicate lat/lng coordinates across a list of entries.
+ * Detects duplicate entries across a list of InputPanel entries.
  *
- * For each set of entries that share the same coordinate:
+ * Two lat/long entries are considered duplicates only when the entire input
+ * tuple matches: lat, lng, radius, crop, and irrigation. Differing radius,
+ * crop, or irrigation produces a different analysis result, so those entries
+ * are intentionally allowed even when they share coordinates.
+ *
+ * For each set of entries that produce identical analysis inputs:
  *   - The first occurrence receives a `warning` issue.
  *   - Every subsequent occurrence receives an `error` issue.
  *
@@ -357,7 +466,7 @@ export function validateCountryFields(form) {
  *   entries involved in a duplicate are present in the map)
  */
 export function findDuplicateCoordIssues(entries) {
-  const coordGroups = new Map(); // `${lat},${lng}` → [id, ...]
+  const groups = new Map(); // composite key → [id, ...]
 
   entries.forEach((entry) => {
     if (entry.type !== 'latlong') return;
@@ -365,14 +474,24 @@ export function findDuplicateCoordIssues(entries) {
     const lng = parseFloat(entry.longitude);
     if (Number.isNaN(lat) || Number.isNaN(lng)) return;
 
-    const key = `${lat},${lng}`;
-    if (!coordGroups.has(key)) coordGroups.set(key, []);
-    coordGroups.get(key).push(entry.id);
+    // Normalise radius the same way the API call does so "blank" and the
+    // default radius collapse together but distinct radii stay distinct.
+    const rawRadius = parseFloat(entry.radius);
+    const radius = !Number.isNaN(rawRadius) && rawRadius > 0
+      ? rawRadius
+      : 'default';
+
+    const crop = entry.crop || '';
+    const irrigation = entry.irrigation || '';
+
+    const key = `${lat}|${lng}|${radius}|${crop}|${irrigation}`;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(entry.id);
   });
 
   const result = new Map(); // id → Issue
 
-  coordGroups.forEach((ids) => {
+  groups.forEach((ids) => {
     if (ids.length < 2) return;
     const others = ids.length - 1;
     ids.forEach((id, index) => {
@@ -380,13 +499,70 @@ export function findDuplicateCoordIssues(entries) {
         field: 'coordinates',
         severity: index === 0 ? 'warning' : 'error',
         message: index === 0
-          ? `Duplicate coordinates — ${others} other ${others === 1 ? 'entry shares' : 'entries share'} this location`
-          : 'Duplicate coordinates — already entered above',
+          ? `Duplicate entry — ${others} other ${others === 1 ? 'entry shares' : 'entries share'} the same coordinates, radius, crop, and irrigation`
+          : 'Duplicate entry — same coordinates, radius, crop, and irrigation already entered above',
       });
     });
   });
 
   return result;
+}
+
+// ─── Analysis API mapping ─────────────────────────────────────────────────────
+
+/**
+ * Converts a single InputPanel entry into the request shape expected by the
+ * food-supply-chain analysis endpoint.
+ *
+ * - lat/long entries → point mode (lat, lng, radius, radius_units)
+ * - country entries with a state → state mode (country, state)
+ * - country entries without a state → country mode (iso_code)
+ *
+ * Returns `null` if the entry can't be mapped (e.g. missing crop code).
+ *
+ * @param {Object} entry - InputPanel entry object
+ * @returns {Object|null} location payload for POST .../locations
+ */
+export function entryToApiLocation(entry) {
+  const commodityCode = CROP_COMMODITY_CODES[entry.crop];
+  const irrigation = IRRIGATION_API_VALUES[entry.irrigation];
+  if (!commodityCode || !irrigation) return null;
+
+  const volume = parseFloat(entry.volume);
+  const volumeFields = !Number.isNaN(volume) && volume > 0
+    ? { total_volume: volume, volume_units: 'MT' }
+    : {};
+
+  if (entry.type === 'latlong') {
+    const radius = parseFloat(entry.radius);
+    const radiusKm = !Number.isNaN(radius) && radius > 0 ? radius : DEFAULT_RADIUS_KM;
+    return {
+      unique_id: String(entry.id),
+      lat: parseFloat(entry.latitude),
+      lng: parseFloat(entry.longitude),
+      radius: radiusKm,
+      radius_units: 'km',
+      commodity_code: commodityCode,
+      irrigation,
+      ...volumeFields,
+    };
+  }
+
+  if (entry.type === 'country') {
+    const base = {
+      unique_id: String(entry.id),
+      commodity_code: commodityCode,
+      irrigation,
+      ...volumeFields,
+    };
+    // ISO code if present, otherwise free-text country name
+    if (entry.country) base.iso_code = entry.country;
+    if (entry.countryName) base.country = entry.countryName;
+    if (entry.state && entry.state.trim()) base.state = entry.state.trim();
+    return base;
+  }
+
+  return null;
 }
 
 export default {
@@ -399,4 +575,5 @@ export default {
   validateLatlongFields,
   validateCountryFields,
   findDuplicateCoordIssues,
+  entryToApiLocation,
 };
