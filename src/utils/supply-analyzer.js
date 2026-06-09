@@ -12,7 +12,8 @@ import {
 function slugifyForBusinessUnit(str) {
   return String(str || '')
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase().trim()
+    .toLowerCase()
+    .trim()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '');
 }
@@ -92,8 +93,8 @@ function generateTemplateCSV() {
     ['latlong', '3.2921', '-70.8219', '50', '', '', 'wheat', 'irrigated', '1000'],
     ['latlong', '-3.2921', '-68.8219', '50', '', '', 'wheat', 'irrigated', '1000'],
     ['latlong', '12.2921', '-73', '50', '', '', 'wheat', 'irrigated', '1000'],
-    ['latlong', '36', '-119', '50', '', '', 'wheat', 'irrigated', '1000'],
-    ['latlong', '36', '-119', '30', '', '', 'wheat', 'irrigated', '1000'],
+    ['latlong', '36', '-119', '90', '', '', 'wheat', 'irrigated', '1000'],
+    ['latlong', '36', '-119', '70', '', '', 'wheat', 'irrigated', '1000'],
     ['latlong', '36', '-119', '10', '', '', 'wheat', 'irrigated', '1000'],
     ['latlong', '38.898992', '-77.007986', '100', '', '', 'wheat', 'rainfed', '450'],
     ['latlong', '-23.568232', '-46.693983', '20', '', '', 'wheat', 'all', '0.1'],

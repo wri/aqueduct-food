@@ -1,0 +1,262 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import { CustomSelect, RadioGroup } from 'aqueduct-components';
+import CountrySelect from 'components/country-select';
+import {
+  ENTRY_MODES,
+  SORTED_CROP_OPTIONS,
+  FILTERED_IRRIGATION_OPTIONS,
+} from 'constants/supply-analyzer';
+
+// ─── Shared field-set renderers (no `this`) ──────────────────────────────────
+// Exported so the review screen's inline edit form can reuse the same fields.
+
+export function renderLatlongFields(form, setField, errs) {
+  return (
+    <div className="entry-form">
+      <div className="form-row -two-col">
+        <div className={`form-field${errs.latitude ? ' -invalid' : ''}`}>
+          <span className="field-label">
+            Latitude <span className="required-mark">*</span>
+          </span>
+          <input
+            type="number"
+            className="field-input"
+            placeholder="-90 to 90"
+            min="-90"
+            max="90"
+            step="any"
+            value={form.latitude}
+            onChange={e => setField('latitude', e.target.value)}
+          />
+          {errs.latitude && <span className="field-error">{errs.latitude}</span>}
+        </div>
+        <div className={`form-field${errs.longitude ? ' -invalid' : ''}`}>
+          <span className="field-label">
+            Longitude <span className="required-mark">*</span>
+          </span>
+          <input
+            type="number"
+            className="field-input"
+            placeholder="-180 to 180"
+            min="-180"
+            max="180"
+            step="any"
+            value={form.longitude}
+            onChange={e => setField('longitude', e.target.value)}
+          />
+          {errs.longitude && <span className="field-error">{errs.longitude}</span>}
+        </div>
+      </div>
+
+      <div className="form-row">
+        <div className="form-field">
+          <span className="field-label">
+            Radius <span className="optional-mark">(km — optional)</span>
+          </span>
+          <input
+            type="number"
+            className="field-input"
+            placeholder="e.g. 50"
+            min="0"
+            step="any"
+            value={form.radius}
+            onChange={e => setField('radius', e.target.value, false)}
+          />
+        </div>
+      </div>
+
+      <div className={`form-row${errs.crop ? ' -invalid' : ''}`}>
+        <div className="form-field">
+          <span className="field-label">
+            Crop <span className="required-mark">*</span>
+          </span>
+          <CustomSelect
+            search
+            options={SORTED_CROP_OPTIONS}
+            value={form.crop}
+            onValueChange={selected => setField('crop', selected ? selected.value : null)}
+          />
+          {errs.crop && <span className="field-error">{errs.crop}</span>}
+        </div>
+      </div>
+
+      <div className={`form-row${errs.irrigation ? ' -invalid' : ''}`}>
+        <div className="form-field">
+          <span className="field-label">
+            Irrigation <span className="required-mark">*</span>
+          </span>
+          <RadioGroup
+            name={`irrigation-${form.latitude || 'new'}`}
+            items={FILTERED_IRRIGATION_OPTIONS}
+            selected={form.irrigation}
+            onChange={({ value }) => setField('irrigation', value)}
+            className="-inline"
+          />
+          {errs.irrigation && <span className="field-error">{errs.irrigation}</span>}
+        </div>
+      </div>
+
+      <div className="form-row">
+        <div className="form-field">
+          <span className="field-label">
+            Volume <span className="optional-mark">(optional)</span>
+          </span>
+          <input
+            type="number"
+            className="field-input"
+            placeholder="e.g. 1000"
+            min="0"
+            step="any"
+            value={form.volume}
+            onChange={e => setField('volume', e.target.value, false)}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function renderCountryFields(form, setField, errs) {
+  return (
+    <div className="entry-form">
+      <div className={`form-row${errs.country ? ' -invalid' : ''}`}>
+        <div className="form-field">
+          <span className="field-label">
+            Country <span className="required-mark">*</span>
+          </span>
+          <CountrySelect
+            value={form.country !== null ? form.country : undefined}
+            onValueChange={(selected) => {
+              setField('country', selected ? selected.value : null);
+              setField('countryName', selected ? selected.label : '');
+            }}
+          />
+          {errs.country && <span className="field-error">{errs.country}</span>}
+        </div>
+      </div>
+
+      <div className="form-row">
+        <div className="form-field">
+          <span className="field-label">
+            State <span className="optional-mark">(optional)</span>
+          </span>
+          <input
+            type="text"
+            className="field-input"
+            placeholder="e.g. Nairobi County"
+            value={form.state}
+            onChange={e => setField('state', e.target.value, false)}
+          />
+        </div>
+      </div>
+
+      <div className={`form-row${errs.crop ? ' -invalid' : ''}`}>
+        <div className="form-field">
+          <span className="field-label">
+            Crop <span className="required-mark">*</span>
+          </span>
+          <CustomSelect
+            search
+            options={SORTED_CROP_OPTIONS}
+            value={form.crop}
+            onValueChange={selected => setField('crop', selected ? selected.value : null)}
+          />
+          {errs.crop && <span className="field-error">{errs.crop}</span>}
+        </div>
+      </div>
+
+      <div className={`form-row${errs.irrigation ? ' -invalid' : ''}`}>
+        <div className="form-field">
+          <span className="field-label">
+            Irrigation <span className="required-mark">*</span>
+          </span>
+          <RadioGroup
+            name={`country-irrigation-${form.country || 'new'}`}
+            items={FILTERED_IRRIGATION_OPTIONS}
+            selected={form.irrigation}
+            onChange={({ value }) => setField('irrigation', value)}
+            className="-inline"
+          />
+          {errs.irrigation && <span className="field-error">{errs.irrigation}</span>}
+        </div>
+      </div>
+
+      <div className="form-row">
+        <div className="form-field">
+          <span className="field-label">
+            Volume <span className="optional-mark">(optional)</span>
+          </span>
+          <input
+            type="number"
+            className="field-input"
+            placeholder="e.g. 1000"
+            min="0"
+            step="any"
+            value={form.volume}
+            onChange={e => setField('volume', e.target.value, false)}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Manual Entry tab ────────────────────────────────────────────────────────
+
+const ManualEntry = ({
+  entryMode,
+  latlongForm,
+  countryForm,
+  errors,
+  onEntryModeChange,
+  setLatlongField,
+  setCountryField,
+  onAddEntry,
+}) => (
+  <div className="input-panel-body">
+    <div className="entry-mode-tabs">
+      {ENTRY_MODES.map(opt => (
+        <button
+          key={opt.value}
+          type="button"
+          className={`entry-tab${entryMode === opt.value ? ' -active' : ''}`}
+          onClick={() => onEntryModeChange(opt.value)}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>
+
+    {entryMode === 'latlong'
+      ? renderLatlongFields(latlongForm, setLatlongField, errors)
+      : renderCountryFields(countryForm, setCountryField, errors)}
+
+    <div className="panel-footer">
+      <button
+        type="button"
+        className="add-location-btn"
+        onClick={onAddEntry}
+      >
+        + Add Location
+      </button>
+    </div>
+  </div>
+);
+
+ManualEntry.propTypes = {
+  entryMode: PropTypes.string.isRequired,
+  latlongForm: PropTypes.object.isRequired,
+  countryForm: PropTypes.object.isRequired,
+  errors: PropTypes.object,
+  onEntryModeChange: PropTypes.func.isRequired,
+  setLatlongField: PropTypes.func.isRequired,
+  setCountryField: PropTypes.func.isRequired,
+  onAddEntry: PropTypes.func.isRequired,
+};
+
+ManualEntry.defaultProps = {
+  errors: {},
+};
+
+export default ManualEntry;
