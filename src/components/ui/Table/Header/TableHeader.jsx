@@ -3,35 +3,32 @@ import PropTypes from 'prop-types';
 
 import TableHeaderActions from './TableHeaderActions';
 
-export default class TableHeader extends React.Component {
-  render() {
-    const { actions, columns, columnValues, columnQueries, filteredData, onFilter, onSort } = this.props;
-    return (
-      <thead>
-        <tr>
-          {(actions.showable || actions.editable || actions.removable) && !!filteredData.length
-            && <th />
-          }
-          {columns.map((c, index) => (
-            <th key={index}>
-              <span className="th-wrapper">
-                <span>{c.label}</span>
+const TableHeader = ({
+  actions, columns, columnValues, columnQueries, filteredData, onFilter, onSort
+}) => (
+  <thead>
+    <tr>
+      {(actions.showable || actions.editable || actions.removable) && !!filteredData.length
+        && <th />
+      }
+      {columns.map(c => (
+        <th key={c.value}>
+          <span className="th-wrapper">
+            <span>{c.label}</span>
 
-                <TableHeaderActions
-                  field={c.value}
-                  values={columnValues[c.value]}
-                  selected={columnQueries[c.value]}
-                  onFilter={onFilter}
-                  onSort={onSort}
-                />
-              </span>
-            </th>
-          ))}
-        </tr>
-      </thead>
-    );
-  }
-}
+            <TableHeaderActions
+              field={c.value}
+              values={columnValues[c.value]}
+              selected={columnQueries[c.value]}
+              onFilter={onFilter}
+              onSort={onSort}
+            />
+          </span>
+        </th>
+      ))}
+    </tr>
+  </thead>
+);
 
 TableHeader.propTypes = {
   actions: PropTypes.object,
@@ -52,3 +49,5 @@ TableHeader.defaultProps = {
   onFilter: null,
   onSort: null
 };
+
+export default TableHeader;

@@ -67,8 +67,7 @@ class MapPageMobile extends PureComponent {
 }
 
 MapPageMobile.propTypes = {
-  filters: PropTypes.object.isRequired,
-  countries: PropTypes.array.isRequired
+  filters: PropTypes.object.isRequired
 };
 
 export default MapPageMobile;

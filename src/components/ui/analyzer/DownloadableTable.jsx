@@ -66,7 +66,7 @@ class AnalyzerDownloadableTable extends PureComponent {
                     Download as
                     <ul>
                       {downloadOptions.map((o, i, arr) => (
-                        <li key={i}>
+                        <li key={o.name}>
                           <button type="button" onClick={o.action}>{o.name}</button>{i < arr.length - 1 ? ',' : ''}
                         </li>
                       ))}

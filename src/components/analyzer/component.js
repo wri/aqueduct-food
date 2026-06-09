@@ -110,7 +110,7 @@ const Analyzer = ({ filters, analysis, toggleModal, setAnalysis }) => {
             </DownloadableTable>
           </div>
           <div>
-            <button className="action-button" onClick={openUploadModal}>
+            <button type="button" className="action-button" onClick={openUploadModal}>
               Upload a new file
             </button>
           </div>

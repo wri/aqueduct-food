@@ -11,6 +11,12 @@ import CountrySelect from 'components/country-select';
 import { dispatch } from '../../../../store';
 
 export default class ComparePageMobile extends React.Component {
+  static toggleShareModal() {
+    dispatch(toggleModal(true, {
+      children: ShareModal
+    }));
+  }
+
   constructor(props) {
     super(props);
     this.state = {
@@ -58,7 +64,7 @@ export default class ComparePageMobile extends React.Component {
               }
             };
             return (
-              <div key={i} className="c-filters-item">
+              <div key={item.title} className="c-filters-item">
                 {/* Country */}
                 <div className="filter-item-header">
                   <span className="title">{item.title}</span>
@@ -82,12 +88,6 @@ export default class ComparePageMobile extends React.Component {
       const country = countries.list.find(c => c.id === item);
       return { label: country ? country.name : '', value: String(index) };
     });
-  }
-
-  static toggleShareModal() {
-    dispatch(toggleModal(true, {
-      children: ShareModal
-    }));
   }
 
   render() {

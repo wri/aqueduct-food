@@ -3,22 +3,18 @@ import PropTypes from 'prop-types';
 import TableFilters from './TableFilters';
 import TableSorts from './TableSorts';
 
-export default class TableHeaderActions extends React.Component {
-  render() {
-    return (
-      <div className="c-table-header-actions">
-        <ul>
-          <li>
-            <TableSorts {...this.props} />
-          </li>
-          <li>
-            <TableFilters {...this.props} />
-          </li>
-        </ul>
-      </div>
-    );
-  }
-}
+const TableHeaderActions = props => (
+  <div className="c-table-header-actions">
+    <ul>
+      <li>
+        <TableSorts {...props} />
+      </li>
+      <li>
+        <TableFilters {...props} />
+      </li>
+    </ul>
+  </div>
+);
 
 TableHeaderActions.propTypes = {
   field: PropTypes.string.isRequired,
@@ -34,3 +30,5 @@ TableHeaderActions.defaultProps = {
   onFilter: null,
   onSort: null
 };
+
+export default TableHeaderActions;

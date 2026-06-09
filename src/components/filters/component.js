@@ -39,11 +39,6 @@ class Filters extends PureComponent {
   constructor(props) {
     super(props);
 
-    // State
-    this.state = {
-      threshold: 0
-    };
-
     // Bindings
     this.updateFilters = this.updateFilters.bind(this);
   }

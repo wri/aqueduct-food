@@ -8,8 +8,7 @@ export default class TableFilters extends React.Component {
     super(props);
 
     this.state = {
-      closed: true,
-      sort: 1
+      closed: true
     };
 
     // Bindings
@@ -63,6 +62,7 @@ export default class TableFilters extends React.Component {
         >
           {/* First child: This is what the item will be tethered to */}
           <button
+            type="button"
             ref={(node) => { this.btnToggle = node; }}
             onClick={this.onToggle}
             className="table-header-btn"
@@ -77,12 +77,12 @@ export default class TableFilters extends React.Component {
               <div className="content">
                 <ul>
                   <li>
-                    <button onClick={() => onSort && onSort({ field, value: 1 })}>
+                    <button type="button" onClick={() => onSort && onSort({ field, value: 1 })}>
                       Ascending
                     </button>
                   </li>
                   <li>
-                    <button onClick={() => onSort && onSort({ field, value: -1 })}>
+                    <button type="button" onClick={() => onSort && onSort({ field, value: -1 })}>
                       Descending
                     </button>
                   </li>

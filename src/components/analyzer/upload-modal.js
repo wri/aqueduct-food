@@ -222,11 +222,11 @@ const AnalyzerUploadModal = ({ filters, onDone }) => {
             </div>
             <div className="buttons">
               {!isEmpty(modalState.locations) && (
-                <button className="action-button" onClick={() => onDone(modalState.locations)}>
+                <button type="button" className="action-button" onClick={() => onDone(modalState.locations)}>
                   Continue without these entries
                 </button>
               )}
-              <button className="action-button" onClick={resetModal}>
+              <button type="button" className="action-button" onClick={resetModal}>
                 Return to upload
               </button>
             </div>
@@ -242,7 +242,7 @@ const AnalyzerUploadModal = ({ filters, onDone }) => {
               {modalState.err.message || 'Unknown error'}
             </p>
             <br />
-            <button className="action-button" onClick={resetModal}>
+            <button type="button" className="action-button" onClick={resetModal}>
               Return to upload
             </button>
           </>

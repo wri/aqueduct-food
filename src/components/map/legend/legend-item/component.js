@@ -151,8 +151,7 @@ LegendItem.propTypes = {
 };
 
 LegendItem.defaultProps = {
-  onToggleInfo: null,
-  waterLayerName: null
+  onToggleInfo: null
 };
 
 export default LegendItem;

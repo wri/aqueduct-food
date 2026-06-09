@@ -204,6 +204,7 @@ class CompareMaps extends PureComponent {
               return (
                 <div
                   className="compareitem-column"
+                  // eslint-disable-next-line react/no-array-index-key
                   key={`${country}-${index}`}
                 >
                   <div className="country-placeholder">
@@ -218,6 +219,7 @@ class CompareMaps extends PureComponent {
 
             return (
               <div
+                // eslint-disable-next-line react/no-array-index-key
                 key={`${country}-${index}`}
                 className="compareitem-column"
               >

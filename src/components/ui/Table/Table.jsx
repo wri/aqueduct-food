@@ -253,6 +253,7 @@ CustomTable.propTypes = {
   actions: PropTypes.object,
   data: PropTypes.array,
   columns: PropTypes.array,
+  selected: PropTypes.array,
   pagination: PropTypes.object,
   onToggleSelectedRow: PropTypes.func,
   onRowDelete: PropTypes.func
@@ -262,6 +263,7 @@ CustomTable.defaultProps = {
   actions: {},
   data: [],
   columns: [],
+  selected: null,
   pagination: {
     enabled: true,
     pageSize: 20,

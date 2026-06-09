@@ -45,12 +45,13 @@ export default class TableContent extends React.Component {
       <tbody>
         {data.map((row, index) => {
           const selectedClass = classnames({ '-selected': rowSelection.includes(index) });
+          const rowKey = columns.map(c => row[c.value]).join('|');
 
           return (
             <tr
               className={`${selectedClass}`}
               onClick={() => onToggleSelectedRow(row, index)}
-              key={index}
+              key={rowKey}
             >
               {(actions.showable || actions.editable || actions.removable)
                 && (
@@ -72,7 +73,7 @@ export default class TableContent extends React.Component {
                 </td>
                 )
               }
-              {columns.map((col, i) => <td key={i}>{row[col.value]}</td>)}
+              {columns.map(col => <td key={col.value}>{row[col.value]}</td>)}
             </tr>
           );
         })}

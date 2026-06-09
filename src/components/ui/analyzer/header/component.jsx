@@ -13,6 +13,7 @@ class AnalyzerHeader extends PureComponent {
         <div className="actions-container">
           <div className="toggle-container">
             <button
+              type="button"
               className="accordion-analyzer-btn"
               onClick={onToggleOpen}
             >

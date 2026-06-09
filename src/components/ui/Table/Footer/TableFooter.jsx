@@ -31,12 +31,12 @@ export default class TableFooter extends React.Component {
           && (
           <ul className="paginator">
             <li className="paginator-link">
-              <button className="paginator-btn" onClick={this.onPrevPage}>
+              <button type="button" className="paginator-btn" onClick={this.onPrevPage}>
                 Prev
               </button>
             </li>
             <li className="paginator-link">
-              <button className="paginator-btn" onClick={this.onNextPage}>
+              <button type="button" className="paginator-btn" onClick={this.onNextPage}>
                 Next
               </button>
             </li>

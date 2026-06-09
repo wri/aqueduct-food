@@ -98,10 +98,6 @@ export default class WidgetEmbedModal extends React.Component {
     return `${origin}${pathname}/#/embed?state=${btoa(JSON.stringify(state))}`;
   }
 
-  toggleLoading(loading) {
-    if (this.mounted) this.setState({ loading });
-  }
-
   getName(widgetParsed) {
     const { filters } = this.props;
     const { name, widgetConfig } = widgetParsed;
@@ -109,6 +105,10 @@ export default class WidgetEmbedModal extends React.Component {
     const proyection = (filters.year === 'baseline') ? 'baseline' : 'future';
 
     return (widgetConfig.titleConfig) ? widgetConfig.titleConfig[proyection] : name;
+  }
+
+  toggleLoading(loading) {
+    if (this.mounted) this.setState({ loading });
   }
 
   render() {

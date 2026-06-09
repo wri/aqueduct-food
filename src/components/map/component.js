@@ -419,6 +419,10 @@ Map.propTypes = {
   layerGroup: PropTypes.array.isRequired,
   mapControls: PropTypes.bool,
   legend: PropTypes.bool,
+  analysis: PropTypes.shape({
+    locations: PropTypes.array,
+    mapView: PropTypes.string
+  }),
   foodLayers: PropTypes.array.isRequired,
   countries: PropTypes.array.isRequired,
   supplyChainLocations: PropTypes.array.isRequired,
@@ -429,7 +433,8 @@ Map.propTypes = {
 
 Map.defaultProps = {
   mapControls: true,
-  legend: true
+  legend: true,
+  analysis: {}
 };
 
 export default Map;

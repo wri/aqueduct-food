@@ -12,7 +12,6 @@ export default class TableFilters extends React.Component {
     this.state = {
       closed: true,
       input: '',
-      sort: 1,
       values: props.values,
       selected: props.selected
     };
@@ -165,6 +164,7 @@ export default class TableFilters extends React.Component {
         >
           {/* First child: This is what the item will be tethered to */}
           <button
+            type="button"
             ref={(node) => { this.btnToggle = node; }}
             onClick={this.onToggle}
             className={btnClass}
@@ -187,7 +187,7 @@ export default class TableFilters extends React.Component {
                   />
                   {!input
                     && (
-                    <button className="-search">
+                    <button type="button" className="-search">
                       <Icon name="icon-search" className="-small" />
                     </button>
                     )
@@ -196,6 +196,7 @@ export default class TableFilters extends React.Component {
                   {!!input
                     && (
                     <button
+                      type="button"
                       className="-close"
                       onClick={this.onResetInput}
                     >
@@ -226,12 +227,12 @@ export default class TableFilters extends React.Component {
               <div className="footer">
                 <ul>
                   <li>
-                    <button onClick={this.onFilterSelectAll}>
+                    <button type="button" onClick={this.onFilterSelectAll}>
                       Select all
                     </button>
                   </li>
                   <li>
-                    <button onClick={this.onFilterClear}>
+                    <button type="button" onClick={this.onFilterClear}>
                       Clear
                     </button>
                   </li>

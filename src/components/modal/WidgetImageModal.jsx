@@ -36,10 +36,6 @@ export default class WidgetImageModal extends React.Component {
       });
   }
 
-  toggleLoading(bool) {
-    if (this.mounted) this.setState({ loading: bool });
-  }
-
   getName(widgetParsed) {
     const { filters } = this.props;
     const { name, widgetConfig } = widgetParsed;
@@ -47,6 +43,10 @@ export default class WidgetImageModal extends React.Component {
     const proyection = (filters.year === 'baseline') ? 'baseline' : 'future';
 
     return (widgetConfig.titleConfig) ? widgetConfig.titleConfig[proyection] : name;
+  }
+
+  toggleLoading(bool) {
+    if (this.mounted) this.setState({ loading: bool });
   }
 
   render() {
@@ -90,7 +90,7 @@ export default class WidgetImageModal extends React.Component {
             </div>
           </div>
           <div className="small-12 large-4 columns sidebar">
-            <button className="c-btn -primary -light" onClick={() => this.getCanvas()}>Download image</button>
+            <button type="button" className="c-btn -primary -light" onClick={() => this.getCanvas()}>Download image</button>
           </div>
         </div>
       </div>
