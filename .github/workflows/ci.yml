@@ -20,5 +20,8 @@ jobs:
       - name: Install dependencies
         run: npm install --force
 
+      - name: Lint
+        run: npm run lint
+
       - name: Check build
         run: npm run build
