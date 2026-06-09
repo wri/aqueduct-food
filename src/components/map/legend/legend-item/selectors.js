@@ -12,8 +12,8 @@ const getIndicator = state => state.filters.indicator;
 
 export const getWaterLayerName = createSelector(
   [getIndicator],
-  (_indicator) => {
-    if (!_indicator) return null;
+  (indicator) => {
+    if (!indicator) return null;
 
     const allWaterIndicators = [
       ...BASELINE_WATER_INDICATORS,
@@ -25,7 +25,7 @@ export const getWaterLayerName = createSelector(
     }), {});
 
 
-    return allWaterIndicators[_indicator] || null;
+    return allWaterIndicators[indicator] || null;
   }
 );
 

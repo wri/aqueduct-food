@@ -20,10 +20,10 @@ const getInfowWindow = properties => (
 );
 
 const getMarkup = (value) => {
-  const _value = format('.3s')(value);
+  const formattedValue = format('.3s')(value);
   return (`
     <div class="marker-bubble-inner">
-      ${_value}
+      ${formattedValue}
     </div>
   `);
 };

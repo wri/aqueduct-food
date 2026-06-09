@@ -66,14 +66,14 @@ class LegendItem extends PureComponent {
       legendConfig.sql_config
     ));
 
-    const _filters = {
+    const parsedFilters = {
       ...filters,
       iso: filters.iso || 'WORLD'
     };
-    const { crop } = _filters;
+    const { crop } = parsedFilters;
     const { sql_query: sqlQuery, sql_config: sqlConfig } = legendConfig;
-    const _sqlParams = reduceSqlParams(sqlConfig, _filters);
-    const query = concatenation(sqlQuery, _sqlParams);
+    const sqlParams = reduceSqlParams(sqlConfig, parsedFilters);
+    const query = concatenation(sqlQuery, sqlParams);
 
     axios.get(`https://${layerConfig.account}.carto.com/api/v2/sql?q=${query}`)
       .then(({ data }) => {

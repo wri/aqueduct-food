@@ -67,11 +67,11 @@ export const getWaterColumn = ({ indicator, year, type }, sufix, widget) => {
     2040: '40',
     2050: '50'
   };
-  let _indicator = layer.indicator;
-  const _year = yearOptions[year];
-  const _dataType = layer.dataType;
-  const _scenario = (year === 'baseline') ? '00' : '28';
-  const _sufix = sufix || layer.sufix;
+  let indicatorCode = layer.indicator;
+  const yearCode = yearOptions[year];
+  const dataTypeCode = layer.dataType;
+  const scenarioCode = (year === 'baseline') ? '00' : '28';
+  const sufixCode = sufix || layer.sufix;
 
 
   /**
@@ -82,10 +82,10 @@ export const getWaterColumn = ({ indicator, year, type }, sufix, widget) => {
    * manually. This should be REMOVED in the future.
    * */
   if (layer.indicator === 'sv' && widget === true) {
-    _indicator = 'ws';
+    indicatorCode = 'ws';
   }
 
-  return `${_indicator}${_year}${_scenario}${_dataType}${_sufix}`;
+  return `${indicatorCode}${yearCode}${scenarioCode}${dataTypeCode}${sufixCode}`;
 };
 
 /**

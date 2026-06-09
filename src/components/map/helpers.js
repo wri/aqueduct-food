@@ -20,9 +20,9 @@ export const getBuckets = (layer = {}, filters = {}) => {
   const { layerConfig, legendConfig } = layer;
   const { sql_query: sqlQuery, sql_config: sqlConfig } = legendConfig;
   const { account } = layerConfig;
-  const _sqlParams = reduceSqlParams(sqlConfig, filters);
+  const sqlParams = reduceSqlParams(sqlConfig, filters);
   const url = `https://${account}.carto.com/api/v2/sql`;
-  const query = concatenation(sqlQuery, _sqlParams);
+  const query = concatenation(sqlQuery, sqlParams);
 
   return fetchQuery(url, { q: query });
 };

@@ -58,8 +58,8 @@ export const parseMapState = createSelector(
 
 export const getBasemap = createSelector(
   [getBasemapId],
-  (_basemapId) => {
-    const currentBasemap = BASEMAPS[_basemapId] || {};
+  (basemapId) => {
+    const currentBasemap = BASEMAPS[basemapId] || {};
     const { value, options } = currentBasemap;
 
     return ({

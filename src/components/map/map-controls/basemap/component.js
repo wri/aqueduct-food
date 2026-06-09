@@ -14,7 +14,7 @@ class BasemapControl extends PureComponent {
 
     this.state = { active: false };
 
-    this._onScreenClick = this.onScreenClick.bind(this);
+    this.onScreenClick = this.onScreenClick.bind(this);
   }
 
   componentWillUnmount() {
@@ -41,9 +41,9 @@ class BasemapControl extends PureComponent {
 
     requestAnimationFrame(() => {
       if (to) {
-        window.addEventListener('click', this._onScreenClick);
+        window.addEventListener('click', this.onScreenClick);
       } else {
-        window.removeEventListener('click', this._onScreenClick);
+        window.removeEventListener('click', this.onScreenClick);
       }
     });
     this.setState({ active });

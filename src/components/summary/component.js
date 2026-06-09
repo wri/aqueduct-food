@@ -20,7 +20,7 @@ class Summary extends PureComponent {
       fields: []
     };
 
-    this._mounted = false;
+    this.mounted = false;
   }
 
   componentWillMount() {
@@ -28,7 +28,7 @@ class Summary extends PureComponent {
   }
 
   componentDidMount() {
-    this._mounted = true;
+    this.mounted = true;
   }
 
   // componentWillReceiveProps(nextProps) {
@@ -48,7 +48,7 @@ class Summary extends PureComponent {
   }
 
   componentWillUnmount() {
-    this._mounted = false;
+    this.mounted = false;
   }
 
   getData() {
@@ -74,7 +74,7 @@ class Summary extends PureComponent {
     fetch(new Request(widgetConfigParsed.data.url))
       .then((response) => {
         if (response.ok) return response.json();
-        if (this._mounted) this.setState({ loading: false });
+        if (this.mounted) this.setState({ loading: false });
         throw new Error(response.statusText);
       })
       .then((data) => {
@@ -117,7 +117,7 @@ class Summary extends PureComponent {
           });
         }
 
-        if (this._mounted) {
+        if (this.mounted) {
           this.setState({
             fields,
             loading: false
@@ -131,8 +131,8 @@ class Summary extends PureComponent {
       filters: { crop },
       countryName
     } = this.props;
-    const _crop = (crop && crop !== 'all') ? `(${capitalizeFirstLetter(crop)})` : '';
-    return `${countryName} summary ${_crop}`;
+    const cropLabel = (crop && crop !== 'all') ? `(${capitalizeFirstLetter(crop)})` : '';
+    return `${countryName} summary ${cropLabel}`;
   }
 
   openModal(slug) {

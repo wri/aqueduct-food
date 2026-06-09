@@ -21,7 +21,7 @@ const isAllCropsLayer = 'dcffe68a-2c51-4847-aa08-0f9e471a8ceb';
 
 export const getCompareConfig = createSelector(
   [getCompareCountries, getCountries, getFilters, getBasemap, getDatasets],
-  (_compareCountries, _countries, _filters, _basemap, _datasets) => {
+  (_compareCountries, _countries, _filters, basemapId, _datasets) => {
     if (isEmpty(_compareCountries) || !_countries.length) return [{}, {}];
 
     return _compareCountries.map((_compareCountry) => {
@@ -94,8 +94,8 @@ export const getCompareConfig = createSelector(
         mapConfig: {
           ...MAP_OPTIONS,
           basemap: {
-            url: BASEMAPS[_basemap].value,
-            options: BASEMAPS[_basemap].options
+            url: BASEMAPS[basemapId].value,
+            options: BASEMAPS[basemapId].options
           }
         },
         bounds: { bbox: getBounds(countryData) },

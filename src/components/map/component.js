@@ -218,7 +218,7 @@ class Map extends PureComponent {
                 map={_map}
                 plugin={PluginLeaflet}
                 onReady={() => {
-                  this._map = _map;
+                  this.map = _map;
                   this.setState({ mapElem: _map });
                   if (!loadingCartoCSS && !loadingMarkers) this.setState({ loading: false });
                 }}
@@ -355,6 +355,8 @@ class Map extends PureComponent {
                   <BasemapControl />
 
                   <ShareButton onClick={() => { this.toggleShareModal(); }} />
+                  {/* Leaflet internal property */}
+                  {/* eslint-disable-next-line no-underscore-dangle */}
                   <DownloadMapControl mapElem={mapElem._mapPane} />
                 </MapControls>
               )}

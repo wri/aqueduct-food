@@ -12,7 +12,7 @@ class Legend extends PureComponent {
 
     this.state = { expanded: props.expanded };
 
-    this._toggleSourceModal = this.toggleSourceModal.bind(this);
+    this.toggleSourceModal = this.toggleSourceModal.bind(this);
   }
 
   toggleExpand() {
@@ -50,7 +50,7 @@ class Legend extends PureComponent {
                 filters={filters}
                 layer={layer}
                 key={layer.id}
-                onToggleInfo={this._toggleSourceModal}
+                onToggleInfo={this.toggleSourceModal}
               />
             ))}
           </ul>

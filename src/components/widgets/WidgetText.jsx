@@ -23,13 +23,13 @@ class WidgetText extends PureComponent {
   render() {
     const { widgetConfig, data } = this.props;
     const { template_config: templateConfig } = widgetConfig;
-    const _data = data[0];
+    const firstRow = data[0];
 
     let template = this.getWidgetTemplate();
 
-    if (_data) {
+    if (firstRow) {
       templateConfig.forEach((param) => {
-        let value = _data[param.key];
+        let value = firstRow[param.key];
 
         const suffix = param.suffix || '';
 
