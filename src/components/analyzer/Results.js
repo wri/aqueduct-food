@@ -185,9 +185,10 @@ const Results = ({
         const selected = ANALYSIS_INDICATORS.find(i => i.key === activeIndicator);
         return (
           <div className="results-indicator-bar">
-            <label className="results-control -indicator">
+            <label className="results-control -indicator" htmlFor="results-analysis-select">
               <span>Analysis</span>
               <select
+                id="results-analysis-select"
                 value={activeIndicator}
                 onChange={e => onActiveIndicatorChange(e.target.value)}
               >
@@ -222,9 +223,10 @@ const Results = ({
 
       {/* Filters + sort ---------------------------------------------------- */}
       <div className="results-controls">
-        <label className="results-control">
+        <label className="results-control" htmlFor="results-watershed-select">
           <span>Watershed</span>
           <select
+            id="results-watershed-select"
             value={resultFilters.watershed}
             onChange={e => onResultFilterChange('watershed', e.target.value)}
           >
@@ -235,9 +237,10 @@ const Results = ({
           </select>
         </label>
 
-        <label className="results-control">
+        <label className="results-control" htmlFor="results-crop-select">
           <span>Crop</span>
           <select
+            id="results-crop-select"
             value={resultFilters.crop}
             onChange={e => onResultFilterChange('crop', e.target.value)}
           >
@@ -248,9 +251,10 @@ const Results = ({
           </select>
         </label>
 
-        <label className="results-control">
+        <label className="results-control" htmlFor="results-business-unit-select">
           <span>Business Unit</span>
           <select
+            id="results-business-unit-select"
             value={resultFilters.businessUnit}
             onChange={e => onResultFilterChange('businessUnit', e.target.value)}
             disabled={businessUnitOptions.length === 0}
@@ -262,9 +266,10 @@ const Results = ({
           </select>
         </label>
 
-        <label className="results-control">
+        <label className="results-control" htmlFor="results-sort-select">
           <span>Sort by</span>
           <select
+            id="results-sort-select"
             value={resultSort}
             onChange={e => onResultSortChange(e.target.value)}
           >
@@ -306,7 +311,6 @@ const Results = ({
                       className="cell-info"
                       role="img"
                       aria-label={tooltip}
-                      tabIndex={0}
                       data-info={tooltip}
                     >
                       i

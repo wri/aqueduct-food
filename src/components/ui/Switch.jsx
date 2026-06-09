@@ -38,14 +38,20 @@ class Switch extends React.Component {
         <span
           className={`switch-label ${(selected === items[0].value) ? '-selected' : ''}`}
           data-value={items[0].value}
+          role="button"
+          tabIndex={0}
           onClick={this.onChange}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') this.onChange(e); }}
         >
           {items[0].label}
         </span>
 
         <span
           className={`switch-element ${position}`}
+          role="button"
+          tabIndex={0}
           onClick={this.onToggle}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') this.onToggle(); }}
         >
           <span />
         </span>
@@ -53,7 +59,10 @@ class Switch extends React.Component {
         <span
           className={`switch-label ${(selected === items[1].value) ? '-selected' : ''}`}
           data-value={items[1].value}
+          role="button"
+          tabIndex={0}
           onClick={this.onChange}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') this.onChange(e); }}
         >
           {items[1].label}
         </span>

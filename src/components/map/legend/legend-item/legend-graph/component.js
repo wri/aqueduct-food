@@ -51,7 +51,10 @@ class LegendGraph extends PureComponent {
                 <div key={item.name} className="graph-group">
                   <div
                     className="graph-group-name"
+                    role="button"
+                    tabIndex={0}
                     onClick={() => this.triggerToggleGroup(item)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') this.triggerToggleGroup(item); }}
                   >
                     <span className={colorClass} style={{ background: itemColor }} />
                     {item.name}

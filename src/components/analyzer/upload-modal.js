@@ -148,8 +148,9 @@ const AnalyzerUploadModal = ({ filters, onDone }) => {
             }}
           >
 
-            <label className="file-upload">
+            <label className="file-upload" htmlFor="file-upload-input">
               <input
+                id="file-upload-input"
                 name="file"
                 type="file"
                 required
