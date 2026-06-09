@@ -25,10 +25,11 @@ export default class CompareItem extends React.Component {
   componentWillReceiveProps(nextProps) {
     if (nextProps.country && nextProps.countryList.length) {
       const bounds = nextProps.countryList.find(c => c.id === nextProps.country);
+      const { mapConfig } = this.state;
 
       this.setState({
         mapConfig: {
-          ...this.state.mapConfig,
+          ...mapConfig,
           bounds
         }
       });
@@ -37,6 +38,9 @@ export default class CompareItem extends React.Component {
 
   render() {
     const { mapConfig } = this.state;
+    const {
+      context, country, filters, layersActive, countryList, loading, widgetsActive
+    } = this.props;
 
     const emptyPlaceholder = (
       <div className="country-placeholder">
@@ -47,15 +51,15 @@ export default class CompareItem extends React.Component {
       </div>
     );
 
-    const showMap = (!this.props.context || (this.props.context && this.props.context === 'map'));
-    const showWidgets = this.props.country && (!this.props.context || (this.props.context && this.props.context === 'data'));
+    const showMap = (!context || (context && context === 'map'));
+    const showWidgets = country && (!context || (context && context === 'data'));
 
     const map = (
       <div>
         <Map
           mapConfig={mapConfig}
-          filters={this.props.filters}
-          layersActive={this.props.layersActive}
+          filters={filters}
+          layersActive={layersActive}
           LayerManager={LayerManager}
           setMapParams={(newMapConfig) => {
             this.setState({
@@ -94,7 +98,7 @@ export default class CompareItem extends React.Component {
         {showMap
           && (
           <section className="compareitem-map">
-            {this.props.country ? map : emptyPlaceholder}
+            {country ? map : emptyPlaceholder}
           </section>
           )
         }
@@ -102,13 +106,13 @@ export default class CompareItem extends React.Component {
           && (
           <section className="compareitem-widgets">
             <Summary
-              filters={this.props.filters}
-              countries={this.props.countryList}
+              filters={filters}
+              countries={countryList}
             />
             <WidgetList
-              filters={this.props.filters}
-              loading={this.props.loading}
-              widgetsActive={this.props.widgetsActive}
+              filters={filters}
+              loading={loading}
+              widgetsActive={widgetsActive}
             />
           </section>
           )
@@ -126,4 +130,14 @@ CompareItem.propTypes = {
   widgetsActive: PropTypes.array,
   filters: PropTypes.object,
   layersActive: PropTypes.array
+};
+
+CompareItem.defaultProps = {
+  context: null,
+  countryList: [],
+  country: null,
+  loading: false,
+  widgetsActive: [],
+  filters: {},
+  layersActive: []
 };

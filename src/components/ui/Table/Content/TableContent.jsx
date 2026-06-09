@@ -16,10 +16,12 @@ export default class TableContent extends React.Component {
   }
 
   render() {
-    const { actions, columns, sort, rowSelection, onRowDelete } = this.props;
+    const {
+      actions, columns, sort, rowSelection, onRowDelete, onToggleSelectedRow, filteredData
+    } = this.props;
     const { bottom, top } = this.getPageBounds();
 
-    let data = this.props.filteredData;
+    let data = filteredData;
 
     if (!data.length) {
       return (
@@ -47,7 +49,7 @@ export default class TableContent extends React.Component {
           return (
             <tr
               className={`${selectedClass}`}
-              onClick={() => this.props.onToggleSelectedRow(row, index)}
+              onClick={() => onToggleSelectedRow(row, index)}
               key={index}
             >
               {(actions.showable || actions.editable || actions.removable)

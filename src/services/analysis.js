@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { sleep } from 'utils/general';
+import sleep from 'utils/general';
 import { entryToApiLocation } from 'utils/supply-analyzer';
 import RESULT_DATA from './TEMP_DATA.json'; // Comment out when not needed for dev due to bundle size
 

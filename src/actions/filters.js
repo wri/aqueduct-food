@@ -3,7 +3,7 @@ import { toastr } from 'react-redux-toastr';
 
 // constants
 import { SET_FILTERS, RESET_FILTERS } from 'constants/filters';
-import { MESSAGES } from 'constants/messages';
+import MESSAGES from 'constants/messages';
 import {
   BASELINE_WATER_INDICATORS,
   PROJECTED_WATER_INDICATORS_ABSOLUTE,

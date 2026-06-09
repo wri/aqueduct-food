@@ -48,6 +48,8 @@ export default class TableFilters extends React.Component {
   }
 
   render() {
+    const { closed } = this.state;
+    const { onSort, field } = this.props;
     return (
       <div>
         <TetherComponent
@@ -61,7 +63,7 @@ export default class TableFilters extends React.Component {
         >
           {/* First child: This is what the item will be tethered to */}
           <button
-            ref={node => this.btnToggle = node}
+            ref={(node) => { this.btnToggle = node; }}
             onClick={this.onToggle}
             className="table-header-btn"
           >
@@ -69,18 +71,18 @@ export default class TableFilters extends React.Component {
           </button>
 
           {/* Second child: If present, this item will be tethered to the the first child */}
-          {!this.state.closed
+          {!closed
             && (
             <div className="tooltip-content">
               <div className="content">
                 <ul>
                   <li>
-                    <button onClick={() => this.props.onSort && this.props.onSort({ field: this.props.field, value: 1 })}>
+                    <button onClick={() => onSort && onSort({ field, value: 1 })}>
                       Ascending
                     </button>
                   </li>
                   <li>
-                    <button onClick={() => this.props.onSort && this.props.onSort({ field: this.props.field, value: -1 })}>
+                    <button onClick={() => onSort && onSort({ field, value: -1 })}>
                       Descending
                     </button>
                   </li>
@@ -101,6 +103,5 @@ TableFilters.propTypes = {
 };
 
 TableFilters.defaultProps = {
-  onChange: null,
-  selected: null
+  onSort: null
 };

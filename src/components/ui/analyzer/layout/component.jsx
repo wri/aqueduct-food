@@ -6,11 +6,7 @@ import classnames from 'classnames';
 class AnalyzerLayout extends PureComponent {
   render() {
     const {
-      children,
-      hideApply = false,
-      disableApply = false,
-      applyLabel = 'Apply analysis',
-      onApply = () => {}
+      children, hideApply, disableApply, applyLabel, onApply
     } = this.props;
     return (
       <div className="l-analyzer">
@@ -43,6 +39,14 @@ AnalyzerLayout.propTypes = {
   applyLabel: PropTypes.node,
   onApply: PropTypes.func,
   children: PropTypes.node
+};
+
+AnalyzerLayout.defaultProps = {
+  hideApply: false,
+  disableApply: false,
+  applyLabel: 'Apply analysis',
+  onApply: () => {},
+  children: null
 };
 
 export default AnalyzerLayout;

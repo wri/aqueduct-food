@@ -3,11 +3,7 @@ import { func, string } from 'prop-types';
 import { Icon } from 'aqueduct-components';
 
 export default function TooltipIcon(props) {
-  const {
-    handleClick,
-    iconName = 'question',
-    tooltipText = 'Learn more'
-  } = props;
+  const { handleClick, iconName, tooltipText } = props;
 
   return (
     <button
@@ -29,4 +25,9 @@ TooltipIcon.propTypes = {
   handleClick: func.isRequired,
   iconName: string,
   tooltipText: string
+};
+
+TooltipIcon.defaultProps = {
+  iconName: 'question',
+  tooltipText: 'Learn more'
 };

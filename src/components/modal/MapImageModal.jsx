@@ -27,7 +27,8 @@ export default class WidgetImageModal extends React.Component {
 
 
   getCanvas() {
-    const { name } = this.props.widget;
+    const { widget } = this.props;
+    const { name } = widget;
 
     domtoimage.toPng(this.canvasContent)
       .then((png) => {
@@ -59,12 +60,13 @@ export default class WidgetImageModal extends React.Component {
     );
 
     const { description } = widgetParsed;
+    const { loading } = this.state;
 
     return (
       <div className="c-widget-image-modal">
         <div className="row expanded">
           <div className="small-12 large-8 columns">
-            <div className="canvas-content" ref={el => this.canvasContent = el}>
+            <div className="canvas-content" ref={(el) => { this.canvasContent = el; }}>
               <div className="title">{this.getName(widgetParsed)}</div>
               <div className="widget">
                 <div className="c-widget">
@@ -75,7 +77,7 @@ export default class WidgetImageModal extends React.Component {
                       </div>
                     </header>
                     <div className="widget-content">
-                      <Spinner isLoading={this.state.loading} />
+                      <Spinner isLoading={loading} />
                       <WidgetChart
                         widget={widget}
                         filters={filters}
@@ -99,4 +101,9 @@ export default class WidgetImageModal extends React.Component {
 WidgetImageModal.propTypes = {
   filters: PropTypes.object,
   widget: PropTypes.object
+};
+
+WidgetImageModal.defaultProps = {
+  filters: {},
+  widget: {}
 };

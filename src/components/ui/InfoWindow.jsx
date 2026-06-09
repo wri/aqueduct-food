@@ -36,3 +36,8 @@ InfoWindow.propTypes = {
   title: PropTypes.string,
   list: PropTypes.array
 };
+
+InfoWindow.defaultProps = {
+  title: '',
+  list: []
+};

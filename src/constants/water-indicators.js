@@ -118,7 +118,7 @@ export const ID_LOOKUP = (
     })
     .reduce((acc, [key, ids]) => {
       const result = { ...acc };
-      ids.forEach(id => result[id] = key);
+      ids.forEach((id) => { result[id] = key; });
       return result;
     }, {})
 );

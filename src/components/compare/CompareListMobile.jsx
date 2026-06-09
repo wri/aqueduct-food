@@ -15,24 +15,27 @@ export default class CompareList extends React.Component {
 
   getItems() {
     const items = [];
+    const {
+      filters: propFilters, countries, active, countryList, loading, widgetsActive, layersActive
+    } = this.props;
+    const { context } = this.state;
 
-    const filters = Object.assign({}, this.props.filters, {
-      country: this.props.countries[this.props.active],
-      countryName: ((this.props.countryList || []).find(c => c.id === this.props.countries[this.props.active]) || {}).name
+    const filters = Object.assign({}, propFilters, {
+      country: countries[active],
+      countryName: ((countryList || []).find(c => c.id === countries[active]) || {}).name
     });
 
-    // const filters = Object.assign({}, this.props.filters, { country: this.props.countries[this.props.active] });
     items.push(
-      <div key={this.props.active} className="comparelist-item">
+      <div key={active} className="comparelist-item">
         <CompareItem
-          context={this.state.context}
+          context={context}
           filters={filters}
-          loading={this.props.loading}
-          widgetsActive={this.props.widgetsActive}
-          index={this.props.active}
-          country={this.props.countries[this.props.active]}
-          countryList={this.props.countryList}
-          layersActive={this.props.layersActive}
+          loading={loading}
+          widgetsActive={widgetsActive}
+          index={active}
+          country={countries[active]}
+          countryList={countryList}
+          layersActive={layersActive}
         />
       </div>
     );
@@ -40,6 +43,7 @@ export default class CompareList extends React.Component {
   }
 
   render() {
+    const { context } = this.state;
     const pageContextOptions = [{ label: 'Data', value: 'data' }, { label: 'Map', value: 'map' }];
     return (
       <div className="c-comparelist">
@@ -48,7 +52,7 @@ export default class CompareList extends React.Component {
             <SegmentedUi
               className="-btns"
               items={pageContextOptions}
-              selected={this.state.context}
+              selected={context}
               onChange={selected => this.setState({ context: selected.value })}
             />
           </div>
@@ -67,4 +71,14 @@ CompareList.propTypes = {
   filters: PropTypes.object,
   layersActive: PropTypes.array,
   active: PropTypes.number
+};
+
+CompareList.defaultProps = {
+  countries: [],
+  countryList: [],
+  loading: false,
+  widgetsActive: [],
+  filters: {},
+  layersActive: [],
+  active: 0
 };

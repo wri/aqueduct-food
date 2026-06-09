@@ -93,11 +93,12 @@ export default class TableFilters extends React.Component {
   }
 
   onFilterSelect(selected) {
+    const { onFilter, field } = this.props;
     this.setState({ selected }, () => {
       const { values } = this.state;
-      if (this.props.onFilter) {
-        this.props.onFilter({
-          field: this.props.field,
+      if (onFilter) {
+        onFilter({
+          field,
           value: (selected.length !== values.length) ? selected : null
         });
       }
@@ -105,23 +106,21 @@ export default class TableFilters extends React.Component {
   }
 
   onFilterSelectAll() {
+    const { onFilter, field } = this.props;
     this.setState({ selected: null }, () => {
-      if (this.props.onFilter) {
-        this.props.onFilter({
-          field: this.props.field,
-          value: this.state.selected
-        });
+      const { selected } = this.state;
+      if (onFilter) {
+        onFilter({ field, value: selected });
       }
     });
   }
 
   onFilterClear() {
+    const { onFilter, field } = this.props;
     this.setState({ selected: [] }, () => {
-      if (this.props.onFilter) {
-        this.props.onFilter({
-          field: this.props.field,
-          value: this.state.selected
-        });
+      const { selected } = this.state;
+      if (onFilter) {
+        onFilter({ field, value: selected });
       }
     });
   }
@@ -145,7 +144,9 @@ export default class TableFilters extends React.Component {
 
   render() {
     const { field } = this.props;
-    const { selected, input, values } = this.state;
+    const {
+      selected, input, values, closed
+    } = this.state;
 
     const btnClass = classnames('table-header-btn', {
       '-active': values && selected && values.length !== selected.length
@@ -164,7 +165,7 @@ export default class TableFilters extends React.Component {
         >
           {/* First child: This is what the item will be tethered to */}
           <button
-            ref={node => this.btnToggle = node}
+            ref={(node) => { this.btnToggle = node; }}
             onClick={this.onToggle}
             className={btnClass}
           >
@@ -172,13 +173,13 @@ export default class TableFilters extends React.Component {
           </button>
 
           {/* Second child: If present, this item will be tethered to the the first child */}
-          {!this.state.closed
+          {!closed
             && (
             <div className="tooltip-content">
               <div className="content">
                 <div className="search-box">
                   <input
-                    ref={node => this.input = node}
+                    ref={(node) => { this.input = node; }}
                     type="text"
                     value={input}
                     placeholder="Type search"
@@ -253,7 +254,7 @@ TableFilters.propTypes = {
 };
 
 TableFilters.defaultProps = {
-  onChange: null,
+  values: [],
   selected: null,
-  values: []
+  onFilter: null
 };

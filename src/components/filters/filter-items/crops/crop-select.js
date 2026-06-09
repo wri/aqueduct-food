@@ -10,16 +10,16 @@ import {
 import { CROP_OPTIONS } from 'constants/crops';
 
 const CropSelect = ({
-  title = 'Crops',
-  hideHelpIcon = false,
-  onHelpIconClick = () => {},
-  cropOptions = CROP_OPTIONS,
+  title,
+  hideHelpIcon,
+  onHelpIconClick,
+  cropOptions,
   crop,
-  onCropChange = () => {},
-  irrigationOptions = IRRIGATION_OPTIONS,
+  onCropChange,
+  irrigationOptions,
   irrigation,
-  onIrrigationChange = () => {},
-  className = ''
+  onIrrigationChange,
+  className
 }) => (
   <div className={classNames('c-filters-item', className)}>
     <div className="filter-item-header">
@@ -73,6 +73,19 @@ CropSelect.propTypes = {
   irrigation: propTypes.string,
   onIrrigationChange: propTypes.func,
   className: propTypes.string,
+};
+
+CropSelect.defaultProps = {
+  title: 'Crops',
+  hideHelpIcon: false,
+  onHelpIconClick: () => {},
+  cropOptions: CROP_OPTIONS,
+  crop: null,
+  onCropChange: () => {},
+  irrigationOptions: IRRIGATION_OPTIONS,
+  irrigation: null,
+  onIrrigationChange: () => {},
+  className: ''
 };
 
 export default CropSelect;

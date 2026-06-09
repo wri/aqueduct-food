@@ -75,8 +75,9 @@ class CustomTable extends PureComponent {
   }
 
   componentWillReceiveProps(nextProps) {
-    const currentData = this.props.data;
-    const currentColumnsKeys = CustomTable.getColumnKeys(this.state.data).sort();
+    const { data: currentData } = this.props;
+    const { data: stateData } = this.state;
+    const currentColumnsKeys = CustomTable.getColumnKeys(stateData).sort();
     const nextData = nextProps.data;
     const nextSelection = nextProps.selected;
     const nextColumnsKeys = CustomTable.getColumnKeys(nextProps.data).sort();
@@ -112,18 +113,23 @@ class CustomTable extends PureComponent {
    * - onChangePage
   */
   onToggleSelectedRow(row, _index) {
-    const rowSelection = this.state.rowSelection.slice();
+    const { onToggleSelectedRow } = this.props;
+    const { rowSelection: currentSelection } = this.state;
+    const rowSelection = currentSelection.slice();
 
     // Toggle the active dataset
     if (_index !== -1) rowSelection.splice(_index, 1);
 
     this.setState({ rowSelection: [_index] }, () => {
-      if (this.props.onToggleSelectedRow) this.props.onToggleSelectedRow(this.state.rowSelection);
+      const { rowSelection: newSelection } = this.state;
+      if (onToggleSelectedRow) onToggleSelectedRow(newSelection);
     });
   }
 
   onRowDelete(_row, _index) {
-    const data = this.state.data.slice();
+    const { onRowDelete } = this.props;
+    const { data: stateData } = this.state;
+    const data = stateData.slice();
     const index = data.findIndex(row => row.id === _row.id);
     data.splice(index, 1);
 
@@ -134,7 +140,7 @@ class CustomTable extends PureComponent {
       columnValues: CustomTable.getColumnValues(data)
     }, () => {
       this.filter();
-      if (this.props.onRowDelete) this.props.onRowDelete(_row, _index);
+      if (onRowDelete) onRowDelete(_row, _index);
     });
   }
 
@@ -145,7 +151,7 @@ class CustomTable extends PureComponent {
     // the map they will be selected because you will remove the filter from the columnQueries
     if (q.value) {
       columnQueries = {
-        ...this.state.columnQueries,
+        ...columnQueries,
         [q.field]: q.value
       };
     } else if (columnQueries[q.field]) {
@@ -170,9 +176,10 @@ class CustomTable extends PureComponent {
   }
 
   onChangePage(page) {
+    const { pagination } = this.state;
     this.setState({
       pagination: {
-        ...this.state.pagination,
+        ...pagination,
         page
       }
     });
@@ -183,10 +190,10 @@ class CustomTable extends PureComponent {
    * - filter
   */
   filter() {
-    const { columnQueries, pagination } = this.state;
+    const { columnQueries, pagination, data } = this.state;
 
     // eslint-disable-next-line max-len
-    const filteredData = this.state.data.filter(row => Object.keys(columnQueries).map(field => columnQueries[field].map(val => !!row[field].toString().toLowerCase().match(val.toString().toLowerCase())).some(match => match)).every(match => match));
+    const filteredData = data.filter(row => Object.keys(columnQueries).map(field => columnQueries[field].map(val => !!row[field].toString().toLowerCase().match(val.toString().toLowerCase())).some(match => match)).every(match => match));
 
     const total = Math.ceil(filteredData.length / pagination.pageSize);
     // Check if the page is equal to the total
@@ -203,6 +210,10 @@ class CustomTable extends PureComponent {
   }
 
   render() {
+    const { actions, columns } = this.props;
+    const {
+      columnValues, columnQueries, filteredData, pagination
+    } = this.state;
     return (
       <div className="c-table">
         <div className="table-content">
@@ -210,11 +221,11 @@ class CustomTable extends PureComponent {
             <table className="table">
               {/* Table header */}
               <TableHeader
-                actions={this.props.actions}
-                columns={this.props.columns}
-                columnValues={this.state.columnValues}
-                columnQueries={this.state.columnQueries}
-                filteredData={this.state.filteredData}
+                actions={actions}
+                columns={columns}
+                columnValues={columnValues}
+                columnQueries={columnQueries}
+                filteredData={filteredData}
                 onFilter={this.onFilter}
                 onSort={this.onSort}
               />
@@ -230,7 +241,7 @@ class CustomTable extends PureComponent {
           </div>
         </div>
         <TableFooter
-          pagination={this.state.pagination}
+          pagination={pagination}
           onChangePage={this.onChangePage}
         />
       </div>

@@ -5,8 +5,10 @@ import Widget from 'components/widgets/widget';
 
 export default class CompareWidgetList extends React.Component {
   render() {
-    const { widgetsActive } = this.props;
-    const items = Array.from(Array(this.props.items));
+    const {
+      widgetsActive, items: itemsCount, countries, countryList, filters: propFilters
+    } = this.props;
+    const items = Array.from(Array(itemsCount));
     const compareWarningList = [
       '88aefca0-e25c-4a16-80b3-f2831d2064e4',
       'd654b935-31cd-4971-877e-bf0345c8b49a',
@@ -18,15 +20,15 @@ export default class CompareWidgetList extends React.Component {
         {widgetsActive.map((widget, index) => (
           <div key={`${widget.id}-${index}`} className="c-compareitem-row">
             {items.map((item, i) => {
-              const country = this.props.countries[i];
+              const country = countries[i];
 
               if (!country) {
                 return null;
               }
 
-              const filters = Object.assign({}, this.props.filters, {
+              const filters = Object.assign({}, propFilters, {
                 country,
-                countryName: ((this.props.countryList || []).find(c => c.id === this.props.countries[i]) || {}).name
+                countryName: ((countryList || []).find(c => c.id === countries[i]) || {}).name
               });
 
               return (
@@ -57,4 +59,11 @@ CompareWidgetList.propTypes = {
   filters: PropTypes.object,
   // SELECTOR
   widgetsActive: PropTypes.array
+};
+
+CompareWidgetList.defaultProps = {
+  grid: null,
+  loading: false,
+  filters: {},
+  widgetsActive: []
 };

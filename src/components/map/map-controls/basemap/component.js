@@ -29,11 +29,13 @@ class BasemapControl extends PureComponent {
   }
 
   onBasemapChange({ value }) {
-    this.props.setBasemap(value);
+    const { setBasemap } = this.props;
+    setBasemap(value);
   }
 
   toggleDropdown(to) {
-    const active = (typeof to !== 'undefined' && to !== null) ? to : !this.state.active;
+    const { active: currentActive } = this.state;
+    const active = (typeof to !== 'undefined' && to !== null) ? to : !currentActive;
 
     this.setState({ active });
 

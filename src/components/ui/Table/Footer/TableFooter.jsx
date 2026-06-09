@@ -11,13 +11,15 @@ export default class TableFooter extends React.Component {
   }
 
   onNextPage() {
-    if (this.props.pagination.page === this.props.pagination.total - 1) return;
-    if (this.props.onChangePage) this.props.onChangePage(this.props.pagination.page + 1);
+    const { pagination, onChangePage } = this.props;
+    if (pagination.page === pagination.total - 1) return;
+    if (onChangePage) onChangePage(pagination.page + 1);
   }
 
   onPrevPage() {
-    if (this.props.pagination.page === 0) return;
-    if (this.props.onChangePage) this.props.onChangePage(this.props.pagination.page - 1);
+    const { pagination, onChangePage } = this.props;
+    if (pagination.page === 0) return;
+    if (onChangePage) onChangePage(pagination.page - 1);
   }
 
   render() {
@@ -63,6 +65,5 @@ TableFooter.defaultProps = {
     page: 0,
     total: null
   },
-  onPrevPage: null,
-  onNextPage: null
+  onChangePage: null
 };

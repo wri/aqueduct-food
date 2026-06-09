@@ -63,7 +63,7 @@ class VegaChartTooltip extends React.Component {
     let val = value;
 
     if (param.format) {
-      val = (!isNaN(value)) ? format(param.format)(value) : val;
+      val = (!Number.isNaN(Number(value))) ? format(param.format)(value) : val;
     }
 
     if (key === 'year') {
@@ -85,6 +85,11 @@ VegaChartTooltip.propTypes = {
   // Define the chart data
   data: PropTypes.any,
   config: PropTypes.object
+};
+
+VegaChartTooltip.defaultProps = {
+  data: null,
+  config: {}
 };
 
 export default VegaChartTooltip;

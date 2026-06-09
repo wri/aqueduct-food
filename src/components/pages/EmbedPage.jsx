@@ -5,15 +5,17 @@ import Widget from 'components/widgets/widget';
 
 export default class EmbedPage extends React.Component {
   componentWillMount() {
-    this.props.getWidget();
+    const { getWidget } = this.props;
+    getWidget();
   }
 
   render() {
+    const { error, widget, filters } = this.props;
     return (
       <div className="l-embed">
-        {this.props.error}
-        {!this.props.error && <Spinner isLoading={!this.props.widget} />}
-        {!this.props.error && this.props.widget && <Widget className="-embed" widget={this.props.widget} filters={this.props.filters} />}
+        {error}
+        {!error && <Spinner isLoading={!widget} />}
+        {!error && widget && <Widget className="-embed" widget={widget} filters={filters} />}
       </div>
     );
   }
@@ -25,4 +27,11 @@ EmbedPage.propTypes = {
   getWidget: PropTypes.func,
   widget: PropTypes.object,
   error: PropTypes.string
+};
+
+EmbedPage.defaultProps = {
+  filters: {},
+  getWidget: () => {},
+  widget: null,
+  error: null
 };

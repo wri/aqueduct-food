@@ -1,1 +1,3 @@
-export const BREAKPOINT_MOBILE = 640;
+const BREAKPOINT_MOBILE = 640;
+
+export default BREAKPOINT_MOBILE;

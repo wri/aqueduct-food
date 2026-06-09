@@ -32,7 +32,8 @@ export default class ComparePageDesktop extends React.Component {
   }
 
   componentWillMount() {
-    this.props.updateCompareUrl();
+    const { updateCompareUrl } = this.props;
+    updateCompareUrl();
   }
 
   componentDidMount() {
@@ -44,7 +45,8 @@ export default class ComparePageDesktop extends React.Component {
   }
 
   componentWillUnmount() {
-    this.props.emptyCompareCountries();
+    const { emptyCompareCountries } = this.props;
+    emptyCompareCountries();
   }
 
   onSticky(isSticky) {
@@ -56,8 +58,9 @@ export default class ComparePageDesktop extends React.Component {
   setStickyFilterPosition() {
     const elemHeight = this.filtersElem.getBoundingClientRect().height;
     const stickyFilterTopPosition = this.filtersElem.offsetTop + elemHeight;
+    const { stickyFilterTopPosition: current } = this.state;
 
-    if (this.state.stickyFilterTopPosition === stickyFilterTopPosition) return;
+    if (current === stickyFilterTopPosition) return;
 
     this.setState({
       stickyFilterTopPosition
@@ -66,7 +69,9 @@ export default class ComparePageDesktop extends React.Component {
 
   getCountrySelects() {
     const items = [];
-    for (let i = 0; i < this.state.items; i += 1) {
+    const { items: itemCount } = this.state;
+    const { compare, setCompareCountry } = this.props;
+    for (let i = 0; i < itemCount; i += 1) {
       const text = i === 0 ? 'Selected country' : 'Compare with...';
       items.push(
         <div className="small-6 columns" key={i}>
@@ -74,9 +79,9 @@ export default class ComparePageDesktop extends React.Component {
             <span className="compare-filters-text">{text}</span>
             <CountrySelect
               className="-fixed"
-              value={this.props.compare.countries[i] || null}
+              value={compare.countries[i] || null}
               onValueChange={(selected) => {
-                if (selected) this.props.setCompareCountry({ index: i, iso: selected.value });
+                if (selected) setCompareCountry({ index: i, iso: selected.value });
 
                 const countrySide = i === 0 ? 'left' : 'right';
                 logEvent('[AQ-Food] Compare', `user sets ${countrySide} country`, selected.label);
@@ -90,6 +95,12 @@ export default class ComparePageDesktop extends React.Component {
   }
 
   render() {
+    const {
+      stickyFilterTopPosition, showStickyFilters, items
+    } = this.state;
+    const {
+      compare, filters, setFilters, setCompareCountry, countries, loading, widgetsActive
+    } = this.props;
     return (
       <div className="l-comparepage l-fullheight">
         <div className="compare-header">
@@ -109,29 +120,29 @@ export default class ComparePageDesktop extends React.Component {
 
         {/* Sticky Filters */}
         <Sticky
-          topLimit={this.state.stickyFilterTopPosition}
+          topLimit={stickyFilterTopPosition}
           onStick={(isSticky) => { this.onSticky(isSticky); }}
         >
-          {this.state.showStickyFilters
+          {showStickyFilters
             && (
             <StickyFilters
               className="-compare"
-              countriesCompare={this.props.compare.countries}
-              filters={this.props.filters}
-              setFilters={this.props.setFilters}
-              setCompareCountry={this.props.setCompareCountry}
+              countriesCompare={compare.countries}
+              filters={filters}
+              setFilters={setFilters}
+              setCompareCountry={setCompareCountry}
             />
             )
           }
         </Sticky>
 
         <CompareList
-          filters={this.props.filters}
-          countryList={this.props.countries.list}
-          countries={this.props.compare.countries}
-          loading={this.props.loading}
-          widgetsActive={this.props.widgetsActive}
-          items={this.state.items}
+          filters={filters}
+          countryList={countries.list}
+          countries={compare.countries}
+          loading={loading}
+          widgetsActive={widgetsActive}
+          items={items}
         />
       </div>
     );
@@ -149,4 +160,17 @@ ComparePageDesktop.propTypes = {
   emptyCompareCountries: PropTypes.func,
   widgetsActive: PropTypes.array,
   layersActive: PropTypes.array
+};
+
+ComparePageDesktop.defaultProps = {
+  compare: {},
+  loading: false,
+  countries: {},
+  filters: {},
+  setFilters: () => {},
+  updateCompareUrl: () => {},
+  setCompareCountry: () => {},
+  emptyCompareCountries: () => {},
+  widgetsActive: [],
+  layersActive: []
 };

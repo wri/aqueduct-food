@@ -29,6 +29,8 @@ TableHeaderActions.propTypes = {
 };
 
 TableHeaderActions.defaultProps = {
-  onChange: null,
-  selected: null
+  values: [],
+  selected: null,
+  onFilter: null,
+  onSort: null
 };

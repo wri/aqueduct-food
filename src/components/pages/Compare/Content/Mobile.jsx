@@ -23,11 +23,13 @@ export default class ComparePageMobile extends React.Component {
   }
 
   componentWillMount() {
-    this.props.updateCompareUrl();
+    const { updateCompareUrl } = this.props;
+    updateCompareUrl();
   }
 
   componentWillUnmount() {
-    this.props.emptyCompareCountries();
+    const { emptyCompareCountries } = this.props;
+    emptyCompareCountries();
   }
 
   onChangeTab(item) {
@@ -42,16 +44,17 @@ export default class ComparePageMobile extends React.Component {
       title: 'Compare with...',
       placeholder: 'Compare with...'
     }];
+    const { compare, setCompareCountry } = this.props;
 
     return (
       <div className="c-filters">
         <div className="filters-section -highlighted">
           {items.map((item, i) => {
             const props = {
-              value: this.props.compare.countries[i] || null,
+              value: compare.countries[i] || null,
               placeholder: items.placeholder,
               onValueChange: (selected) => {
-                if (selected) this.props.setCompareCountry({ index: i, iso: selected.value });
+                if (selected) setCompareCountry({ index: i, iso: selected.value });
               }
             };
             return (
@@ -74,8 +77,9 @@ export default class ComparePageMobile extends React.Component {
   }
 
   getCountries() {
-    return this.props.compare.countries.map((item, index) => {
-      const country = this.props.countries.list.find(c => c.id === item);
+    const { compare, countries } = this.props;
+    return compare.countries.map((item, index) => {
+      const country = countries.list.find(c => c.id === item);
       return { label: country ? country.name : '', value: String(index) };
     });
   }
@@ -87,6 +91,10 @@ export default class ComparePageMobile extends React.Component {
   }
 
   render() {
+    const { active, items } = this.state;
+    const {
+      filters, setFilters, countries, compare, loading, widgetsActive, layersActive
+    } = this.props;
     const headingContent = (
       <div>
         {this.getCountrySelects()}
@@ -97,8 +105,8 @@ export default class ComparePageMobile extends React.Component {
         <div className="compare-filters">
           <MobileFilters
             className="-compare"
-            filters={this.props.filters}
-            setFilters={this.props.setFilters}
+            filters={filters}
+            setFilters={setFilters}
             headingContent={headingContent}
           >
             <SegmentedUi
@@ -110,14 +118,14 @@ export default class ComparePageMobile extends React.Component {
           </MobileFilters>
         </div>
         <CompareListMobile
-          active={this.state.active}
-          filters={this.props.filters}
-          countryList={this.props.countries.list}
-          countries={this.props.compare.countries}
-          loading={this.props.loading}
-          widgetsActive={this.props.widgetsActive}
-          layersActive={this.props.layersActive}
-          items={this.state.items}
+          active={active}
+          filters={filters}
+          countryList={countries.list}
+          countries={compare.countries}
+          loading={loading}
+          widgetsActive={widgetsActive}
+          layersActive={layersActive}
+          items={items}
         />
       </div>
     );
@@ -135,4 +143,17 @@ ComparePageMobile.propTypes = {
   emptyCompareCountries: PropTypes.func,
   widgetsActive: PropTypes.array,
   layersActive: PropTypes.array
+};
+
+ComparePageMobile.defaultProps = {
+  compare: {},
+  loading: false,
+  countries: {},
+  filters: {},
+  setFilters: () => {},
+  updateCompareUrl: () => {},
+  setCompareCountry: () => {},
+  emptyCompareCountries: () => {},
+  widgetsActive: [],
+  layersActive: []
 };

@@ -77,8 +77,9 @@ export default class WidgetEmbedModal extends React.Component {
    * @returns {string}
    */
   getCode() {
-    const width = this.state.selectedOption.value.split('x')[0];
-    const height = this.state.selectedOption.value.split('x')[1];
+    const { selectedOption } = this.state;
+    const width = selectedOption.value.split('x')[0];
+    const height = selectedOption.value.split('x')[1];
     return `<iframe src="${this.getEmbedURL()}" width="${width}" height="${height}" frameborder="0" style="border:0" allowfullscreen></iframe>`;
   }
 
@@ -87,9 +88,10 @@ export default class WidgetEmbedModal extends React.Component {
    * @returns {string}
    */
   getEmbedURL() {
+    const { filters, widget } = this.props;
     const state = {
-      filters: this.props.filters,
-      embed: { id: this.props.widget.dataset }
+      filters,
+      embed: { id: widget.dataset }
     };
     const { location: { origin, pathname } } = window;
 
@@ -110,10 +112,11 @@ export default class WidgetEmbedModal extends React.Component {
   }
 
   render() {
+    const { copyError, loading, selectedOption } = this.state;
     let copyButtonContent = 'Copy code';
-    if (this.state.copyError === false) {
+    if (copyError === false) {
       copyButtonContent = 'Copied!';
-    } else if (this.state.copyError === true) {
+    } else if (copyError === true) {
       copyButtonContent = 'Copy it manually';
     }
 
@@ -134,7 +137,7 @@ export default class WidgetEmbedModal extends React.Component {
               {this.getName(widgetParsed)}
             </div>
             <div className="widget">
-              <Spinner isLoading={this.state.loading} />
+              <Spinner isLoading={loading} />
               <WidgetChart
                 widget={widget}
                 filters={filters}
@@ -146,10 +149,10 @@ export default class WidgetEmbedModal extends React.Component {
             <h2>Embed size</h2>
             <CustomSelect
               options={embedOptions}
-              value={this.state.selectedOption.value}
+              value={selectedOption.value}
               onValueChange={this.onChangeSize}
             />
-            <textareara className="code" ref={node => this.code = node} readOnly>
+            <textareara className="code" ref={(node) => { this.code = node; }} readOnly>
               {this.getCode()}
             </textareara>
             <button className="c-btn -primary -light" type="button" onClick={() => this.onCopy()}>
@@ -165,4 +168,9 @@ export default class WidgetEmbedModal extends React.Component {
 WidgetEmbedModal.propTypes = {
   widget: PropTypes.object,
   filters: PropTypes.object
+};
+
+WidgetEmbedModal.defaultProps = {
+  widget: {},
+  filters: {}
 };

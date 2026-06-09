@@ -17,14 +17,16 @@ class Switch extends React.Component {
   */
   onChange(e) {
     // Send object
-    const selectedObj = this.props.items.find(item => item.value === e.currentTarget.dataset.value);
-    this.props.onChange(selectedObj);
+    const { items, onChange } = this.props;
+    const selectedObj = items.find(item => item.value === e.currentTarget.dataset.value);
+    onChange(selectedObj);
   }
 
   onToggle() {
     // Send object
-    const selectedObj = this.props.items.find(item => item.value !== this.props.selected);
-    this.props.onChange(selectedObj);
+    const { items, selected, onChange } = this.props;
+    const selectedObj = items.find(item => item.value !== selected);
+    onChange(selectedObj);
   }
 
   render() {
@@ -64,6 +66,11 @@ Switch.propTypes = {
   selected: PropTypes.string,
   items: PropTypes.array.isRequired, // It should be an array of 2 elements
   onChange: PropTypes.func
+};
+
+Switch.defaultProps = {
+  selected: null,
+  onChange: () => {}
 };
 
 export default Switch;

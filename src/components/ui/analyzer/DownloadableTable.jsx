@@ -6,20 +6,16 @@ import BtnMenu from 'components/ui/BtnMenu';
 class AnalyzerDownloadableTable extends PureComponent {
   render() {
     const {
-      onExpandTable = () => {},
+      onExpandTable,
       children,
-      noExpand = false,
-      downloadDisabled = false,
-      downloading = false,
-      downloadOptions = [],
-      hideInstructions = false,
-      downloadButtons = false,
-      instructionUrl = 'https://github.com/wri/aqueduct30_data_download/blob/master/metadata.md',
-      contentWrapper = node => (
-        <div className="analyzer-content">
-          {node}
-        </div>
-      )
+      noExpand,
+      downloadDisabled,
+      downloading,
+      downloadOptions,
+      hideInstructions,
+      downloadButtons,
+      instructionUrl,
+      contentWrapper
     } = this.props;
 
     const instructionsNode = (
@@ -109,6 +105,22 @@ AnalyzerDownloadableTable.propTypes = {
   instructionUrl: PropTypes.string,
   downloadButtons: PropTypes.bool,
   contentWrapper: PropTypes.func
+};
+
+AnalyzerDownloadableTable.defaultProps = {
+  onExpandTable: () => {},
+  noExpand: false,
+  downloadDisabled: false,
+  downloadOptions: [],
+  downloading: false,
+  hideInstructions: false,
+  instructionUrl: 'https://github.com/wri/aqueduct30_data_download/blob/master/metadata.md',
+  downloadButtons: false,
+  contentWrapper: node => (
+    <div className="analyzer-content">
+      {node}
+    </div>
+  )
 };
 
 export default AnalyzerDownloadableTable;

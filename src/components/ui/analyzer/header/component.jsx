@@ -7,11 +7,7 @@ import BtnMenu from 'components/ui/BtnMenu';
 
 class AnalyzerHeader extends PureComponent {
   render() {
-    const {
-      title = 'Analyze',
-      actions = [],
-      onToggleOpen = () => {}
-    } = this.props;
+    const { title, actions, onToggleOpen } = this.props;
     return (
       <div className="c-analyzer-header">
         <div className="actions-container">
@@ -47,6 +43,12 @@ AnalyzerHeader.propTypes = {
     })
   ),
   onToggleOpen: PropTypes.func
+};
+
+AnalyzerHeader.defaultProps = {
+  title: 'Analyze',
+  actions: [],
+  onToggleOpen: () => {}
 };
 
 export default AnalyzerHeader;

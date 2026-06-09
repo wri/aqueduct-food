@@ -44,6 +44,7 @@ TableHeader.propTypes = {
 };
 
 TableHeader.defaultProps = {
+  actions: {},
   columns: [],
   columnValues: {},
   columnQueries: {},
