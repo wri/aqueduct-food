@@ -166,7 +166,8 @@ export default class TableFilters extends React.Component {
           </button>
 
           {/* Second child: If present, this item will be tethered to the the first child */}
-          {!this.state.closed &&
+          {!this.state.closed
+            && (
             <div className="tooltip-content">
               <div className="content">
                 <div className="search-box">
@@ -177,19 +178,23 @@ export default class TableFilters extends React.Component {
                     placeholder="Type search"
                     onChange={this.onChangeInput}
                   />
-                  {!input &&
+                  {!input
+                    && (
                     <button className="-search">
                       <Icon name="icon-search" className="-small" />
                     </button>
+                    )
                   }
 
-                  {!!input &&
+                  {!!input
+                    && (
                     <button
                       className="-close"
                       onClick={this.onResetInput}
                     >
                       <Icon name="icon-cross" className="-small" />
                     </button>
+                    )
                   }
                 </div>
                 <CheckboxGroup
@@ -226,6 +231,7 @@ export default class TableFilters extends React.Component {
                 </ul>
               </div>
             </div>
+            )
           }
         </TetherComponent>
       </div>

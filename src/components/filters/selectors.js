@@ -5,7 +5,6 @@ import {
   BASELINE_WATER_INDICATORS,
   PROJECTED_WATER_INDICATORS_ABSOLUTE,
   PROJECTED_WATER_INDICATORS_CHANGE,
-  PROJECTED_WATER_INDICATORS_IDS,
   NONE_OPTION_WATER_INDICATORS,
   ALLOWED_PROJECTED_WATER_INDICATORS,
   SUPPLY_CHAIN_WATER_INDICATORS,
@@ -24,7 +23,7 @@ export const getWaterOptions = createSelector(
     let waterIndicators = [];
 
     if (_scope === 'supply_chain') {
-      waterIndicators = SUPPLY_CHAIN_WATER_INDICATORS
+      waterIndicators = SUPPLY_CHAIN_WATER_INDICATORS;
     } else {
       if (_year === 'baseline') waterIndicators = BASELINE_WATER_INDICATORS;
 

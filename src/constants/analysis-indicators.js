@@ -41,10 +41,10 @@ export const INDICATOR_FOR_COLUMN = ANALYSIS_INDICATORS.reduce((acc, ind) => {
 
 const BWS_BANDS = [
   { min: -Infinity, max: 1, score: 0, cat: 0, label: 'Low (<10%)', detail: 'Less than 10% of available supply withdrawn — low competition for water.' },
-  { min: 1,  max: 2,        score: 1, cat: 1, label: 'Low - Medium (10-20%)', detail: '10-20% of available supply withdrawn.' },
-  { min: 2,  max: 3,        score: 2, cat: 2, label: 'Medium - High (20-40%)', detail: '20-40% of available supply withdrawn — meaningful water competition.' },
-  { min: 3,  max: 4,        score: 3, cat: 3, label: 'High (40-80%)', detail: '40-80% of available supply withdrawn — basin is under significant stress.' },
-  { min: 4,  max: Infinity, score: 4, cat: 4, label: 'Extremely High (>80%)', detail: 'More than 80% of available supply withdrawn — basin is heavily over-allocated.' },
+  { min: 1, max: 2, score: 1, cat: 1, label: 'Low - Medium (10-20%)', detail: '10-20% of available supply withdrawn.' },
+  { min: 2, max: 3, score: 2, cat: 2, label: 'Medium - High (20-40%)', detail: '20-40% of available supply withdrawn — meaningful water competition.' },
+  { min: 3, max: 4, score: 3, cat: 3, label: 'High (40-80%)', detail: '40-80% of available supply withdrawn — basin is under significant stress.' },
+  { min: 4, max: Infinity, score: 4, cat: 4, label: 'Extremely High (>80%)', detail: 'More than 80% of available supply withdrawn — basin is heavily over-allocated.' },
 ];
 
 function findBwsBand(score) {
@@ -55,10 +55,10 @@ function findBwsBand(score) {
 // ─── SBTN thresholds ─────────────────────────────────────────────────────────
 
 const SBTN_LEVELS = {
-  1: { label: 'Very Low',  detail: 'Pressure is negligible relative to ecosystem capacity.' },
-  2: { label: 'Low',       detail: 'Pressure is below targets but should be monitored.' },
-  3: { label: 'Medium',    detail: 'Pressure approaches the SBTN action threshold — consider mitigation.' },
-  4: { label: 'High',      detail: 'Pressure exceeds the SBTN action threshold — action recommended.' },
+  1: { label: 'Very Low', detail: 'Pressure is negligible relative to ecosystem capacity.' },
+  2: { label: 'Low', detail: 'Pressure is below targets but should be monitored.' },
+  3: { label: 'Medium', detail: 'Pressure approaches the SBTN action threshold — consider mitigation.' },
+  4: { label: 'High', detail: 'Pressure exceeds the SBTN action threshold — action recommended.' },
   5: { label: 'Very High', detail: 'Severe pressure on the basin — immediate action required.' },
 };
 
@@ -86,9 +86,8 @@ export function describeIndicatorValue(columnKey, row) {
   switch (columnKey) {
     case 'bws_score':
     case 'bws_raw': {
-      const score = columnKey === 'bws_score'
-        ? (typeof value === 'number' ? value : parseFloat(value))
-        : (typeof row.bws_score === 'number' ? row.bws_score : parseFloat(row.bws_score));
+      const toNumber = v => (typeof v === 'number' ? v : parseFloat(v));
+      const score = columnKey === 'bws_score' ? toNumber(value) : toNumber(row.bws_score);
       const band = findBwsBand(score);
       if (!band) return null;
       return `BWS ${columnKey === 'bws_raw' ? 'raw withdrawal ratio' : `score ${score.toFixed(2)}`} → ${band.label}. ${band.detail}`;

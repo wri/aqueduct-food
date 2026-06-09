@@ -1,6 +1,6 @@
-import React from 'react'
-import propTypes from 'prop-types'
-import classNames from 'classnames'
+import React from 'react';
+import propTypes from 'prop-types';
+import classNames from 'classnames';
 import {
   Icon,
   RadioGroup,
@@ -20,42 +20,40 @@ const CropSelect = ({
   irrigation,
   onIrrigationChange = () => {},
   className = ''
-}) => {
-  return (
-    <div className={classNames("c-filters-item", className)}>
-      <div className="filter-item-header">
-        <span className="title">{title}</span>
-        {!hideHelpIcon && (
-          <button
-            type="button"
-            className="icon-container"
-            onClick={onHelpIconClick}
-          >
-            <Icon
-              name="icon-question"
-              className="title-icon"
-            />
-          </button>
-        )}
-      </div>
-
-      <CustomSelect
-        search
-        options={cropOptions.sort((c1, c2) => c1.label > c2.label ? 1 : -1)}
-        value={crop}
-        onValueChange={onCropChange}
-      />
-
-      <RadioGroup
-        name="irrigation"
-        items={irrigationOptions}
-        onChange={onIrrigationChange}
-        selected={irrigation}
-        className="-inline"
-      />
+}) => (
+  <div className={classNames('c-filters-item', className)}>
+    <div className="filter-item-header">
+      <span className="title">{title}</span>
+      {!hideHelpIcon && (
+      <button
+        type="button"
+        className="icon-container"
+        onClick={onHelpIconClick}
+      >
+        <Icon
+          name="icon-question"
+          className="title-icon"
+        />
+      </button>
+      )}
     </div>
-  )
-}
+
+    <CustomSelect
+      search
+      options={cropOptions.sort((c1, c2) => (c1.label > c2.label ? 1 : -1))}
+      value={crop}
+      onValueChange={onCropChange}
+    />
+
+    <RadioGroup
+      name="irrigation"
+      items={irrigationOptions}
+      onChange={onIrrigationChange}
+      selected={irrigation}
+      className="-inline"
+    />
+  </div>
+);
 
 CropSelect.propTypes = {
   title: propTypes.node,
@@ -75,6 +73,6 @@ CropSelect.propTypes = {
   irrigation: propTypes.string,
   onIrrigationChange: propTypes.func,
   className: propTypes.string,
-}
+};
 
-export default CropSelect
+export default CropSelect;

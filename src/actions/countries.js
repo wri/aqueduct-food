@@ -8,7 +8,7 @@ import {
   SET_FILTERS
 } from 'constants/filters';
 
-import { store } from 'main';
+import { store } from '../store';
 
 export function getCountries() {
   return (dispatch) => {

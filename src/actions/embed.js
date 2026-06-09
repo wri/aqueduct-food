@@ -1,7 +1,7 @@
 import axios from 'axios';
 import WRISerializer from 'wri-json-api-serializer';
-import { store } from 'main';
 import { SET_EMBED, GET_WIDGET_SUCCESS, GET_WIDGET_ERROR } from 'constants/embed';
+import { store } from '../store';
 
 export function setEmbed(embed) {
   return {

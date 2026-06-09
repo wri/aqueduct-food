@@ -11,7 +11,7 @@ class CompareSummaries extends PureComponent {
     return (
       <div className="c-compareitem-summaries">
         <div className="c-compareitem-row">
-          {compareConfig.map(_compareConfig => Object.keys(_compareConfig).length ? (
+          {compareConfig.map(_compareConfig => (Object.keys(_compareConfig).length ? (
             <div
               key={_compareConfig.country}
               className="compareitem-column"
@@ -21,7 +21,7 @@ class CompareSummaries extends PureComponent {
                 countryName={_compareConfig.filters.countryName}
               />
             </div>
-          ) : null)}
+          ) : null))}
         </div>
       </div>
     );

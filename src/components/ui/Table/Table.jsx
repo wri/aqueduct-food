@@ -9,7 +9,6 @@ import TableContent from './Content/TableContent';
 import TableFooter from './Footer/TableFooter';
 
 class CustomTable extends PureComponent {
-
   /**
    * STATIC METHODS
    * - getColumnKeys
@@ -26,8 +25,8 @@ class CustomTable extends PureComponent {
 
     columnsKeys.forEach((key) => {
       const values = uniq(data.map(d => d[key]))
-                     .sort((a, b) => a - b)
-                     .map(d => d && d.toString());
+        .sort((a, b) => a - b)
+        .map(d => d && d.toString());
       columns[key] = values;
     });
 
@@ -35,7 +34,7 @@ class CustomTable extends PureComponent {
   }
 
   static setTableData(props) {
-    const data = props.data;
+    const { data } = props;
 
     return {
       // Data
@@ -140,7 +139,7 @@ class CustomTable extends PureComponent {
   }
 
   onFilter(q) {
-    let columnQueries = this.state.columnQueries;
+    let { columnQueries } = this.state;
 
     // Let's use null when you select all the values, so whenever you add more points to
     // the map they will be selected because you will remove the filter from the columnQueries
@@ -186,13 +185,8 @@ class CustomTable extends PureComponent {
   filter() {
     const { columnQueries, pagination } = this.state;
 
-    const filteredData = this.state.data.filter((row) => {
-      return Object.keys(columnQueries).map((field) => {
-        return columnQueries[field].map((val) => {
-          return !!row[field].toString().toLowerCase().match(val.toString().toLowerCase());
-        }).some(match => match);
-      }).every(match => match);
-    });
+    // eslint-disable-next-line max-len
+    const filteredData = this.state.data.filter(row => Object.keys(columnQueries).map(field => columnQueries[field].map(val => !!row[field].toString().toLowerCase().match(val.toString().toLowerCase())).some(match => match)).every(match => match));
 
     const total = Math.ceil(filteredData.length / pagination.pageSize);
     // Check if the page is equal to the total

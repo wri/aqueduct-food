@@ -1,5 +1,6 @@
+/* eslint-disable max-len */
+// Static content page: long prose paragraphs and inline content tables.
 import React from 'react';
-import { Spinner } from 'aqueduct-components';
 
 export default class AboutPage extends React.Component {
   render() {
@@ -23,7 +24,7 @@ export default class AboutPage extends React.Component {
                   <li>Ministries of water and agriculture: Government officials within relevant ministries can use Aqueduct Food to see how changes in climate and demand for water could affect their food-producing areas. </li>
                 </ul>
 
-                <p>For instructions on how to use Aqueduct Food, see <a target="_blank" href="https://s3.amazonaws.com/aqueduct-food/Aqueduct+Food+User-s+Guide.pdf">here</a>.</p>
+                <p>For instructions on how to use Aqueduct Food, see <a target="_blank" rel="noopener noreferrer" href="https://s3.amazonaws.com/aqueduct-food/Aqueduct+Food+User-s+Guide.pdf">here</a>.</p>
               </div>
 
               <div className="text-section">
@@ -32,7 +33,7 @@ export default class AboutPage extends React.Component {
                   <h3>Aqueduct water risk indicators (WRI)</h3>
                   <p>The Aqueduct water risk indicators were developed using hydrological modeling of long-term trends. A list and description of each water risk indicator can be found in the table below. The table also notes which indicators are most applicable to irrigated or rainfed agriculture, and for which indicators future projections are available.</p>
                   <div className="c-table">
-                    <table className="table"><tbody><tr><th>Indicator</th><th className="description">Description</th><th>Irrigated?</th><th>Rainfed?</th><th>Future Projections?</th></tr><tr><td>Water stress</td><td>Measures the ratio of total annual water withdrawals to total available annual renewable supply, accounting for upstream consumptive use. Higher values indicate less water availability and more competition among users. Baseline values are generated using hydrological modeling of long-term trends from 1960 to 2014.</td><td className="-a-center">✔</td><td></td><td className="-a-center">✔</td></tr><tr><td>Seasonal variability</td><td>Measures the variation in water supply between months of the year. Areas with high seasonal variability may have extreme wet and/or dry seasons. Baseline values are generated using hydrological modeling of long-term trends from 1960 to 2014.</td><td className="-a-center">✔</td><td className="-a-center">✔</td><td className="-a-center">✔</td></tr><tr><td>Inter-annual variability</td><td>Measures the variability in water supply from year to year. It is an indicator of the unpredictability of supply. Baseline values are generated using hydrological modeling of long-term trends from 1960 to 2014.</td><td className="-a-center">✔</td><td className="-a-center">✔</td><td></td></tr><tr><td>Drought severity (soil moisture)</td><td>Estimates the average magnitude of droughts based on the severity and frequency of periods of time during which soil moisture remains low. Baseline values are generated using hydrological modeling of long-term trends from 1960 to 2014.</td><td className="-a-center">✔</td><td className="-a-center">✔</td><td></td></tr><tr><td>Groundwater stress</td><td>Measures the relative ratio of groundwater withdrawal to recharge rate. Values above one indicate that groundwater is being depleted faster than it is being restored. Unsustainable groundwater consumption could affect groundwater availability and groundwater-dependent ecosystems. Baseline values are generated using hydrological modeling of long-term trends from 1990 to 2014.</td><td className="-a-center">✔</td><td></td><td></td></tr><tr><td>Groundwater table declining trend</td><td>Measures trends in the decline of the groundwater table. The slope of the decline correlates to the severity of the trend. Baseline values are generated using hydrological modeling from 1990 to 2014.</td><td className="-a-center">✔</td><td></td><td></td></tr></tbody></table><div></div>
+                    <table className="table"><tbody><tr><th>Indicator</th><th className="description">Description</th><th>Irrigated?</th><th>Rainfed?</th><th>Future Projections?</th></tr><tr><td>Water stress</td><td>Measures the ratio of total annual water withdrawals to total available annual renewable supply, accounting for upstream consumptive use. Higher values indicate less water availability and more competition among users. Baseline values are generated using hydrological modeling of long-term trends from 1960 to 2014.</td><td className="-a-center">✔</td><td /><td className="-a-center">✔</td></tr><tr><td>Seasonal variability</td><td>Measures the variation in water supply between months of the year. Areas with high seasonal variability may have extreme wet and/or dry seasons. Baseline values are generated using hydrological modeling of long-term trends from 1960 to 2014.</td><td className="-a-center">✔</td><td className="-a-center">✔</td><td className="-a-center">✔</td></tr><tr><td>Inter-annual variability</td><td>Measures the variability in water supply from year to year. It is an indicator of the unpredictability of supply. Baseline values are generated using hydrological modeling of long-term trends from 1960 to 2014.</td><td className="-a-center">✔</td><td className="-a-center">✔</td><td /></tr><tr><td>Drought severity (soil moisture)</td><td>Estimates the average magnitude of droughts based on the severity and frequency of periods of time during which soil moisture remains low. Baseline values are generated using hydrological modeling of long-term trends from 1960 to 2014.</td><td className="-a-center">✔</td><td className="-a-center">✔</td><td /></tr><tr><td>Groundwater stress</td><td>Measures the relative ratio of groundwater withdrawal to recharge rate. Values above one indicate that groundwater is being depleted faster than it is being restored. Unsustainable groundwater consumption could affect groundwater availability and groundwater-dependent ecosystems. Baseline values are generated using hydrological modeling of long-term trends from 1990 to 2014.</td><td className="-a-center">✔</td><td /><td /></tr><tr><td>Groundwater table declining trend</td><td>Measures trends in the decline of the groundwater table. The slope of the decline correlates to the severity of the trend. Baseline values are generated using hydrological modeling from 1990 to 2014.</td><td className="-a-center">✔</td><td /><td /></tr></tbody></table><div />
                   </div>
                   <p><i>Source: Aqueduct 2018 (forthcoming)</i></p>
                 </div>
@@ -40,13 +41,13 @@ export default class AboutPage extends React.Component {
                 <div className="text-subsection">
                   <h3>MapSPAM (IFPRI)</h3>
                   <p>The Spatial Production Allocation Model (MapSPAM) takes a cross-entropy approach to estimate global crop distribution at a 10x10 km resolution. MapSPAM provides Aqueduct Food’s geospatially explicit crop layers. </p>
-                  <p><i>Source: <a href="http://mapspam.info/" target="_blank">http://mapspam.info/</a></i></p>
+                  <p><i>Source: <a href="http://mapspam.info/" target="_blank" rel="noopener noreferrer">http://mapspam.info/</a></i></p>
                 </div>
 
                 <div className="text-subsection">
                   <h3>IMPACT Model (IFPRI)</h3>
                   <p>The International Model for Policy Analysis of Agricultural Commodities and Trade (IMPACT) is a network of linked economic, water, and crop models. Its core is a partial equilibrium economic model which simulates agricultural markets. This economic model is linked to water and crop models to analyze changing environmental, biophysical, and socioeconomic trends. Aqueduct Food’s country-scale datasets on food production, food demand, crop net trade, share of population at risk of hunger, and kilocalories per person are provided by IMPACT.</p>
-                  <p><i>Source: <a href="https://www.ifpri.org/program/impact-model" target="_blank">https://www.ifpri.org/program/impact-model</a></i></p>
+                  <p><i>Source: <a href="https://www.ifpri.org/program/impact-model" target="_blank" rel="noopener noreferrer">https://www.ifpri.org/program/impact-model</a></i></p>
                 </div>
               </div>
 
@@ -66,7 +67,7 @@ export default class AboutPage extends React.Component {
                       <li>Food availability is estimated based on food demand but does not consider external factors that may hinder access to food such as price</li>
                       <li>Some populations, such as indigenous communities, participate in markets that are isolated from world food price fluctuations</li>
                     </ul>
-                </li>
+                  </li>
                 </ul>
               </div>
               <div className="text-section">

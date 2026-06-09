@@ -2,7 +2,7 @@ import { render } from 'react-dom';
 import InfoWindow from 'components/ui/InfoWindow';
 
 // Redux
-import { store, dispatch } from 'main';
+import { store, dispatch } from 'store';
 import { setFilters } from 'actions/filters';
 
 
@@ -93,7 +93,8 @@ export default class BubbleClusterLayer {
         if (b) {
           const bounds = new L.LatLngBounds(
             new L.LatLng(b.minLat, b.maxLng),
-            new L.LatLng(b.maxLat, b.minLng));
+            new L.LatLng(b.maxLat, b.minLng)
+          );
 
           // We should check if the sidebar is opened
           const sidebarWidth = store.getState().sidebar.width + 25;
@@ -144,7 +145,6 @@ export default class BubbleClusterLayer {
         if (value < 0) { additionalClass = '-negative'; }
         break;
       default:
-
     }
     return `c-marker-bubble ${additionalClass}`;
   }

@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { dispatch } from 'main';
+import { dispatch } from 'store';
 import ShareModal from 'components/modal/share';
 
 // Components
@@ -11,7 +11,6 @@ import MobileFilters from 'components/filters/mobile';
 import CountrySelect from 'components/country-select';
 
 export default class ComparePageMobile extends React.Component {
-
   constructor(props) {
     super(props);
     this.state = {

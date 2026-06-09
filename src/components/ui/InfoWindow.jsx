@@ -12,9 +12,10 @@ export default function InfoWindow(props) {
   return (
     <div className="c-infowindow">
       <h3>{title}</h3>
-      {list && !!list.length &&
+      {list && !!list.length
+        && (
         <dl className="dl">
-          {list.map(item =>
+          {list.map(item => (
             <div
               // onClick={() => console.log(item)}
               className="dc"
@@ -23,8 +24,9 @@ export default function InfoWindow(props) {
               <dt className="dt">{item.label}:</dt>
               <dd className="dd">{parse(item.value)}</dd>
             </div>
-          )}
+          ))}
         </dl>
+        )
       }
     </div>
   );

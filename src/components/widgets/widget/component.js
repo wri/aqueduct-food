@@ -158,7 +158,7 @@ class Widget extends PureComponent {
                   }}
                   className="widget-noresults"
                 >
-                    No data available
+                  No data available
                 </div>
               )}
             <Spinner isLoading={loading} />

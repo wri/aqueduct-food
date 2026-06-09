@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 export default class TableFooter extends React.Component {
-
   constructor(props) {
     super(props);
 
@@ -26,7 +25,8 @@ export default class TableFooter extends React.Component {
     return (
       <div className="table-footer">
         {/* Paginator */}
-        {pagination.enabled &&
+        {pagination.enabled
+          && (
           <ul className="paginator">
             <li className="paginator-link">
               <button className="paginator-btn" onClick={this.onPrevPage}>
@@ -39,11 +39,12 @@ export default class TableFooter extends React.Component {
               </button>
             </li>
           </ul>
+          )
         }
 
         {/* Page locator */}
-        {pagination.enabled &&
-          <span>Page <span>{pagination.page + 1}</span> of <span>{pagination.total}</span></span>
+        {pagination.enabled
+          && <span>Page <span>{pagination.page + 1}</span> of <span>{pagination.total}</span></span>
         }
       </div>
     );

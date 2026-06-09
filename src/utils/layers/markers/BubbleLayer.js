@@ -15,7 +15,7 @@ export default class BubbleLayer {
       pointToLayer: (feature) => {
         // This should be given by the current filters
         const cropFilter = 'allcrops';
-        const crops = feature.properties.crops;
+        const { crops } = feature.properties;
         const cropSelected = find(crops, { slug: cropFilter });
 
         // Options

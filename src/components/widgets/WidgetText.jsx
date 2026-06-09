@@ -50,6 +50,7 @@ class WidgetText extends PureComponent {
 
     return (
       <div className="c-widget-text">
+        {/* eslint-disable-next-line react/no-danger */}
         <p dangerouslySetInnerHTML={{ __html: template }} />
       </div>
     );

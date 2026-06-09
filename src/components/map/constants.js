@@ -1,3 +1,6 @@
+/* eslint-disable max-len */
+// Data-only module: map tile URLs (with access tokens) and indicator description
+// strings are inherently long and cannot be meaningfully wrapped.
 export const MAP_OPTIONS = {
   detectRetina: true,
   scrollWheelZoom: true,

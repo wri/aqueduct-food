@@ -9,26 +9,24 @@ export default class TableHeader extends React.Component {
     return (
       <thead>
         <tr>
-          {(actions.showable || actions.editable || actions.removable) && !!filteredData.length &&
-            <th />
+          {(actions.showable || actions.editable || actions.removable) && !!filteredData.length
+            && <th />
           }
-          {columns.map((c, index) => {
-            return (
-              <th key={index}>
-                <span className="th-wrapper">
-                  <span>{c.label}</span>
+          {columns.map((c, index) => (
+            <th key={index}>
+              <span className="th-wrapper">
+                <span>{c.label}</span>
 
-                  <TableHeaderActions
-                    field={c.value}
-                    values={columnValues[c.value]}
-                    selected={columnQueries[c.value]}
-                    onFilter={onFilter}
-                    onSort={onSort}
-                  />
-                </span>
-              </th>
-            );
-          })}
+                <TableHeaderActions
+                  field={c.value}
+                  values={columnValues[c.value]}
+                  selected={columnQueries[c.value]}
+                  onFilter={onFilter}
+                  onSort={onSort}
+                />
+              </span>
+            </th>
+          ))}
         </tr>
       </thead>
     );

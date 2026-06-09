@@ -6,7 +6,6 @@ import isEmpty from 'lodash/isEmpty';
 import { Icon } from 'aqueduct-components';
 
 export default class TableContent extends React.Component {
-
   getPageBounds() {
     const { pagination } = this.props;
 
@@ -34,9 +33,7 @@ export default class TableContent extends React.Component {
 
     /* Apply sorting to data */
     if (!isEmpty(sort)) {
-      data = data.slice().sort((rowA, rowB) => {
-        return rowA[sort.field].toString().toLowerCase() > rowB[sort.field].toString().toLowerCase() ? sort.value : (sort.value * -1);
-      });
+      data = data.slice().sort((rowA, rowB) => (rowA[sort.field].toString().toLowerCase() > rowB[sort.field].toString().toLowerCase() ? sort.value : (sort.value * -1)));
     }
 
     /* Apply pagination to data */
@@ -53,9 +50,11 @@ export default class TableContent extends React.Component {
               onClick={() => this.props.onToggleSelectedRow(row, index)}
               key={index}
             >
-              {(actions.showable || actions.editable || actions.removable) &&
+              {(actions.showable || actions.editable || actions.removable)
+                && (
                 <td>
-                  {actions.removable &&
+                  {actions.removable
+                    && (
                     <button
                       type="button"
                       onClick={(e) => {
@@ -66,12 +65,12 @@ export default class TableContent extends React.Component {
                     >
                       <Icon name="icon-cross" className="-small" />
                     </button>
+                    )
                   }
                 </td>
+                )
               }
-              {columns.map((col, i) =>
-                <td key={i}>{row[col.value]}</td>
-              )}
+              {columns.map((col, i) => <td key={i}>{row[col.value]}</td>)}
             </tr>
           );
         })}

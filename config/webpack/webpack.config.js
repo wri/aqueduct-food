@@ -99,6 +99,7 @@ const config = {
       reducers: path.resolve(__dirname, '..', '..', 'src', 'reducers'),
       services: path.resolve(__dirname, '..', '..', 'src', 'services'),
       main: path.resolve(__dirname, '..', '..', 'src', 'main'),
+      store: path.resolve(__dirname, '..', '..', 'src', 'store'),
       routes: path.resolve(__dirname, '..', '..', 'src', 'routes'),
       data: path.resolve(__dirname, '..', '..', 'src', 'data')
     },

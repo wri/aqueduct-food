@@ -11,14 +11,12 @@ class VegaChartTooltip extends React.Component {
 
     return (
       <ul className="tooltip-list">
-        {config.fields.map((item, i) => {
-          return (
-            <li className="tooltip-list-item" key={i}>
-              <span className="title"> {item.label || item.key}: </span>
-              <span className="value"> {this.parseValues(item.key, data[item.key], item)} </span>
-            </li>
-          );
-        })}
+        {config.fields.map((item, i) => (
+          <li className="tooltip-list-item" key={i}>
+            <span className="title"> {item.label || item.key}: </span>
+            <span className="value"> {this.parseValues(item.key, data[item.key], item)} </span>
+          </li>
+        ))}
       </ul>
     );
   }
@@ -34,28 +32,24 @@ class VegaChartTooltip extends React.Component {
         <table className="tooltip-table">
           <thead>
             <tr>
-              {config.table.headers.map((k, j) => {
-                return (
-                  <th key={j}>{k}</th>
-                );
-              })}
+              {config.table.headers.map((k, j) => (
+                <th key={j}>{k}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
-            {sortBy(data, d => d.impactparameter || d.commodity).map((d, i) => {
-              return (
-                <tr className="tooltip-list-item" key={i}>
-                  {config.table.columns.map((item, j) => {
-                    const key = item.key;
-                    const parse = item.parse || {};
+            {sortBy(data, d => d.impactparameter || d.commodity).map((d, i) => (
+              <tr className="tooltip-list-item" key={i}>
+                {config.table.columns.map((item, j) => {
+                  const { key } = item;
+                  const parse = item.parse || {};
 
-                    return (
-                      <td key={j}>{this.parseValues(key, d[key], parse)}</td>
-                    );
-                  })}
-                </tr>
-              );
-            })}
+                  return (
+                    <td key={j}>{this.parseValues(key, d[key], parse)}</td>
+                  );
+                })}
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
@@ -72,8 +66,8 @@ class VegaChartTooltip extends React.Component {
       val = (!isNaN(value)) ? format(param.format)(value) : val;
     }
 
-    if(key === 'year') {
-      if(BASELINE_YEARS.includes((value || '').toString())) val = 'Baseline'
+    if (key === 'year') {
+      if (BASELINE_YEARS.includes((value || '').toString())) val = 'Baseline';
     }
 
     return `${preffix}${val}${suffix}`;

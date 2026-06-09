@@ -14,7 +14,6 @@ const embedOptions = [
 ];
 
 export default class WidgetEmbedModal extends React.Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -126,8 +125,6 @@ export default class WidgetEmbedModal extends React.Component {
       widget.widgetConfig.params_config,
       widget.widgetConfig.sql_config
     );
-
-    const { name, description, widgetConfig, queryUrl } = widgetParsed;
 
     return (
       <div className="c-embed">

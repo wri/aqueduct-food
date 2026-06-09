@@ -4,9 +4,11 @@ require('dotenv').config({ silent: true });
 process.env.BROWSERSLIST_CONFIG = 'browserslist';
 
 const path = require('path');
+// eslint-disable-next-line import/no-unresolved
 const validate = require('webpack-validator');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+
 const rootPath = process.cwd();
 const componentsPath = path.join(rootPath, '..', 'aqueduct-components');
 

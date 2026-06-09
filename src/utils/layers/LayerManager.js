@@ -1,6 +1,6 @@
 import template from 'lodash/template';
 
-import { store } from 'main';
+import { store } from 'store';
 
 // AQ components
 import { get, getObjectConversion } from 'aqueduct-components';
@@ -82,17 +82,16 @@ export default class LayerManager {
   _setMarkers(layer, zoomLevels) {
     const { id } = layer || {};
     const { prevZoom, nextZoom } = zoomLevels || {};
-    const { filters, compare } = store.getState()
-    const { scope, country } = filters;
-    const { countries } = compare;
+    const { filters } = store.getState();
+    const { scope } = filters;
 
     let markers = [];
     let markerConfig = {};
 
     // prevents set markers if zoom is still in same range
-    if ((!!prevZoom &&
-      !ZOOM_DISPLAYS_TOP.includes(prevZoom) && !ZOOM_DISPLAYS_TOP.includes(nextZoom)) ||
-      (ZOOM_DISPLAYS_TOP.includes(prevZoom) && ZOOM_DISPLAYS_TOP.includes(nextZoom))) return;
+    if ((!!prevZoom
+      && !ZOOM_DISPLAYS_TOP.includes(prevZoom) && !ZOOM_DISPLAYS_TOP.includes(nextZoom))
+      || (ZOOM_DISPLAYS_TOP.includes(prevZoom) && ZOOM_DISPLAYS_TOP.includes(nextZoom))) return;
 
     if (!this._markerLayers[id]) return;
 
@@ -101,7 +100,7 @@ export default class LayerManager {
     markers = this._getMarkersByZoom(layer, nextZoom);
 
     if (scope === 'country' && layer.country) {
-      markers = this._markerLayers[id].filter(marker => marker.properties.iso === layer.country)
+      markers = this._markerLayers[id].filter(marker => marker.properties.iso === layer.country);
     }
 
     this._addMarkers(markers, layer, markerConfig);
@@ -151,7 +150,7 @@ export default class LayerManager {
     const { bucket, crop } = params;
     const cartoCss = _layerConfig.body.layers[0].options.cartocss;
     const cartoCssTemplate = template(cartoCss, { interpolate: /{{([\s\S]+?)}}/g });
-    const color = CROP_OPTIONS.find(c => c.value === crop).color;
+    const { color } = CROP_OPTIONS.find(c => c.value === crop);
 
     return cartoCssTemplate({ bucket, color });
   }
@@ -167,7 +166,7 @@ export default class LayerManager {
     this._mapRequests[layerConfig.category] = get({
       url: `https://${layerConfig.account}.carto.com/api/v2/sql?q=${legendConfigConverted.sqlQuery}`,
       onSuccess: (data) => {
-        const bucket = data.rows[0].bucket;
+        const { bucket } = data.rows[0];
         if (bucket === null || !bucket) {
           console.error('No buckets available');
           this._deleteLoader(layerConfig.id);
@@ -237,7 +236,7 @@ export default class LayerManager {
       ...layerSpec.layerConfig,
       ...{ id: layerSpec.id, category: layerSpec.category }
     };
-    const legendConfig = layerSpec.legendConfig;
+    const { legendConfig } = layerSpec;
 
     const options = opts;
 

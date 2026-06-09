@@ -4,7 +4,6 @@ import { Spinner } from 'aqueduct-components';
 import Widget from 'components/widgets/widget';
 
 export default class EmbedPage extends React.Component {
-
   componentWillMount() {
     this.props.getWidget();
   }

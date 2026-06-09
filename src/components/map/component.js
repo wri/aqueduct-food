@@ -269,6 +269,7 @@ class Map extends PureComponent {
                                     ...layer.layerConfig.body.layers[0],
                                     options: {
                                       ...layer.layerConfig.body.layers[0].options,
+                                      // eslint-disable-next-line max-len
                                       sql: 'SELECT s.aq30_id as cartodb_id, coalesce(NULLIF({{label}},\'\'), \'No Data\') as label, r.the_geom, r.the_geom_webmercator, (CASE WHEN {{label}} = \'Insignificant Trend\' THEN -1 ELSE coalesce({{indicator}}, -9999)END) as water_risk FROM water_risk_indicators_annual s LEFT JOIN y2018m12d06_rh_master_shape_v01 r on s.aq30_id=r.aq30_id WHERE s.pfaf_id != -9999 and s.gid_1 != \'-9999\' and r.aqid != -9999 and s.pfaf_id in {{watershed_ids}} ORDER BY s.aq30_id'
                                     }
                                   }
@@ -297,6 +298,7 @@ class Map extends PureComponent {
                                     ...layer.layerConfig.body.layers[0],
                                     options: {
                                       ...layer.layerConfig.body.layers[0].options,
+                                      // eslint-disable-next-line max-len
                                       sql: 'SELECT s.aq30_id as cartodb_id, coalesce(NULLIF({{label}},\'\'), \'No Data\') as label, r.the_geom, r.the_geom_webmercator, (CASE WHEN {{label}} = \'Insignificant Trend\' THEN -1 ELSE coalesce({{indicator}}, -9999)END) as water_risk FROM water_risk_indicators_annual s LEFT JOIN y2018m12d06_rh_master_shape_v01 r on s.aq30_id=r.aq30_id WHERE s.pfaf_id != -9999 and s.gid_1 != \'-9999\' and r.aqid != -9999 and s.aq30_id in {{aquifer_ids}} ORDER BY s.aq30_id'
                                     }
                                   }

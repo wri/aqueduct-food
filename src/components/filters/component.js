@@ -9,13 +9,11 @@ import {
   Timeline,
   RadioGroup,
   CustomSelect,
-  InfoModal,
-  ThresholdSlider
+  InfoModal
 } from 'aqueduct-components';
 
 // components
 import CountrySelect from 'components/country-select';
-import TooltipIcon from 'components/ui/TooltipIcon';
 
 // constants
 import { APP_DEFINITIONS } from 'constants/definitions';
@@ -168,7 +166,6 @@ class Filters extends PureComponent {
     } = this.props;
     const disablesTimeline = !filters.indicator || (filters.indicator === 'none' && filters.food === 'none');
     const componentClass = classnames('c-filters', { [className]: !!className });
-    const indicator = this.getIndicator();
 
     const timeline = (
       <div className="c-filters-item">
@@ -395,42 +392,6 @@ class Filters extends PureComponent {
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
-
-            {/* Supply Chain Filters */}
-            {filters.scope === 'supply_chain' && (
-              <div className="filters-section" style={{ paddingRight: 24, paddingBottom: 0 }}>
-                <div className="row expanded collapse">
-                  <div className="small-12 medium-4 columns">
-                    {waterRiskIndicatorSelect}
-                  </div>
-                </div>
-                {indicator && (
-                  <div className="c-filters-item mt-4">
-                    <div className="filter-item-header mb-6">
-                      <div className="title">
-                        <div>
-                          <p>
-                            <strong>{indicator.name} Desired Condition </strong>{' '}
-                            <TooltipIcon handleClick={() => this.openModal('desired-condition-thresholds')} />
-                          </p>
-                          <p style={{ fontSize: 16 }}>(Adjust slider to set a desired condition threshold)</p>
-                        </div>
-                      </div>
-                    </div>
-                    <ThresholdSlider
-                      threshold={parseFloat(filters.threshold) || 0}
-                      onChange={(threshold) => {
-                        this.updateFilters(threshold, 'threshold');
-                      }}
-                      values={indicator.rangeValues}
-                      defaultValue={indicator.defaultValue}
-                      unit={indicator.unit}
-                      ranges={indicator.items}
-                    />
-                  </div>
-                )}
               </div>
             )}
 

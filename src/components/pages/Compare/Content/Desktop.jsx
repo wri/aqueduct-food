@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Icon, toggleModal, Sticky } from 'aqueduct-components';
-import { dispatch } from 'main';
+import { dispatch } from 'store';
 import { Link } from 'react-router';
 
 // Components
@@ -112,7 +112,8 @@ export default class ComparePageDesktop extends React.Component {
           topLimit={this.state.stickyFilterTopPosition}
           onStick={(isSticky) => { this.onSticky(isSticky); }}
         >
-          {this.state.showStickyFilters &&
+          {this.state.showStickyFilters
+            && (
             <StickyFilters
               className="-compare"
               countriesCompare={this.props.compare.countries}
@@ -120,6 +121,7 @@ export default class ComparePageDesktop extends React.Component {
               setFilters={this.props.setFilters}
               setCompareCountry={this.props.setCompareCountry}
             />
+            )
           }
         </Sticky>
 

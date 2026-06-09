@@ -75,7 +75,7 @@ export const getMapHeaderTemplate = (filters = {}) => {
     .find(w => w.value === indicator);
 
   if (scope === 'supply_chain') {
-    return `Supply chain`
+    return 'Supply chain';
   }
 
   // Global, all crops, baseline

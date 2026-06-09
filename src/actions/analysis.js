@@ -2,7 +2,7 @@
 import { SET_ANALYSIS, RESET_ANALYSIS } from 'constants/analyzer';
 
 export function setAnalysis(payload) {
-  return (dispatch, getState) => {
+  return (dispatch) => {
     dispatch({
       type: SET_ANALYSIS,
       payload,

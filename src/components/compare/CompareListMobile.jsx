@@ -6,7 +6,6 @@ import CompareItem from 'components/compare/CompareItem';
 import { SegmentedUi } from 'aqueduct-components';
 
 export default class CompareList extends React.Component {
-
   constructor(props) {
     super(props);
     this.state = {

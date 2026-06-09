@@ -1,3 +1,5 @@
+/* eslint-disable max-len */
+// Data-only module: long user-facing content strings and HTML templates.
 export const APP_DEFINITIONS = {
   crops: {
     title: 'Crops',

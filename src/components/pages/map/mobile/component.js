@@ -22,8 +22,7 @@ class MapPageMobile extends PureComponent {
   render() {
     const { context } = this.state;
     const {
-      filters,
-      countries
+      filters
     } = this.props;
 
     return (

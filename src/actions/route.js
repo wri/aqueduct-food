@@ -1,9 +1,9 @@
 // Route actions won't be dispatched inside connect, so dispatch funcion is needed
-import { dispatch } from 'main';
 import { setMapLocation, setLayerParametrization } from 'actions/map';
 import { setFilters } from 'actions/filters';
 import { setCompareCountry } from 'actions/compare';
 import { setEmbed } from 'actions/embed';
+import { dispatch } from '../store';
 
 export function onEnterMapPage({ location }, replace, done) {
   const { crop, country, food, irrigation, scope, subscope, period, period_value, year, indicator, type, zoom, threshold } = location.query;

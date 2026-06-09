@@ -44,6 +44,7 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(rootPath, 'public')));
 
 // Load environment config
+// eslint-disable-next-line import/no-dynamic-require, global-require
 require(envPath)(app);
 
 module.exports = app;

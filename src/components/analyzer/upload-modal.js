@@ -1,10 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import isNil from 'lodash/isNil'
-import isEmpty from 'lodash/isEmpty'
-import {
-  SegmentedUi,
-} from 'aqueduct-components';
+import isNil from 'lodash/isNil';
+import isEmpty from 'lodash/isEmpty';
 import CustomTable from 'components/ui/Table/Table';
 import {
   ID_LOOKUP,
@@ -16,41 +13,39 @@ import {
   ERROR_RESULT_HEADERS,
   transformErrors,
   ANALYSIS_URL,
-} from 'constants/analyzer'
-import { downloadCSV, toBase64 } from 'utils/data'
+} from 'constants/analyzer';
+import { downloadCSV, toBase64 } from 'utils/data';
 import { DownloadableTable } from 'components/ui/analyzer';
 import {
   fetchAnalysis,
-} from 'services/analysis'
+} from 'services/analysis';
 
 const LOADING_STATE_TEXT = {
   transforming: 'Preparing file',
   uploading: 'Uploading',
   processing: <>Analyzing <small>(this may take a few minutes)</small></>,
   downloading: 'Downloading results',
-}
+};
 
 const AnalyzerUploadModal = ({ filters, onDone }) => {
-  const [modalState, setModalState] = useState({ stage: 'initial' })
-  const [filename, setFilename] = useState()
-  const inputRef = useRef(null)
-  const formRef = useRef(null)
-  const indicatorKey = filters.indicator ? ID_LOOKUP[filters.indicator] : undefined
+  const [modalState, setModalState] = useState({ stage: 'initial' });
+  const [filename, setFilename] = useState();
+  const inputRef = useRef(null);
+  const formRef = useRef(null);
+  const indicatorKey = filters.indicator ? ID_LOOKUP[filters.indicator] : undefined;
 
-  if (!ALLOWED_WATER_INDICATOR_KEYS_BY_SCOPE.supply_chain.includes(indicatorKey)) return null
-  
-  const indicatorSpec = WATER_INDICATORS[indicatorKey]
+  if (!ALLOWED_WATER_INDICATOR_KEYS_BY_SCOPE.supply_chain.includes(indicatorKey)) return null;
 
-  const nullFn = useCallback(() => {}, [])
+  const indicatorSpec = WATER_INDICATORS[indicatorKey];
 
   useEffect(() => {
-    const modalElement = document.querySelector('.c-modal.analyzer')
+    const modalElement = document.querySelector('.c-modal.analyzer');
     if (modalState.stage.match(/error/)) {
-      modalElement.classList.add('error')
+      modalElement.classList.add('error');
     } else {
-      modalElement.classList.remove('error')
+      modalElement.classList.remove('error');
     }
-  }, [modalState])
+  }, [modalState]);
 
   const downloadErrorCSV = (event, data) => {
     if (event) event.preventDefault();
@@ -59,63 +54,63 @@ const AnalyzerUploadModal = ({ filters, onDone }) => {
       showLabels: true,
       filename: `Prioritize Basins Analyzer - ${indicatorSpec ? indicatorSpec.name : indicatorKey} - Rows with errors`,
       headers: ERROR_RESULT_HEADERS.map(e => e.label)
-    })
+    });
   };
 
   const submitFile = (file) => {
     if (file && !isNil(filters.threshold) && indicatorSpec) {
-      setModalState({ stage: 'transforming' })
+      setModalState({ stage: 'transforming' });
       toBase64(file)
-      .then(value => {
-        const newFile = new File([value], `${file.name}.b64`) // For staging
-        // const newFile = file
-        const data = new FormData(formRef.current)
-        data.append('data', newFile)
-        setModalState({ stage: 'uploading', progress: 0 })
-        fetchAnalysis(data, indicatorKey, indicatorSpec.toRaw(filters.threshold), {
-          onDownloadProgress: e => setModalState({ stage: 'downloading', progress: e.loaded / e.total }),
-          onUploadProgress: e => {
-            const progress = e.loaded / e.total
-            if (progress >= 1) {
-              setModalState({ stage: 'processing' })
-            } else {
-              setModalState({ stage: 'uploading', progress })
-            }
-          },
-          onProcessing: progress => setModalState({ stage: 'processing', progress })
+        .then((value) => {
+          const newFile = new File([value], `${file.name}.b64`); // For staging
+          // const newFile = file
+          const data = new FormData(formRef.current);
+          data.append('data', newFile);
+          setModalState({ stage: 'uploading', progress: 0 });
+          fetchAnalysis(data, indicatorKey, indicatorSpec.toRaw(filters.threshold), {
+            onDownloadProgress: e => setModalState({ stage: 'downloading', progress: e.loaded / e.total }),
+            onUploadProgress: (e) => {
+              const progress = e.loaded / e.total;
+              if (progress >= 1) {
+                setModalState({ stage: 'processing' });
+              } else {
+                setModalState({ stage: 'uploading', progress });
+              }
+            },
+            onProcessing: progress => setModalState({ stage: 'processing', progress })
+          })
+          // UNCOMMENT TO MOCK
+          // fakeAnalysis(null, indicatorKey, null, {
+          //   includeLocations: true,
+          //   includeErrors: true,
+          //   onDownloadProgress: e => setModalState({ stage: 'downloading', progress: e.loaded / e.total }),
+          //   onUploadProgress: e => setModalState({ stage: 'uploading', progress: e.loaded / e.total }),
+          //   onProcessing: () => setModalState({ stage: 'processing' })
+          // })
+            .then((d) => {
+              const hasErrors = !isEmpty(d.errors);
+              setModalState({ stage: hasErrors ? 'loaded-errors' : 'loaded', locations: d.locations, errors: d.errors });
+              if (!hasErrors) setTimeout(() => onDone(d.locations || []), 3000);
+            })
+            .catch((err) => {
+              setModalState({ stage: 'error', which: 'request', err });
+              console.error(err);
+            });
         })
-        // UNCOMMENT TO MOCK
-        // fakeAnalysis(null, indicatorKey, null, {
-        //   includeLocations: true,
-        //   includeErrors: true,
-        //   onDownloadProgress: e => setModalState({ stage: 'downloading', progress: e.loaded / e.total }),
-        //   onUploadProgress: e => setModalState({ stage: 'uploading', progress: e.loaded / e.total }),
-        //   onProcessing: () => setModalState({ stage: 'processing' })
-        // })
-        .then(data => {
-          const hasErrors = !isEmpty(data.errors)
-          setModalState({ stage: hasErrors ? 'loaded-errors' : 'loaded', locations: data.locations, errors: data.errors })
-          if (!hasErrors) setTimeout(() => onDone(data.locations || []), 3000)
-        })
-        .catch(err => {
-          setModalState({ stage: 'error', which: 'request', err })
-          console.error(err)
-        })
-      })
-      .catch(err => {
-        setModalState({ stage: 'error', which: 'transform', err })
-        console.error(err)
-      })
+        .catch((err) => {
+          setModalState({ stage: 'error', which: 'transform', err });
+          console.error(err);
+        });
     }
-  }
+  };
 
   const resetModal = () => {
-    setModalState({ stage: 'initial' })
-    setFilename(undefined)
-    if (formRef.current) formRef.current.reset()
-  }
+    setModalState({ stage: 'initial' });
+    setFilename(undefined);
+    if (formRef.current) formRef.current.reset();
+  };
 
-  const hasProgressValue = !isNil(modalState.progress)
+  const hasProgressValue = !isNil(modalState.progress);
 
   return (
     <div>
@@ -126,7 +121,7 @@ const AnalyzerUploadModal = ({ filters, onDone }) => {
           <h3>Import Sourcing Locations</h3>
           <p>
             This functionality is in beta and under development.  Please help us improve and report bugs{' '}
-            <a href="https://form.asana.com/?k=QWAlk9irSkhMNvxJqyFyEw&d=25496124013636" target="_blank">here</a>.{' '}
+            <a href="https://form.asana.com/?k=QWAlk9irSkhMNvxJqyFyEw&d=25496124013636" rel="noopener noreferrer" target="_blank">here</a>.{' '}
             Thank you for your patience.
           </p>
           <p>Please use the excel template below to structure your data.</p>
@@ -139,20 +134,20 @@ const AnalyzerUploadModal = ({ filters, onDone }) => {
           {/* <p>More information can be found <a href="#">here</a></p> */}
           <p>Click this link to download the template:</p>
           <ul>
-              <li>
-                <a href={ANALYSIS_URL || ''} download>template_supply_chain.xlsx</a>
-              </li>
+            <li>
+              <a href={ANALYSIS_URL || ''} download>template_supply_chain.xlsx</a>
+            </li>
           </ul>
           <form
             id="upload-form"
             ref={formRef}
-            onSubmit={e => {
-              const file = inputRef.current.files[0]
-              e.preventDefault()
-              submitFile(file)
+            onSubmit={(e) => {
+              const file = inputRef.current.files[0];
+              e.preventDefault();
+              submitFile(file);
             }}
           >
-            
+
             <label className="file-upload">
               <input
                 name="file"
@@ -181,9 +176,9 @@ const AnalyzerUploadModal = ({ filters, onDone }) => {
                   </p>
                 ) : (
                   <>
-                    <div className={classNames("progress-bar", { indeterminate: !hasProgressValue })}>
+                    <div className={classNames('progress-bar', { indeterminate: !hasProgressValue })}>
                       <div
-                        className={classNames("value", { indeterminate: !hasProgressValue })}
+                        className={classNames('value', { indeterminate: !hasProgressValue })}
                         style={{ width: hasProgressValue ? `${Math.round(modalState.progress * 100)}%` : undefined }}
                       />
                     </div>
@@ -211,7 +206,7 @@ const AnalyzerUploadModal = ({ filters, onDone }) => {
                 hideInstructions
                 noExpand
                 downloadOptions={[
-                  { name: 'CSV', action: (e) => downloadErrorCSV(e, transformErrors(modalState.errors)) }
+                  { name: 'CSV', action: e => downloadErrorCSV(e, transformErrors(modalState.errors)) }
                 ]}
               >
                 <CustomTable
@@ -246,7 +241,7 @@ const AnalyzerUploadModal = ({ filters, onDone }) => {
             <p className="error-text">
               {modalState.err.message || 'Unknown error'}
             </p>
-            <br/>
+            <br />
             <button className="action-button" onClick={resetModal}>
               Return to upload
             </button>
@@ -254,9 +249,9 @@ const AnalyzerUploadModal = ({ filters, onDone }) => {
         )}
       </div>
     </div>
-    
-  )
-}
+
+  );
+};
 
 AnalyzerUploadModal.propTypes = {
   filters: PropTypes.object.isRequired,

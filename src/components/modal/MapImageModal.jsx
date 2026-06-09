@@ -9,7 +9,6 @@ import { Spinner, saveAsFile } from 'aqueduct-components';
 import { getObjectConversion } from 'utils/filters';
 
 export default class WidgetImageModal extends React.Component {
-
   constructor(props) {
     super(props);
 
@@ -59,7 +58,7 @@ export default class WidgetImageModal extends React.Component {
       widget.widgetConfig.sql_config
     );
 
-    const { name, description } = widgetParsed;
+    const { description } = widgetParsed;
 
     return (
       <div className="c-widget-image-modal">
@@ -68,7 +67,7 @@ export default class WidgetImageModal extends React.Component {
             <div className="canvas-content" ref={el => this.canvasContent = el}>
               <div className="title">{this.getName(widgetParsed)}</div>
               <div className="widget">
-                <div className="c-widget" >
+                <div className="c-widget">
                   <div>
                     <header className="widget-header">
                       <div className="widget-titles">

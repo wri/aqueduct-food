@@ -3,7 +3,7 @@ import {
   GET_WIDGET_SUCCESS,
   GET_WIDGET_ERROR
 }
-from 'constants/embed';
+  from 'constants/embed';
 
 const initialState = {
   id: null,

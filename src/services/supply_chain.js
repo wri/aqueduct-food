@@ -10,12 +10,11 @@ import { WRIAPI } from 'utils/axios';
  * @returns [Object] - array with analysis results.
  */
 
-export const fetchAnalysis = params =>
-  WRIAPI.post('/aqueduct/analysis', params)
-    .then((response) => {
-      const { status, statusText, data } = response;
-      if (status >= 300) throw new Error(statusText);
-      return data;
-    });
+export const fetchAnalysis = params => WRIAPI.post('/aqueduct/analysis', params)
+  .then((response) => {
+    const { status, statusText, data } = response;
+    if (status >= 300) throw new Error(statusText);
+    return data;
+  });
 
 export default { fetchAnalysis };

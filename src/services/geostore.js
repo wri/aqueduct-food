@@ -10,12 +10,11 @@ import { toGeoJsonCollection } from 'utils/geojson';
  * @param {string} id - Geostore ID to retrieve
  * @returns {Promise<Object>} Serialized geostore object
  */
-export const fetchGeostore = id =>
-  WRIAPI.get(`/v1/geostore/${id}`)
-    .then(({ status, statusText, data }) => {
-      if (status >= 400) throw new Error(statusText);
-      return WRISerializer(data);
-    });
+export const fetchGeostore = id => WRIAPI.get(`/v1/geostore/${id}`)
+  .then(({ status, statusText, data }) => {
+    if (status >= 400) throw new Error(statusText);
+    return WRISerializer(data);
+  });
 
 /**
  * Creates a new geostore from an array of InputPanel entries.
@@ -32,11 +31,10 @@ export const fetchGeostore = id =>
  * @returns {Promise<Object>} Serialized geostore object, including the
  *                            `id` needed to reference the stored geometry
  */
-export const saveGeostore = (entries, properties = {}) =>
-  WRIAPI.post('/v1/geostore', toGeoJsonCollection(entries, properties))
-    .then(({ status, statusText, data }) => {
-      if (status >= 400) throw new Error(statusText);
-      return WRISerializer(data);
-    });
+export const saveGeostore = (entries, properties = {}) => WRIAPI.post('/v1/geostore', toGeoJsonCollection(entries, properties))
+  .then(({ status, statusText, data }) => {
+    if (status >= 400) throw new Error(statusText);
+    return WRISerializer(data);
+  });
 
 export default { fetchGeostore, saveGeostore };

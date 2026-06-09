@@ -6,11 +6,9 @@ export default function BtnMenu(props) {
   const cNames = classnames('c-btn-menu', {
     [props.className]: props.className
   });
-  const btnClassNames = (item) => {
-    return classnames('btn-menu-btn', {
-      '-disabled': item.disabled
-    });
-  };
+  const btnClassNames = item => classnames('btn-menu-btn', {
+    '-disabled': item.disabled
+  });
 
   return (
     <ul className={cNames}>

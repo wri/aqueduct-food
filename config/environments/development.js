@@ -1,6 +1,5 @@
 /* eslint no-console: 0 */
 
-const path = require('path');
 const logger = require('morgan');
 const PrettyError = require('pretty-error');
 

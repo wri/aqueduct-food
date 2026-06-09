@@ -6,7 +6,7 @@ import {
   TOOLTIP_SET_POSITION,
   TOOLTIP_FOLLOW_TOGGLE
 }
-from 'constants/ui';
+  from 'constants/ui';
 
 export function setTooltipChildren(children) {
   return dispatch => dispatch({ type: TOOLTIP_SET_CHILDREN, payload: children });

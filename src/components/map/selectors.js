@@ -91,7 +91,12 @@ export const getActiveLayers = createSelector(
 
           if (!(ALLOWED_WATER_INDICATOR_KEYS_BY_SCOPE[_filters.scope] || []).includes(indicatorKey)) return;
 
-          const family = _filters.scope === 'supply_chain' ? 'baseline-threshold' : (_filters.year === 'baseline' ? 'baseline' : 'projected');
+          let family;
+          if (_filters.scope === 'supply_chain') {
+            family = 'baseline-threshold';
+          } else {
+            family = _filters.year === 'baseline' ? 'baseline' : 'projected';
+          }
 
           if (dataset.id !== WATER_SPECS[family]) return;
           const currentWaterSpec = layerSpec.find(_layer => _layer.family === family);

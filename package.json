@@ -8,6 +8,8 @@
     "script": "node src/script1.ts",
     "build": "NODE_OPTIONS=--openssl-legacy-provider NODE_ENV=production webpack --config ./config/webpack/webpack.config.prod.js --progress --colors",
     "test": "eslint .",
+    "lint": "eslint . --ext .js,.jsx",
+    "lint:fix": "eslint . --ext .js,.jsx --fix",
     "dev": "NODE_OPTIONS=--openssl-legacy-provider NODE_ENV=development webpack-dev-server --config ./config/webpack/webpack.config.dev.js"
   },
   "repository": {

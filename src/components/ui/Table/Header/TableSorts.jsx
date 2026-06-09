@@ -69,7 +69,8 @@ export default class TableFilters extends React.Component {
           </button>
 
           {/* Second child: If present, this item will be tethered to the the first child */}
-          {!this.state.closed &&
+          {!this.state.closed
+            && (
             <div className="tooltip-content">
               <div className="content">
                 <ul>
@@ -86,6 +87,7 @@ export default class TableFilters extends React.Component {
                 </ul>
               </div>
             </div>
+            )
           }
         </TetherComponent>
       </div>

@@ -3,8 +3,7 @@ import toUpper from 'lodash/toUpper';
 import isNil from 'lodash/isNil';
 import { ExportToCsv } from 'export-to-csv';
 
-export const deburrUpper = string =>
-  toUpper(deburr(string));
+export const deburrUpper = string => toUpper(deburr(string));
 
 export const downloadCSV = ({ data = [], headers, replaceNull = true, ...options } = {}) => {
   const csvExporter = new ExportToCsv({

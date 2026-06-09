@@ -7,7 +7,6 @@ import Summary from 'components/summary';
 import LayerManager from 'utils/layers/LayerManager';
 
 export default class CompareItem extends React.Component {
-
   constructor(props) {
     super(props);
 
@@ -92,12 +91,15 @@ export default class CompareItem extends React.Component {
 
     return (
       <div className="c-compareitem">
-        {showMap &&
+        {showMap
+          && (
           <section className="compareitem-map">
             {this.props.country ? map : emptyPlaceholder}
           </section>
+          )
         }
-        {showWidgets &&
+        {showWidgets
+          && (
           <section className="compareitem-widgets">
             <Summary
               filters={this.props.filters}
@@ -109,6 +111,7 @@ export default class CompareItem extends React.Component {
               widgetsActive={this.props.widgetsActive}
             />
           </section>
+          )
         }
       </div>
     );

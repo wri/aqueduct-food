@@ -1,12 +1,12 @@
-import compact from 'lodash/compact'
-import sortBy from 'lodash/sortBy'
-import { WATER_INDICATORS } from 'constants/water-indicators'
+import compact from 'lodash/compact';
+import sortBy from 'lodash/sortBy';
+import { WATER_INDICATORS } from 'constants/water-indicators';
 
-export const SET_ANALYSIS = 'SET_ANALYSIS'
-export const RESET_ANALYSIS = 'RESET_ANALYSIS'
+export const SET_ANALYSIS = 'SET_ANALYSIS';
+export const RESET_ANALYSIS = 'RESET_ANALYSIS';
 
 // TODO: Update to non-blob based URL once merged into the main branch
-export const ANALYSIS_URL = "https://rawcdn.githack.com/greenriver/aqueduct-food/5f8afafbe8d923a75bef8c902ff98ee3bc439baa/doc/analyzer/template_supply_chain.xlsx"
+export const ANALYSIS_URL = 'https://rawcdn.githack.com/greenriver/aqueduct-food/5f8afafbe8d923a75bef8c902ff98ee3bc439baa/doc/analyzer/template_supply_chain.xlsx';
 
 export const RESULT_LOOKUP = {
   as: 'Annual Spend',
@@ -29,9 +29,9 @@ export const RESULT_LOOKUP = {
   st: 'State/Province',
   wid: 'Watershed ID',
   aid: 'Aquifer ID'
-}
+};
 
-const arrayToLookup = arr => arr.reduce((acc, k) => ({ ...acc, [k]: RESULT_LOOKUP[k] }), {})
+const arrayToLookup = arr => arr.reduce((acc, k) => ({ ...acc, [k]: RESULT_LOOKUP[k] }), {});
 
 export const LOCATION_RESULT_FIELD_ORDER = [
   'rn',
@@ -44,10 +44,10 @@ export const LOCATION_RESULT_FIELD_ORDER = [
   'rv',
   'dc',
   'pcr',
-]
+];
 
-export const LOCATION_RESULT_LOOKUP = arrayToLookup(LOCATION_RESULT_FIELD_ORDER)
-export const LOCATION_RESULT_HEADERS = Object.values(LOCATION_RESULT_LOOKUP).map(label => ({ value: label, label }))
+export const LOCATION_RESULT_LOOKUP = arrayToLookup(LOCATION_RESULT_FIELD_ORDER);
+export const LOCATION_RESULT_HEADERS = Object.values(LOCATION_RESULT_LOOKUP).map(label => ({ value: label, label }));
 
 export const ERROR_RESULT_FIELD_ORDER = [
   'rn',
@@ -62,66 +62,60 @@ export const ERROR_RESULT_FIELD_ORDER = [
   'mv',
   'as',
   'e',
-]
+];
 
-export const ERROR_RESULT_LOOKUP = arrayToLookup(ERROR_RESULT_FIELD_ORDER)
-export const ERROR_RESULT_HEADERS = Object.values(ERROR_RESULT_LOOKUP).map(label => ({ value: label, label }))
+export const ERROR_RESULT_LOOKUP = arrayToLookup(ERROR_RESULT_FIELD_ORDER);
+export const ERROR_RESULT_HEADERS = Object.values(ERROR_RESULT_LOOKUP).map(label => ({ value: label, label }));
 
 export const WATER_INDICATORS_LOOKUP = (
   ['bws', 'bwd', 'cep', 'udw', 'usa', 'gtd']
-  .map(key => {
-    const indicator = WATER_INDICATORS[key]
-    if (indicator) return [key, indicator]
-    return null
-  })
-  .filter(Boolean)
-  .reduce((acc, [key, indicator]) => ({ ...acc, [key]: { name: indicator.name, shortName: key.toUpperCase() } }), {})
-)
-
-export const getShortNameForIndicator = indicator => {
-  let shortName
-  try {
-    shortName = WATER_INDICATORS_LOOKUP[indicator].shortName || '*'
-  } catch(e) {
-    shortName = '*'
-  }
-  return shortName
-}
-
-export const getHeadersForIndicator = (headers = [], indicator) => {
-  return (
-    compact(headers)
-    .filter(e => e.value !== (indicator === 'gtd' ? RESULT_LOOKUP.wid : RESULT_LOOKUP.aid))
-    .map(h => {
-      const replaced = h.label.replace(/^(\*)/, getShortNameForIndicator(indicator))
-      return { value: replaced, label: replaced }
+    .map((key) => {
+      const indicator = WATER_INDICATORS[key];
+      if (indicator) return [key, indicator];
+      return null;
     })
-  )
-}
+    .filter(Boolean)
+    .reduce((acc, [key, indicator]) => ({ ...acc, [key]: { name: indicator.name, shortName: key.toUpperCase() } }), {})
+);
 
-export const transformValues = (items, { indicator, orderArr = [] } = {}) => {
-  return items.map(loc => (
-    sortBy(Object.entries(loc), ([k]) => orderArr.indexOf(k))
+export const getShortNameForIndicator = (indicator) => {
+  let shortName;
+  try {
+    shortName = WATER_INDICATORS_LOOKUP[indicator].shortName || '*';
+  } catch (e) {
+    shortName = '*';
+  }
+  return shortName;
+};
+
+export const getHeadersForIndicator = (headers = [], indicator) => (
+  compact(headers)
+    .filter(e => e.value !== (indicator === 'gtd' ? RESULT_LOOKUP.wid : RESULT_LOOKUP.aid))
+    .map((h) => {
+      const replaced = h.label.replace(/^(\*)/, getShortNameForIndicator(indicator));
+      return { value: replaced, label: replaced };
+    })
+);
+
+export const transformValues = (items, { indicator, orderArr = [] } = {}) => items.map(loc => (
+  sortBy(Object.entries(loc), ([k]) => orderArr.indexOf(k))
     .reduce((acc, [k, v]) => {
-      const label = RESULT_LOOKUP[k].replace(/^(\*)/, getShortNameForIndicator(indicator))
-      return ({ ...acc, [label]: v })
+      const label = RESULT_LOOKUP[k].replace(/^(\*)/, getShortNameForIndicator(indicator));
+      return ({ ...acc, [label]: v });
     }, {})
-  ))
-}
+));
 
-export const transformLocations = (locations = [], indicator) => {
-  return transformValues(
-    locations,
-    {
-      orderArr: LOCATION_RESULT_FIELD_ORDER.filter(e => e !== (indicator === 'gtd' ? 'wid' : 'aid')),
-      indicator,
-    }
-  )
-}
-export const transformErrors = (errors = []) => transformValues(errors, { orderArr: ERROR_RESULT_FIELD_ORDER })
+export const transformLocations = (locations = [], indicator) => transformValues(
+  locations,
+  {
+    orderArr: LOCATION_RESULT_FIELD_ORDER.filter(e => e !== (indicator === 'gtd' ? 'wid' : 'aid')),
+    indicator,
+  }
+);
+export const transformErrors = (errors = []) => transformValues(errors, { orderArr: ERROR_RESULT_FIELD_ORDER });
 
 export const transformResults = ({ errors = [], locations = [], indicator = '' } = {}) => ({
   locations: transformLocations(locations, indicator),
   errors: transformErrors(errors),
   indicator,
-})
+});
