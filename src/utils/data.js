@@ -8,7 +8,7 @@ export const deburrUpper = string => toUpper(deburr(string));
 export const downloadCSV = ({ data = [], headers, replaceNull = true, ...options } = {}) => {
   const csvExporter = new ExportToCsv({
     ...options,
-    headers: headers || (data[0] && Object.keys(data[0]) || [])
+    headers: headers || (data[0] ? Object.keys(data[0]) : [])
   });
   csvExporter.generateCsv(replaceNull ? data.map(d => Object.entries(d).reduce((acc, [k, v]) => ({ ...acc, [k]: isNil(v) ? '' : v }), {})) : data);
 };

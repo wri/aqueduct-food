@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { dispatch } from 'store';
 import ShareModal from 'components/modal/share';
 
 // Components
@@ -9,6 +8,7 @@ import { SegmentedUi, toggleModal } from 'aqueduct-components';
 import CompareListMobile from 'components/compare/CompareListMobile';
 import MobileFilters from 'components/filters/mobile';
 import CountrySelect from 'components/country-select';
+import { dispatch } from '../../../../store';
 
 export default class ComparePageMobile extends React.Component {
   constructor(props) {
@@ -19,7 +19,6 @@ export default class ComparePageMobile extends React.Component {
     };
 
     // bindings
-    this.toggleShareModal = this.toggleShareModal.bind(this);
     this.onChangeTab = this.onChangeTab.bind(this);
   }
 
@@ -52,7 +51,7 @@ export default class ComparePageMobile extends React.Component {
               value: this.props.compare.countries[i] || null,
               placeholder: items.placeholder,
               onValueChange: (selected) => {
-                selected && this.props.setCompareCountry({ index: i, iso: selected.value });
+                if (selected) this.props.setCompareCountry({ index: i, iso: selected.value });
               }
             };
             return (
@@ -81,7 +80,7 @@ export default class ComparePageMobile extends React.Component {
     });
   }
 
-  toggleShareModal() {
+  static toggleShareModal() {
     dispatch(toggleModal(true, {
       children: ShareModal
     }));

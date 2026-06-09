@@ -97,7 +97,7 @@ export default class WidgetEmbedModal extends React.Component {
   }
 
   toggleLoading(loading) {
-    this.mounted && this.setState({ loading });
+    if (this.mounted) this.setState({ loading });
   }
 
   getName(widgetParsed) {

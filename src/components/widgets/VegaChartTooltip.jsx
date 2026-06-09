@@ -14,7 +14,7 @@ class VegaChartTooltip extends React.Component {
         {config.fields.map((item, i) => (
           <li className="tooltip-list-item" key={i}>
             <span className="title"> {item.label || item.key}: </span>
-            <span className="value"> {this.parseValues(item.key, data[item.key], item)} </span>
+            <span className="value"> {VegaChartTooltip.parseValues(item.key, data[item.key], item)} </span>
           </li>
         ))}
       </ul>
@@ -24,7 +24,7 @@ class VegaChartTooltip extends React.Component {
   getTable() {
     const { data, config } = this.props;
 
-    const title = this.parseValues(config.table.title.key, data[0][config.table.title.key], config.table.title.parse || {});
+    const title = VegaChartTooltip.parseValues(config.table.title.key, data[0][config.table.title.key], config.table.title.parse || {});
 
     return (
       <div>
@@ -45,7 +45,7 @@ class VegaChartTooltip extends React.Component {
                   const parse = item.parse || {};
 
                   return (
-                    <td key={j}>{this.parseValues(key, d[key], parse)}</td>
+                    <td key={j}>{VegaChartTooltip.parseValues(key, d[key], parse)}</td>
                   );
                 })}
               </tr>
@@ -57,7 +57,7 @@ class VegaChartTooltip extends React.Component {
     );
   }
 
-  parseValues(key, value, param) {
+  static parseValues(key, value, param) {
     const preffix = param.preffix || '';
     const suffix = param.suffix || '';
     let val = value;

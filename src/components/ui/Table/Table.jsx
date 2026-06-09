@@ -118,7 +118,7 @@ class CustomTable extends PureComponent {
     if (_index !== -1) rowSelection.splice(_index, 1);
 
     this.setState({ rowSelection: [_index] }, () => {
-      this.props.onToggleSelectedRow && this.props.onToggleSelectedRow(this.state.rowSelection);
+      if (this.props.onToggleSelectedRow) this.props.onToggleSelectedRow(this.state.rowSelection);
     });
   }
 
@@ -134,7 +134,7 @@ class CustomTable extends PureComponent {
       columnValues: CustomTable.getColumnValues(data)
     }, () => {
       this.filter();
-      this.props.onRowDelete && this.props.onRowDelete(_row, _index);
+      if (this.props.onRowDelete) this.props.onRowDelete(_row, _index);
     });
   }
 
@@ -148,8 +148,8 @@ class CustomTable extends PureComponent {
         ...this.state.columnQueries,
         [q.field]: q.value
       };
-    } else {
-      !!columnQueries[q.field] && delete columnQueries[q.field];
+    } else if (columnQueries[q.field]) {
+      delete columnQueries[q.field];
     }
 
     this.setState({

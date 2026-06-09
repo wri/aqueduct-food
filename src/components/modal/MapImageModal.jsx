@@ -36,7 +36,7 @@ export default class WidgetImageModal extends React.Component {
   }
 
   toggleLoading(bool) {
-    this.mounted && this.setState({ loading: bool });
+    if (this.mounted) this.setState({ loading: bool });
   }
 
   getName(widgetParsed) {

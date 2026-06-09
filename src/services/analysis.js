@@ -44,7 +44,10 @@ export const fetchAnalysis = (
                 }
                 return;
               }
-              if (statusAnalisis === 'failed') return reject(new Error('Analyzer processing failed. Please try again'));
+              if (statusAnalisis === 'failed') {
+                reject(new Error('Analyzer processing failed. Please try again'));
+                return;
+              }
               setTimeout(() => makeRequest(), 1000);
             })
         );
@@ -77,6 +80,8 @@ export const fakeAnalysis = async (
     const ms = Math.random() * 100 + 200;
     progress += added;
     if (progress > 1) progress = 1;
+    // Intentional sequential delay to simulate mock upload progress
+    // eslint-disable-next-line no-await-in-loop
     await sleep(ms);
     onUploadProgress({ loaded: progress, total: 1 });
   }
@@ -90,6 +95,8 @@ export const fakeAnalysis = async (
     const ms = Math.random() * 100 + 300;
     progress += added;
     if (progress > 1) progress = 1;
+    // Intentional sequential delay to simulate mock download progress
+    // eslint-disable-next-line no-await-in-loop
     await sleep(ms);
     onDownloadProgress({ loaded: progress, total: 1 });
   }

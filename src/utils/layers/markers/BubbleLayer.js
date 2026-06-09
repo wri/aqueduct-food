@@ -22,13 +22,13 @@ export default class BubbleLayer {
         const options = {
           location: feature.geometry.coordinates,
           className: 'c-marker-bubble',
-          size: this._getSize(cropSelected.value),
+          size: BubbleLayer._getSize(cropSelected.value),
           data: feature.properties
         };
 
         // Marker && infowindow html
-        const divHtmlIcon = this._setMarkerHtml(cropSelected.value);
-        const divHtmlInfowindow = this._setInfowindowHtml(options.data);
+        const divHtmlIcon = BubbleLayer._setMarkerHtml(cropSelected.value);
+        const divHtmlInfowindow = BubbleLayer._setInfowindowHtml(options.data);
 
         const marker = L.marker(options.location.reverse(), {
           icon: L.divIcon({
@@ -60,7 +60,7 @@ export default class BubbleLayer {
   // - _setMarkerHtml
   // - _setInfowindowHtml
   // - _getSize
-  _setMarkerHtml(value) {
+  static _setMarkerHtml(value) {
     const _value = format('.3s')(value);
     return (`
       <div class="marker-bubble-inner">
@@ -69,7 +69,7 @@ export default class BubbleLayer {
     `);
   }
 
-  _setInfowindowHtml(properties) {
+  static _setInfowindowHtml(properties) {
     return (`
       <div class="c-infowindow -no-iteraction">
         <h3>${properties.country}</h3>
@@ -77,7 +77,7 @@ export default class BubbleLayer {
     );
   }
 
-  _getSize(v) {
+  static _getSize(v) {
     const size = (v < 1) ? 1 : v;
     const multiplicator = 2.5;
     const constant = 50;

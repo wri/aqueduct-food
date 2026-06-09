@@ -85,7 +85,7 @@ export default class TableFilters extends React.Component {
   onResetInput(e) {
     // As we are using svg symbols, if you click on one it will consider that it's outside the dropdown
     // That's why I put this
-    e && e.stopPropagation();
+    if (e) e.stopPropagation();
 
     this.setState({
       input: ''
@@ -95,28 +95,34 @@ export default class TableFilters extends React.Component {
   onFilterSelect(selected) {
     this.setState({ selected }, () => {
       const { values } = this.state;
-      this.props.onFilter && this.props.onFilter({
-        field: this.props.field,
-        value: (selected.length !== values.length) ? selected : null
-      });
+      if (this.props.onFilter) {
+        this.props.onFilter({
+          field: this.props.field,
+          value: (selected.length !== values.length) ? selected : null
+        });
+      }
     });
   }
 
   onFilterSelectAll() {
     this.setState({ selected: null }, () => {
-      this.props.onFilter && this.props.onFilter({
-        field: this.props.field,
-        value: this.state.selected
-      });
+      if (this.props.onFilter) {
+        this.props.onFilter({
+          field: this.props.field,
+          value: this.state.selected
+        });
+      }
     });
   }
 
   onFilterClear() {
     this.setState({ selected: [] }, () => {
-      this.props.onFilter && this.props.onFilter({
-        field: this.props.field,
-        value: this.state.selected
-      });
+      if (this.props.onFilter) {
+        this.props.onFilter({
+          field: this.props.field,
+          value: this.state.selected
+        });
+      }
     });
   }
 

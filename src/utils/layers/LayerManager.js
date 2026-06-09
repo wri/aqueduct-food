@@ -1,6 +1,5 @@
 import template from 'lodash/template';
 
-import { store } from 'store';
 
 // AQ components
 import { get, getObjectConversion } from 'aqueduct-components';
@@ -10,6 +9,7 @@ import BubbleClusterLayer from 'utils/layers/markers/BubbleClusterLayer';
 
 // constants
 import { CROP_OPTIONS } from 'constants/crops';
+import { store } from '../../store';
 
 const ZOOM_DISPLAYS_TOP = [2, 3];
 
@@ -37,7 +37,7 @@ export default class LayerManager {
       cartodb: this._addCartoLayer
     }[layer.provider];
 
-    method && method.call(this, layer, opts);
+    if (method) method.call(this, layer, opts);
   }
 
   removeLayer(layerId) {
@@ -142,7 +142,7 @@ export default class LayerManager {
     delete this._mapLayersLoading[id];
     // Check if all the layers are loaded
     if (!Object.keys(this._mapLayersLoading).length) {
-      this._onLayerAddedSuccess && this._onLayerAddedSuccess();
+      if (this._onLayerAddedSuccess) this._onLayerAddedSuccess();
     }
   }
 

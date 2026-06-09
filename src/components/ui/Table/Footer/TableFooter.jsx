@@ -12,12 +12,12 @@ export default class TableFooter extends React.Component {
 
   onNextPage() {
     if (this.props.pagination.page === this.props.pagination.total - 1) return;
-    this.props.onChangePage && this.props.onChangePage(this.props.pagination.page + 1);
+    if (this.props.onChangePage) this.props.onChangePage(this.props.pagination.page + 1);
   }
 
   onPrevPage() {
     if (this.props.pagination.page === 0) return;
-    this.props.onChangePage && this.props.onChangePage(this.props.pagination.page - 1);
+    if (this.props.onChangePage) this.props.onChangePage(this.props.pagination.page - 1);
   }
 
   render() {
