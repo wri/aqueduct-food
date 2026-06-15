@@ -44,6 +44,7 @@
 
 /* COMPONENTS */
 @import "components/analyzer";
+@import "components/analyzer-widgets";
 @import "components/basemap-selector";
 @import "components/bubble-marker";
 @import "components/btn-menu";
@@ -55,6 +56,8 @@
 @import "components/legend";
 @import "components/report";
 @import "components/summary";
+@import "components/supply-chain-entries";
+@import "components/supply-chain-results";
 @import "components/text";
 @import "components/tooltip";
 @import "components/swipe";

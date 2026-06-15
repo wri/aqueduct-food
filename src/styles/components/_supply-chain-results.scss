@@ -1,0 +1,112 @@
+// Analysis results relocated to the sidebar section below the input header
+// (.c-sticky). Reuses the existing `.c-input-panel` results styling, but the
+// panel itself is a white card so it blends with its white container. The
+// review/results markup is authored for the dark blue filters panel (white
+// text on blue), so the descendant colors are flipped to dark-on-light below.
+
+.c-supply-chain-results {
+  &.c-input-panel {
+    margin: ($space-1) ($space-1 * 2) 0;
+    padding: ($space-1 * 2);
+    max-width: $max-width-sidebar;
+    border-radius: 12px;
+    background-color: #fff;
+    border: 1px solid #e2e8f0; // slate-200
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  }
+
+  // The results screen already provides its own internal spacing.
+  .review-screen { margin: 0; }
+
+  // ── Dark-on-light overrides ────────────────────────────────────────────────
+  .review-header {
+    border-bottom-color: #e2e8f0; // slate-200
+
+    .review-back-btn {
+      color: #64748b; // slate-500
+      &:hover { color: #0f172a; } // slate-900
+    }
+
+    .review-title { color: #0f172a; } // slate-900
+  }
+
+  .review-summary-bar {
+    background: #f8fafc; // slate-50
+    border: 1px solid #e2e8f0; // slate-200
+
+    .summary-stat { color: #64748b; } // slate-500
+    .summary-divider { background: #e2e8f0; } // slate-200
+  }
+
+  .results-view-toggle {
+    background: #f1f5f9; // slate-100
+  }
+
+  .results-view-btn {
+    color: #64748b; // slate-500
+
+    &:hover { color: #0f172a; } // slate-900
+
+    &.-active {
+      background: #fff;
+      color: #0f172a; // slate-900
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+    }
+  }
+
+  .aw-empty { color: #94a3b8; } // slate-400
+
+  .analysis-empty-results {
+    color: #64748b; // slate-500
+    background: #f8fafc; // slate-50
+    border: 1px solid #e2e8f0; // slate-200
+  }
+
+  .analysis-results-table table {
+    color: #334155; // slate-700
+
+    th, td { border-bottom-color: #e2e8f0; } // slate-200
+
+    th {
+      background: #f1f5f9; // slate-100
+      color: #475569; // slate-600
+      box-shadow: inset 0 -1px 0 #e2e8f0;
+    }
+
+    tr:not(.group-header):hover td { background: #f8fafc; } // slate-50
+
+    tbody.result-group + tbody.result-group .group-header td {
+      border-top-color: #e2e8f0; // slate-200
+    }
+
+    tr.group-header td {
+      background: #f8fafc; // slate-50
+      color: #0f172a; // slate-900
+
+      .group-header-count { color: #94a3b8; } // slate-400
+    }
+
+    td .cell-info {
+      background: #e2e8f0; // slate-200
+      color: #475569; // slate-600
+    }
+  }
+
+  .review-footer {
+    border-top-color: #e2e8f0; // slate-200
+
+    // The plain (non-primary) action; the `.-primary` Download CSV button keeps
+    // its blue fill from _filters.scss, which reads well on the white card.
+    .submit-btn:not(.-primary) {
+      background-color: #f1f5f9; // slate-100
+      color: #334155; // slate-700
+
+      &:hover { background-color: #e2e8f0; } // slate-200
+
+      &[disabled] {
+        background-color: #f8fafc; // slate-50
+        color: #cbd5e1; // slate-300
+      }
+    }
+  }
+}

@@ -32,6 +32,16 @@ export const INDICATOR_COLUMN_KEYS = new Set(
   ANALYSIS_INDICATORS.flatMap(i => i.columns),
 );
 
+// Default view state for the results screen (shared between the header controls
+// and the data table/charts via Redux).
+export const DEFAULT_ANALYSIS_VIEW = {
+  activeIndicator: ANALYSIS_INDICATORS[0].key,
+  resultFilters: { watershed: '', crop: '', businessUnit: '' },
+  resultSort: 'default', // 'default' | 'production_desc' | 'risk_desc'
+  resultGrouping: 'none', // 'none' | 'watershed' | 'crop' | 'business_unit'
+  resultView: 'table', // 'table' | 'charts'
+};
+
 export const INDICATOR_FOR_COLUMN = ANALYSIS_INDICATORS.reduce((acc, ind) => {
   ind.columns.forEach((col) => { acc[col] = ind; });
   return acc;

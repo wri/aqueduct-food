@@ -273,7 +273,7 @@ class Filters extends PureComponent {
           )}
         >
           {withScope && filters.scope === 'supply_chain' && (
-            <div className="filters-section" style={{ paddingRight: 32, paddingTop: 0 }}>
+            <div className="filters-section" style={{ paddingRight: 32, paddingTop: 0, paddingBottom: 0 }}>
               <InputPanel
                 onSubmit={(entries) => {
                   this.updateFilters(entries, 'supplyChainLocations');

@@ -13,3 +13,6 @@ export { default as sidebar } from './sidebar';
 export { default as share } from './share';
 export { default as embed } from './embed';
 export { default as analysis } from './analysis';
+export { default as supplyChainEntries } from './supplyChainEntries';
+export { default as supplyChainOutsideLand } from './supplyChainOutsideLand';
+export { default as supplyChainAnalysis } from './supplyChainAnalysis';

@@ -6,6 +6,22 @@ export const PANEL_MODES = [
   { value: 'bulk', label: 'Bulk Upload' },
 ];
 
+// Redux action type + localStorage key for the supply-chain entries list,
+// which is shared between the InputPanel and the sticky entries list.
+export const SET_SUPPLY_CHAIN_ENTRIES = 'SET_SUPPLY_CHAIN_ENTRIES';
+export const SUPPLY_CHAIN_ENTRIES_LS_KEY = 'inputPanel_entries';
+
+// Ids of lat/long entries flagged as outside land boundaries by the spatial
+// check. Shared (via Redux) between the InputPanel review summary/actions and
+// the locations card so both validate consistently.
+export const SET_SUPPLY_CHAIN_OUTSIDE_LAND = 'SET_SUPPLY_CHAIN_OUTSIDE_LAND';
+
+// Analysis phase + results, shared so the results render in the section below
+// the input header (alongside the locations card) instead of inside it.
+export const SET_SUPPLY_CHAIN_ANALYSIS = 'SET_SUPPLY_CHAIN_ANALYSIS';
+export const SET_SUPPLY_CHAIN_ANALYSIS_VIEW = 'SET_SUPPLY_CHAIN_ANALYSIS_VIEW';
+export const RESET_SUPPLY_CHAIN_ANALYSIS = 'RESET_SUPPLY_CHAIN_ANALYSIS';
+
 export const ENTRY_MODES = [
   { value: 'latlong', label: 'Lat / Long' },
   { value: 'country', label: 'Country + State' },

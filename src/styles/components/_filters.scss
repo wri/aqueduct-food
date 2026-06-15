@@ -806,6 +806,13 @@
     }
   }
 
+  // ── Review list hint ───────────────────────────────────────────────────
+  .review-list-hint {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.55);
+    margin: ($space-1) 0;
+  }
+
   // ── Review footer ──────────────────────────────────────────────────────
   .review-footer {
     border-top: 1px solid rgba(255, 255, 255, 0.15);

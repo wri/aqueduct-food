@@ -7,6 +7,8 @@ import Map from 'components/map';
 import Sidebar from 'components/sidebar';
 import Filters from 'components/filters';
 import StickyFilters from 'components/filters/sticky';
+import SupplyChainEntriesList from 'components/filters/supply-chain-entries';
+import SupplyChainResults from 'components/filters/supply-chain-results';
 import WidgetList from 'components/widgets/widget-list';
 import Analyzer from 'components/analyzer';
 import Summary from 'components/summary';
@@ -73,7 +75,18 @@ class MapPageDesktop extends PureComponent {
                 withScope
               />
             )}
+            {filters.scope === 'supply_chain' && (
+              <SupplyChainEntriesList />
+            )}
           </Sticky>
+
+          {/* Analysis results render in the normal sidebar scroll flow (not
+              inside the Sticky). When the Sticky switches to position: fixed it
+              is pinned to the viewport, which would clip the long charts/table
+              below the fold; keeping the results in flow lets them scroll. */}
+          {filters.scope === 'supply_chain' && (
+            <SupplyChainResults />
+          )}
 
           {/* Widget List */}
           {filters.scope !== 'supply_chain' ? (

@@ -509,6 +509,60 @@ export function findDuplicateCoordIssues(entries) {
   return result;
 }
 
+/**
+ * Collects all validation issues for a single entry: field-level validation,
+ * the land-boundary check (outsideLandIds), and duplicate-coordinate issues.
+ *
+ * @param {Object} entry - InputPanel entry
+ * @param {Array<number|string>} outsideLandIds - ids flagged outside land
+ * @param {Map} duplicateIssues - output of findDuplicateCoordIssues
+ * @returns {Object[]} issues
+ */
+export function getEntryIssues(entry, outsideLandIds = [], duplicateIssues = new Map()) {
+  const issues = validateEntry(entry);
+
+  if (entry.type === 'latlong' && outsideLandIds.includes(entry.id)) {
+    issues.push({
+      field: 'coordinates',
+      severity: 'error',
+      message: 'Coordinates are outside land boundaries',
+    });
+  }
+
+  const dupIssue = duplicateIssues.get(entry.id);
+  if (dupIssue) issues.push(dupIssue);
+
+  return issues;
+}
+
+/**
+ * Classifies a list of entries into error / warning / valid buckets, factoring
+ * in the land-boundary check. Shared by the review summary/actions (header) and
+ * the locations list (card) so both stay in sync.
+ *
+ * @param {Object[]} entries
+ * @param {Array<number|string>} outsideLandIds
+ * @returns {{ validated, errors, warnings, valid, validCount }}
+ */
+export function classifyEntries(entries = [], outsideLandIds = []) {
+  const duplicateIssues = findDuplicateCoordIssues(entries);
+  const validated = entries.map(entry => ({
+    entry,
+    issues: getEntryIssues(entry, outsideLandIds, duplicateIssues),
+  }));
+  const errors = validated.filter(({ issues }) => entryStatus(issues) === 'error');
+  const warnings = validated.filter(({ issues }) => entryStatus(issues) === 'warning');
+  const valid = validated.filter(({ issues }) => entryStatus(issues) === 'valid');
+
+  return {
+    validated,
+    errors,
+    warnings,
+    valid,
+    validCount: validated.length - errors.length,
+  };
+}
+
 // ─── Analysis API mapping ─────────────────────────────────────────────────────
 
 /**
