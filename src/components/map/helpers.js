@@ -218,8 +218,51 @@ export const getSupplyChainLocationsLayer = (entries = []) => {
   };
 };
 
+// Blue outline for the basins returned by the food-supply-chain analysis.
+// Fill is kept faint so the basin reads as an outlined region without hiding
+// the underlying water-risk choropleth or the red input markers on top.
+const SUPPLY_CHAIN_BASIN_STYLE = {
+  color: '#2E57B8',
+  weight: 2,
+  opacity: 0.95,
+  fill: true,
+  fillColor: '#2E57B8',
+  fillOpacity: 0.06,
+};
+
+/**
+ * Converts the GeoJSON FeatureCollection of matched basins (returned by
+ * `runFoodSupplyChainAnalysis` when `geometry: true`) into a Leaflet geoJSON
+ * layer spec with blue borders, ready for LayerManager.
+ *
+ * `style` is kept as a live function (layerConfig.parse === false) so it is
+ * passed straight to L.geoJSON instead of being JSON-serialised.
+ *
+ * @param {Object|null} geojson - GeoJSON FeatureCollection of basins
+ * @returns {Object|null} layer spec or null when there is no geometry
+ */
+export const getSupplyChainBasinsLayer = (geojson) => {
+  if (!geojson || !geojson.features || !geojson.features.length) return null;
+
+  return {
+    id: `supply-chain-basins-${Date.now()}`,
+    provider: 'leaflet',
+    isSupplyChainBasinLayer: true,
+    layerConfig: {
+      type: 'geoJSON',
+      parse: false,
+      body: geojson,
+      options: {
+        style: () => ({ ...SUPPLY_CHAIN_BASIN_STYLE }),
+      },
+    },
+    legendConfig: {},
+  };
+};
+
 export default {
   updateCartoCSS,
   prepareMarkerLayer,
-  getSupplyChainLocationsLayer
+  getSupplyChainLocationsLayer,
+  getSupplyChainBasinsLayer
 };

@@ -121,9 +121,14 @@ export default { fetchAnalysis };
  * @param {Object[]} entries - InputPanel entries
  * @param {Object} [options]
  * @param {'planar'|'geodesic'} [options.buffer] - buffer math for point inputs
- * @returns {Promise<{ results: Object[], errors: Object[], skipped: Object[] }>}
+ * @param {boolean} [options.geometry] - when true, request a GeoJSON
+ *   FeatureCollection of the matched basins alongside the usual results.
+ * @param {number} [options.simplify] - Douglas-Peucker tolerance in degrees
+ *   (0.001–0.05) used to shrink basin geometry payloads. Only sent when
+ *   `geometry` is true.
+ * @returns {Promise<{ results: Object[], errors: Object[], skipped: Object[], geojson: Object|null }>}
  */
-export const runFoodSupplyChainAnalysis = (entries, { buffer } = {}) => {
+export const runFoodSupplyChainAnalysis = (entries, { buffer, geometry, simplify } = {}) => {
   // Filter out entries that can't be mapped (e.g. unknown crop slug) so the
   // request itself is well-formed; surface them back to the caller as `skipped`.
   const skipped = [];
@@ -141,19 +146,26 @@ export const runFoodSupplyChainAnalysis = (entries, { buffer } = {}) => {
   });
 
   if (!locations.length) {
-    return Promise.resolve({ results: [], errors: [], skipped });
+    return Promise.resolve({ results: [], errors: [], skipped, geojson: null });
   }
+
+  const params = {
+    ...(buffer && { buffer }),
+    ...(geometry && { geometry: true }),
+    ...(geometry && simplify != null && { simplify }),
+  };
 
   const url = `${config.ANALYSIS_API_URL}/api/v1/aqueduct/analysis/food-supply-chain/locations`;
   return axios
     .post(url, { locations }, {
       headers: { 'Content-Type': 'application/json' },
-      params: buffer ? { buffer } : undefined,
+      params: Object.keys(params).length ? params : undefined,
     })
     .then(({ data = {} }) => ({
       results: data.results || [],
       errors: data.errors || [],
       skipped,
+      geojson: data.geojson || null,
     }));
 };
 

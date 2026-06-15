@@ -294,12 +294,14 @@ class InputPanel extends PureComponent {
   // ── Analysis ─────────────────────────────────────────────────────────────
 
   runAnalysis() {
-    const { onSubmit } = this.props;
+    const { onSubmit, onBasinsResolved } = this.props;
     const valid = this.validEntries();
     if (!valid.length) return;
 
     // Push the same set to the map so the visual context matches the table.
     onSubmit(valid);
+    // Clear any basins from a previous run while the new one is in flight.
+    onBasinsResolved(null);
 
     this.setState({
       screen: 'analyzing',
@@ -312,8 +314,11 @@ class InputPanel extends PureComponent {
       resultGrouping: 'none',
     });
 
-    runFoodSupplyChainAnalysis(valid)
+    // Request basin geometry too so the map can outline the matched basins.
+    // `simplify` keeps the GeoJSON payload small while preserving shape.
+    runFoodSupplyChainAnalysis(valid, { geometry: true, simplify: 0.01 })
       .then((data) => {
+        onBasinsResolved(data.geojson || null);
         this.setState({ screen: 'results', analysisResults: data, analysisError: null });
       })
       .catch((err) => {
@@ -582,10 +587,12 @@ class InputPanel extends PureComponent {
 
 InputPanel.propTypes = {
   onSubmit: PropTypes.func,
+  onBasinsResolved: PropTypes.func,
 };
 
 InputPanel.defaultProps = {
   onSubmit: () => {},
+  onBasinsResolved: () => {},
 };
 
 export default InputPanel;

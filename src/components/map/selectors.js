@@ -240,6 +240,8 @@ export const getLayerGroup = createSelector(
 
 export const getSupplyChainLocations = state => (state.filters.supplyChainLocations || []);
 
+export const getSupplyChainBasins = state => (state.filters.supplyChainBasins || null);
+
 export default {
   getMapState,
   getActiveLayers,

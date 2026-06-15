@@ -278,6 +278,9 @@ class Filters extends PureComponent {
                 onSubmit={(entries) => {
                   this.updateFilters(entries, 'supplyChainLocations');
                 }}
+                onBasinsResolved={(geojson) => {
+                  this.updateFilters(geojson, 'supplyChainBasins');
+                }}
               />
             </div>
           )}

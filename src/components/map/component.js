@@ -33,7 +33,12 @@ import MapHeader from './header';
 import Legend from './legend';
 
 // helpers
-import { prepareMarkerLayer, updateCartoCSS, getSupplyChainLocationsLayer } from './helpers';
+import {
+  prepareMarkerLayer,
+  updateCartoCSS,
+  getSupplyChainLocationsLayer,
+  getSupplyChainBasinsLayer
+} from './helpers';
 import { parseMetadataLayer } from './utils';
 
 // constants
@@ -59,7 +64,8 @@ class Map extends PureComponent {
       foodLayers,
       mapState,
       parametrization,
-      supplyChainLocations
+      supplyChainLocations,
+      supplyChainBasins
     } = this.props;
     const {
       layers: nextLayers,
@@ -67,7 +73,8 @@ class Map extends PureComponent {
       foodLayers: nextFoodLayers,
       mapState: nextMapState,
       parametrization: nextParametrization,
-      supplyChainLocations: nextSupplyChainLocations
+      supplyChainLocations: nextSupplyChainLocations,
+      supplyChainBasins: nextSupplyChainBasins
     } = nextProps;
     const { zoom } = mapState;
     const { zoom: nextZoom } = nextMapState;
@@ -77,6 +84,7 @@ class Map extends PureComponent {
     const zoomChanged = zoom !== nextZoom;
     const parametrizationChanged = !isEqual(parametrization, nextParametrization);
     const supplyChainLocationsChanged = !isEqual(supplyChainLocations, nextSupplyChainLocations);
+    const supplyChainBasinsChanged = !isEqual(supplyChainBasins, nextSupplyChainBasins);
     const isSingleCropLayer = '383f2ae6-6925-49e8-9e56-e5a84b38fd4a';
     const isAllCropsLayer = 'dcffe68a-2c51-4847-aa08-0f9e471a8ceb';
 
@@ -131,9 +139,20 @@ class Map extends PureComponent {
 
     if (supplyChainLocationsChanged) {
       const scLayer = getSupplyChainLocationsLayer(nextSupplyChainLocations);
-      const { layers: currentLayers } = this.state;
-      const withoutSCLayer = currentLayers.filter(_layer => !_layer.isSupplyChainLayer);
-      this.setState({ layers: scLayer ? [...withoutSCLayer, scLayer] : withoutSCLayer });
+      this.setState(({ layers: currentLayers }) => {
+        const withoutSCLayer = currentLayers.filter(_layer => !_layer.isSupplyChainLayer);
+        return { layers: scLayer ? [...withoutSCLayer, scLayer] : withoutSCLayer };
+      });
+    }
+
+    // Basins returned by the analysis are drawn underneath the input markers
+    // (appended last → lowest zIndex), so the red location points stay on top.
+    if (supplyChainBasinsChanged) {
+      const basinLayer = getSupplyChainBasinsLayer(nextSupplyChainBasins);
+      this.setState(({ layers: currentLayers }) => {
+        const withoutBasinLayer = currentLayers.filter(_layer => !_layer.isSupplyChainBasinLayer);
+        return { layers: basinLayer ? [...withoutBasinLayer, basinLayer] : withoutBasinLayer };
+      });
     }
   }
 
@@ -428,6 +447,7 @@ Map.propTypes = {
   foodLayers: PropTypes.array.isRequired,
   countries: PropTypes.array.isRequired,
   supplyChainLocations: PropTypes.array.isRequired,
+  supplyChainBasins: PropTypes.object,
   toggleModal: PropTypes.func.isRequired,
   setMapLocation: PropTypes.func.isRequired,
   setLayerParametrization: PropTypes.func.isRequired
@@ -436,7 +456,8 @@ Map.propTypes = {
 Map.defaultProps = {
   mapControls: true,
   legend: true,
-  analysis: {}
+  analysis: {},
+  supplyChainBasins: null
 };
 
 export default Map;
