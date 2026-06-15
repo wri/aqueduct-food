@@ -72,3 +72,21 @@
     &:hover { opacity: .7; }
   }
 }
+
+// Basin popups (food-supply-chain analysis) open on click, so they keep a
+// visible close button and a scrollable body for the full analysis row.
+.leaflet-popup.basin-popup {
+  a.leaflet-popup-close-button {
+    display: block;
+  }
+
+  .leaflet-popup-content {
+    padding-top: 24px;
+  }
+
+  .basin-popup-subtitle {
+    display: block;
+    color: #8a9da6;
+    font-size: 12px;
+  }
+}

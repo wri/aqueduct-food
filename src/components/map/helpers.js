@@ -230,6 +230,69 @@ const SUPPLY_CHAIN_BASIN_STYLE = {
   fillOpacity: 0.06,
 };
 
+// Friendly labels + display order for the basin popup. Mirrors the analysis
+// results table; any extra keys the API returns are appended using their raw
+// key so the popup stays forward-compatible.
+const BASIN_POPUP_LABELS = {
+  pfaf_id: 'Basin (PFAF)',
+  country: 'Country',
+  state: 'State',
+  iso_code: 'ISO',
+  commodity_code: 'Crop',
+  irrigation: 'Irrigation',
+  total_volume: 'Total Volume (MT)',
+  bws_label: 'BWS Label',
+  bws_cat: 'BWS Category',
+  bws_score: 'BWS Score',
+  bws_raw: 'BWS Raw',
+  sbtn_quant_max: 'SBTN Quantity',
+  sbtn_qual_max: 'SBTN Quality',
+  basin_production: 'Basin Production',
+  summed_production: 'Summed Production',
+  production_sourced_from_basin: 'Sourced From Basin',
+};
+
+// Keys handled in the popup header (title) so they aren't repeated in the body.
+const BASIN_POPUP_HEADER_KEYS = new Set(['unique_id', 'business_unit', 'pfaf_id']);
+
+const escapeHTML = value => String(value)
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;');
+
+const formatBasinValue = (value) => {
+  if (value === null || value === undefined || value === '') return '—';
+  if (typeof value === 'number') {
+    if (!Number.isFinite(value)) return String(value);
+    if (Number.isInteger(value)) return value.toLocaleString();
+    return value.toFixed(Math.abs(value) >= 100 ? 2 : 4);
+  }
+  return escapeHTML(value);
+};
+
+const buildBasinPopup = (properties = {}) => {
+  const title = properties.business_unit || properties.country
+    || (properties.pfaf_id != null ? `Basin ${properties.pfaf_id}` : 'Basin');
+  const subtitle = properties.pfaf_id != null ? `PFAF ${escapeHTML(properties.pfaf_id)}` : '';
+
+  const orderedKeys = Object.keys(BASIN_POPUP_LABELS)
+    .filter(key => !BASIN_POPUP_HEADER_KEYS.has(key) && key in properties);
+  const extraKeys = Object.keys(properties)
+    .filter(key => !(key in BASIN_POPUP_LABELS) && !BASIN_POPUP_HEADER_KEYS.has(key));
+
+  const rows = [...orderedKeys, ...extraKeys].map((key) => {
+    const label = BASIN_POPUP_LABELS[key] || key;
+    return `<div class="dc"><span class="dt">${escapeHTML(label)}</span><span class="dd">${formatBasinValue(properties[key])}</span></div>`;
+  }).join('');
+
+  return `<div class="c-infowindow">
+    <h3>${escapeHTML(title)}</h3>
+    ${subtitle ? `<span class="basin-popup-subtitle">${subtitle}</span>` : ''}
+    <div class="dl">${rows}</div>
+  </div>`;
+};
+
 /**
  * Converts the GeoJSON FeatureCollection of matched basins (returned by
  * `runFoodSupplyChainAnalysis` when `geometry: true`) into a Leaflet geoJSON
@@ -254,6 +317,17 @@ export const getSupplyChainBasinsLayer = (geojson) => {
       body: geojson,
       options: {
         style: () => ({ ...SUPPLY_CHAIN_BASIN_STYLE }),
+        // Bind a popup with the basin's analysis row. Kept as a live function
+        // (layerConfig.parse === false) so it survives un-serialised.
+        onEachFeature: (feature, layer) => {
+          if (feature && feature.properties) {
+            layer.bindPopup(buildBasinPopup(feature.properties), {
+              closeButton: true,
+              className: 'basin-popup',
+              maxHeight: 320,
+            });
+          }
+        },
       },
     },
     legendConfig: {},
