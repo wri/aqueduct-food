@@ -3,6 +3,14 @@ import sleep from 'utils/general';
 import { entryToApiLocation } from 'utils/supply-analyzer';
 import RESULT_DATA from './TEMP_DATA.json'; // Comment out when not needed for dev due to bundle size
 
+const ANALYSIS_BASE = `${config.ANALYSIS_API_URL}/aqueduct/analysis`;
+
+// The gateway rejects keyless requests with a 403, so every gateway call must
+// send the application's API key. Injected at build time from ANALYSIS_API_KEY.
+const apiKeyHeaders = () => (config.ANALYSIS_API_KEY
+  ? { 'x-api-key': config.ANALYSIS_API_KEY }
+  : {});
+
 export const fetchAnalysis = (
   formData,
   indicator,
@@ -15,9 +23,9 @@ export const fetchAnalysis = (
 ) => (
   axios({
     method: 'post',
-    url: `${config.ANALYSIS_API_URL}/aqueduct/analysis/food-supply-chain/${indicator}/${threshold}`,
+    url: `${ANALYSIS_BASE}/food-supply-chain/${indicator}/${threshold}`,
     data: formData,
-    headers: { 'Content-Type': 'multipart/form-data' },
+    headers: { 'Content-Type': 'multipart/form-data', ...apiKeyHeaders() },
     onDownloadProgress,
     onUploadProgress,
   })
@@ -29,7 +37,7 @@ export const fetchAnalysis = (
 
       return new Promise((resolve, reject) => {
         const makeRequest = () => (
-          axios.get(`${config.ANALYSIS_API_URL}/aqueduct/analysis/food-supply-chain/${jobToken}`)
+          axios.get(`${ANALYSIS_BASE}/food-supply-chain/${jobToken}`, { headers: apiKeyHeaders() })
             .then(({ data = {} } = {}) => {
               const { results, percent_complete = 0, status: statusAnalisis } = data;
               onProcessing(percent_complete / 100);
@@ -155,10 +163,10 @@ export const runFoodSupplyChainAnalysis = (entries, { buffer, geometry, simplify
     ...(geometry && simplify != null && { simplify }),
   };
 
-  const url = `${config.ANALYSIS_API_URL}/api/v1/aqueduct/analysis/food-supply-chain/locations`;
+  const url = `${ANALYSIS_BASE}/food-supply-chain/locations`;
   return axios
     .post(url, { locations }, {
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...apiKeyHeaders() },
       params: Object.keys(params).length ? params : undefined,
     })
     .then(({ data = {} }) => ({
@@ -183,9 +191,9 @@ export const checkPointsOutsideLand = (entries) => {
 
   return axios
     .post(
-      `${config.ANALYSIS_API_URL}/api/v1/aqueduct/analysis/points-outside-land`,
+      `${ANALYSIS_BASE}/points-outside-land`,
       { locations },
-      { headers: { 'Content-Type': 'application/json' } },
+      { headers: { 'Content-Type': 'application/json', ...apiKeyHeaders() } },
     )
     .then(({ data }) => {
       const outside = data.outside || [];
