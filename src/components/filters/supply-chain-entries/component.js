@@ -5,6 +5,8 @@ import {
   validateLatlongFields,
   validateCountryFields,
   fillMissingBusinessUnits,
+  validateEntry,
+  entryStatus,
 } from 'utils/supply-analyzer';
 import ReviewEntryList from 'components/analyzer/ReviewEntryList';
 
@@ -93,13 +95,29 @@ class SupplyChainEntriesList extends PureComponent {
 
   render() {
     const {
-      entries, outsideLandIds, phase, onRemoveEntry, onClearAll,
+      entries,
+      outsideLandIds,
+      phase,
+      screen,
+      spatialCheckLoading,
+      onRemoveEntry,
+      onClearAll,
+      onOpenReview,
     } = this.props;
     const { editingId, editDraft, editDraftErrors } = this.state;
 
     // Hidden while the analysis is running / showing results — the results
     // section takes over the space below the input header.
     if (!entries.length || phase === 'analyzing' || phase === 'results') return null;
+
+    const errorCount = entries.filter(e => entryStatus(validateEntry(e)) === 'error').length;
+
+    let reviewBtnLabel = 'Review & Validate';
+    if (spatialCheckLoading) {
+      reviewBtnLabel = 'Checking locations\u2026';
+    } else if (errorCount > 0) {
+      reviewBtnLabel = `Review & Fix (${errorCount} error${errorCount !== 1 ? 's' : ''})`;
+    }
 
     return (
       <div className="c-supply-chain-entries">
@@ -125,6 +143,19 @@ class SupplyChainEntriesList extends PureComponent {
           onRemoveEntry={onRemoveEntry}
           onApplyQuickFix={this.applyQuickFix}
         />
+
+        {screen !== 'review' && (
+          <div className="entries-list-footer">
+            <button
+              type="button"
+              className={`review-btn${spatialCheckLoading ? ' -loading' : ''}`}
+              disabled={spatialCheckLoading}
+              onClick={onOpenReview}
+            >
+              {reviewBtnLabel}
+            </button>
+          </div>
+        )}
       </div>
     );
   }
@@ -134,9 +165,12 @@ SupplyChainEntriesList.propTypes = {
   entries: PropTypes.array,
   outsideLandIds: PropTypes.array,
   phase: PropTypes.string,
+  screen: PropTypes.string,
+  spatialCheckLoading: PropTypes.bool,
   setEntries: PropTypes.func.isRequired,
   onRemoveEntry: PropTypes.func.isRequired,
   onClearAll: PropTypes.func.isRequired,
+  onOpenReview: PropTypes.func.isRequired,
   clearOutsideLandId: PropTypes.func.isRequired,
 };
 
@@ -144,6 +178,8 @@ SupplyChainEntriesList.defaultProps = {
   entries: [],
   outsideLandIds: [],
   phase: 'idle',
+  screen: 'input',
+  spatialCheckLoading: false,
 };
 
 export default SupplyChainEntriesList;

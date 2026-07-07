@@ -345,4 +345,35 @@
 
     &:hover { background-color: palette(blue, dark); }
   }
+
+  // ── Review trigger ──────────────────────────────────────────────────────────
+  .entries-list-footer {
+    margin-top: $space-1 * 1.5;
+    padding-top: $space-1 * 1.5;
+    border-top: 1px solid #e2e8f0; // slate-200
+  }
+
+  .review-btn {
+    width: 100%;
+    padding: ($space-1 * 0.75) ($space-1 * 2);
+    border-radius: 4px;
+    font-size: $font-size-small;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    background-color: palette(blue, primary);
+    color: #fff;
+    transition: background-color 0.15s;
+    text-align: center;
+
+    &:hover {
+      background-color: palette(blue, dark);
+    }
+
+    &.-loading,
+    &:disabled {
+      opacity: 0.65;
+      cursor: wait;
+    }
+  }
 }

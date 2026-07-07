@@ -2,6 +2,7 @@ import {
   SET_SUPPLY_CHAIN_ANALYSIS,
   SET_SUPPLY_CHAIN_ANALYSIS_VIEW,
   RESET_SUPPLY_CHAIN_ANALYSIS,
+  SET_SUPPLY_CHAIN_REVIEW,
 } from 'constants/supply-analyzer';
 import { DEFAULT_ANALYSIS_VIEW } from 'constants/analysis-indicators';
 
@@ -10,12 +11,16 @@ import { DEFAULT_ANALYSIS_VIEW } from 'constants/analysis-indicators';
 // the phase, results and the shared view state all live here in Redux.
 //
 //   phase: 'idle' | 'analyzing' | 'results'
+//   screen: 'input' | 'review' — review header/actions vs entry form
 const initialState = {
   phase: 'idle',
   results: null, // { results, errors, skipped, geojson }
   entries: [], // snapshot of the entries that produced the results
   error: null,
   view: { ...DEFAULT_ANALYSIS_VIEW },
+  screen: 'input',
+  spatialCheckLoading: false,
+  spatialCheckError: false,
 };
 
 export default function (state = initialState, action) {
@@ -24,6 +29,8 @@ export default function (state = initialState, action) {
       return { ...state, ...action.payload };
     case SET_SUPPLY_CHAIN_ANALYSIS_VIEW:
       return { ...state, view: { ...state.view, ...action.payload } };
+    case SET_SUPPLY_CHAIN_REVIEW:
+      return { ...state, ...action.payload };
     case RESET_SUPPLY_CHAIN_ANALYSIS:
       return { ...initialState, view: { ...DEFAULT_ANALYSIS_VIEW } };
     default:

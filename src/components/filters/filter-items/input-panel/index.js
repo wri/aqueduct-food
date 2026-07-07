@@ -1,8 +1,8 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { setSupplyChainEntries, setOutsideLandIds } from 'actions/supplyChainEntries';
-import { setSupplyChainAnalysis } from 'actions/supplyChainAnalysis';
+import { setSupplyChainEntries } from 'actions/supplyChainEntries';
+import { setSupplyChainAnalysis, closeSupplyChainReview } from 'actions/supplyChainAnalysis';
 import ManualEntry from 'components/analyzer/ManualEntry';
 import BulkUpload from 'components/analyzer/BulkUpload';
 import Review from 'components/analyzer/Review';
@@ -15,14 +15,12 @@ import {
 import { DEFAULT_ANALYSIS_VIEW } from 'constants/analysis-indicators';
 import {
   parseCSVText,
-  validateEntry,
-  entryStatus,
   validateLatlongFields,
   validateCountryFields,
   classifyEntries,
   fillMissingBusinessUnits,
 } from 'utils/supply-analyzer';
-import { checkPointsOutsideLand, runFoodSupplyChainAnalysis } from 'services/analysis';
+import { runFoodSupplyChainAnalysis } from 'services/analysis';
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -40,10 +38,6 @@ class InputPanel extends PureComponent {
       isDragging: false,
       errors: {},
       bulkResult: null,
-      // Review phase
-      screen: 'input', // 'input' | 'review'
-      spatialCheckLoading: false,
-      spatialCheckError: false,
     };
 
     this.fileInputRef = React.createRef();
@@ -55,7 +49,6 @@ class InputPanel extends PureComponent {
     this.handleDrop = this.handleDrop.bind(this);
     this.handleFileChange = this.handleFileChange.bind(this);
     this.processUpload = this.processUpload.bind(this);
-    this.openReview = this.openReview.bind(this);
     this.applyValidEntries = this.applyValidEntries.bind(this);
     this.runAnalysis = this.runAnalysis.bind(this);
   }
@@ -141,33 +134,6 @@ class InputPanel extends PureComponent {
     reader.readAsText(uploadFile);
   }
 
-  // ── Review screen ────────────────────────────────────────────────────────
-
-  openReview() {
-    const { entries, setOutsideLand } = this.props;
-    const latlngEntries = entries.filter(e => e.type === 'latlong');
-
-    const openWithIds = (outsideLandIds, spatialCheckError = false) => {
-      setOutsideLand(Array.from(outsideLandIds));
-      this.setState({
-        screen: 'review',
-        spatialCheckLoading: false,
-        spatialCheckError,
-      });
-    };
-
-    if (!latlngEntries.length) {
-      openWithIds([]);
-      return;
-    }
-
-    this.setState({ spatialCheckLoading: true, spatialCheckError: false });
-
-    checkPointsOutsideLand(latlngEntries)
-      .then(outsideLandIds => openWithIds(outsideLandIds))
-      .catch(() => openWithIds([], true));
-  }
-
   // Computes the subset of entries with no blocking errors. Shared by the
   // "Apply" path (pushes locations to the map) and the "Run Analysis" path.
   validEntries() {
@@ -222,9 +188,13 @@ class InputPanel extends PureComponent {
   // ── Review screen ────────────────────────────────────────────────────────
 
   renderReviewScreen() {
-    const { spatialCheckError } = this.state;
     const {
-      onSubmit, entries, outsideLandIds, analysisError,
+      spatialCheckError,
+      closeReview,
+      onSubmit,
+      entries,
+      outsideLandIds,
+      analysisError,
     } = this.props;
 
     return (
@@ -233,7 +203,7 @@ class InputPanel extends PureComponent {
         outsideLandIds={outsideLandIds}
         spatialCheckError={spatialCheckError}
         analysisError={analysisError}
-        onBack={() => this.setState({ screen: 'input' })}
+        onBack={closeReview}
         onRunAnalysis={this.runAnalysis}
         onApplyValidEntries={this.applyValidEntries}
         onApplyAll={() => onSubmit(entries)}
@@ -245,7 +215,6 @@ class InputPanel extends PureComponent {
 
   render() {
     const {
-      screen,
       panelMode,
       entryMode,
       latlongForm,
@@ -254,9 +223,8 @@ class InputPanel extends PureComponent {
       uploadFile,
       isDragging,
       bulkResult,
-      spatialCheckLoading,
     } = this.state;
-    const { entries, phase } = this.props;
+    const { screen, phase } = this.props;
 
     // While the analysis is showing results, the header holds the results
     // controls (the data table/charts render in the section below).
@@ -274,20 +242,6 @@ class InputPanel extends PureComponent {
           {this.renderReviewScreen()}
         </div>
       );
-    }
-
-    // Compute live validation for the entries list status dots
-    const validatedEntries = entries.map(e => ({
-      entry: e,
-      status: entryStatus(validateEntry(e)),
-    }));
-    const errorCount = validatedEntries.filter(v => v.status === 'error').length;
-
-    let reviewBtnLabel = 'Review & Validate';
-    if (spatialCheckLoading) {
-      reviewBtnLabel = 'Checking locations\u2026';
-    } else if (errorCount > 0) {
-      reviewBtnLabel = `Review & Fix (${errorCount} error${errorCount !== 1 ? 's' : ''})`;
     }
 
     return (
@@ -335,23 +289,6 @@ class InputPanel extends PureComponent {
             onClear={() => this.setState({ uploadFile: null, bulkResult: null })}
           />
         )}
-
-        {/* The added-locations list now lives in the sticky section
-            (SupplyChainEntriesList). Keep the review trigger here. */}
-        {entries.length > 0 && (
-          <div className="entries-list">
-            <div className="panel-footer -submit">
-              <button
-                type="button"
-                className={`review-btn${spatialCheckLoading ? ' -loading' : ''}`}
-                disabled={spatialCheckLoading}
-                onClick={this.openReview}
-              >
-                {reviewBtnLabel}
-              </button>
-            </div>
-          </div>
-        )}
       </div>
     );
   }
@@ -362,9 +299,11 @@ InputPanel.propTypes = {
   outsideLandIds: PropTypes.array,
   analysisError: PropTypes.string,
   phase: PropTypes.string,
+  screen: PropTypes.string,
+  spatialCheckError: PropTypes.bool,
   setEntries: PropTypes.func.isRequired,
-  setOutsideLand: PropTypes.func.isRequired,
   setAnalysis: PropTypes.func.isRequired,
+  closeReview: PropTypes.func.isRequired,
   onSubmit: PropTypes.func,
   onBasinsResolved: PropTypes.func,
 };
@@ -374,6 +313,8 @@ InputPanel.defaultProps = {
   outsideLandIds: [],
   analysisError: null,
   phase: 'idle',
+  screen: 'input',
+  spatialCheckError: false,
   onSubmit: () => {},
   onBasinsResolved: () => {},
 };
@@ -384,10 +325,12 @@ export default connect(
     outsideLandIds: state.supplyChainOutsideLand,
     analysisError: state.supplyChainAnalysis.error,
     phase: state.supplyChainAnalysis.phase,
+    screen: state.supplyChainAnalysis.screen,
+    spatialCheckError: state.supplyChainAnalysis.spatialCheckError,
   }),
   {
     setEntries: setSupplyChainEntries,
-    setOutsideLand: setOutsideLandIds,
     setAnalysis: setSupplyChainAnalysis,
+    closeReview: closeSupplyChainReview,
   },
 )(InputPanel);
