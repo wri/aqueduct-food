@@ -41,6 +41,73 @@
   }
 
   // ── Review list ─────────────────────────────────────────────────────────────
+  .validation-summary {
+    display: flex;
+    flex-direction: column;
+    gap: ($space-1 * 0.75);
+    margin-bottom: $space-1;
+  }
+
+  .review-summary-bar {
+    display: flex;
+    align-items: center;
+    gap: $space-1;
+    padding: ($space-1) ($space-1 * 1.5);
+    background: #f8fafc; // slate-50
+    border: 1px solid #e2e8f0; // slate-200
+    border-radius: 6px;
+
+    .summary-stat {
+      display: flex;
+      align-items: baseline;
+      gap: 5px;
+      font-size: $font-size-small;
+      color: #64748b; // slate-500
+
+      .stat-count {
+        font-size: 20px;
+        font-weight: 700;
+        line-height: 1;
+      }
+
+      &.-valid   { .stat-count { color: #22c55e; } }
+      &.-warning { .stat-count { color: #f59e0b; } }
+      &.-error   { .stat-count { color: #ef4444; } }
+    }
+
+    .summary-divider {
+      width: 1px;
+      height: 20px;
+      background: #e2e8f0;
+      margin: 0 ($space-1 * 0.5);
+    }
+  }
+
+  .spatial-check-notice,
+  .analysis-error-notice {
+    padding: ($space-1 * 0.5) $space-1;
+    border-radius: 4px;
+    font-size: $font-size-small;
+  }
+
+  .spatial-check-notice {
+    background-color: #fffbeb;
+    border: 1px solid #fcd34d;
+    color: #92400e;
+  }
+
+  .analysis-error-notice {
+    background-color: #fef2f2;
+    border: 1px solid #fca5a5;
+    color: #b91c1c;
+  }
+
+  .review-fix-hint {
+    margin: 0;
+    font-size: $font-size-small;
+    color: #64748b;
+  }
+
   .review-body {
     display: flex;
     flex-direction: column;
@@ -351,6 +418,59 @@
     margin-top: $space-1 * 1.5;
     padding-top: $space-1 * 1.5;
     border-top: 1px solid #e2e8f0; // slate-200
+  }
+
+  .review-footer-actions {
+    display: flex;
+    flex-direction: column;
+    gap: ($space-1 * 0.75);
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: ($space-1 * 0.75) ($space-1 * 2);
+    border-radius: 4px;
+    font-size: $font-size-small;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    text-align: center;
+    transition: background-color 0.15s, color 0.15s;
+
+    &.-primary {
+      background-color: palette(blue, primary);
+      color: #fff;
+
+      &:hover:not(:disabled) {
+        background-color: palette(blue, dark);
+      }
+    }
+
+    &:not(.-primary):not(.-secondary) {
+      background-color: #f1f5f9;
+      color: #334155;
+
+      &:hover:not(:disabled) {
+        background-color: #e2e8f0;
+      }
+    }
+
+    &.-secondary {
+      background: transparent;
+      color: #64748b;
+      text-transform: none;
+      font-weight: 500;
+      letter-spacing: 0;
+
+      &:hover:not(:disabled) {
+        color: #0f172a;
+      }
+    }
+
+    &:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
   }
 
   .review-btn {

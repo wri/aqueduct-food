@@ -274,14 +274,7 @@ class Filters extends PureComponent {
         >
           {withScope && filters.scope === 'supply_chain' && (
             <div className="filters-section" style={{ paddingRight: 32, paddingTop: 0, paddingBottom: 0 }}>
-              <InputPanel
-                onSubmit={(entries) => {
-                  this.updateFilters(entries, 'supplyChainLocations');
-                }}
-                onBasinsResolved={(geojson) => {
-                  this.updateFilters(geojson, 'supplyChainBasins');
-                }}
-              />
+              <InputPanel />
             </div>
           )}
           <div>

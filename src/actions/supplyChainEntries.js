@@ -1,6 +1,7 @@
 import {
   SET_SUPPLY_CHAIN_ENTRIES,
   SET_SUPPLY_CHAIN_OUTSIDE_LAND,
+  SET_SUPPLY_CHAIN_REVIEW,
   SUPPLY_CHAIN_ENTRIES_LS_KEY,
 } from 'constants/supply-analyzer';
 
@@ -15,6 +16,7 @@ export function setSupplyChainEntries(entries) {
     } catch (_) { /* storage quota exceeded or private mode */ }
 
     dispatch({ type: SET_SUPPLY_CHAIN_ENTRIES, payload: entries });
+    dispatch({ type: SET_SUPPLY_CHAIN_REVIEW, payload: { validationChecked: false } });
   };
 }
 

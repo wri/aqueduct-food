@@ -1,14 +1,14 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
+import ValidationSummaryBar from 'components/analyzer/ValidationSummaryBar';
+import ReviewEntryList from 'components/analyzer/ReviewEntryList';
 import {
   validateLatlongFields,
   validateCountryFields,
   fillMissingBusinessUnits,
-  validateEntry,
-  entryStatus,
+  classifyEntries,
 } from 'utils/supply-analyzer';
-import ReviewEntryList from 'components/analyzer/ReviewEntryList';
 
 // The list of added supply-chain locations, with validation status, inline
 // edit, quick-fixes and remove. Lives in the sidebar sticky section (.c-sticky)
@@ -98,11 +98,15 @@ class SupplyChainEntriesList extends PureComponent {
       entries,
       outsideLandIds,
       phase,
-      screen,
+      validationChecked,
       spatialCheckLoading,
+      spatialCheckError,
+      analysisError,
       onRemoveEntry,
       onClearAll,
       onOpenReview,
+      onRunAnalysis,
+      onApplyValidEntries,
     } = this.props;
     const { editingId, editDraft, editDraftErrors } = this.state;
 
@@ -110,13 +114,15 @@ class SupplyChainEntriesList extends PureComponent {
     // section takes over the space below the input header.
     if (!entries.length || phase === 'analyzing' || phase === 'results') return null;
 
-    const errorCount = entries.filter(e => entryStatus(validateEntry(e)) === 'error').length;
+    const { errors, validCount } = classifyEntries(entries, outsideLandIds);
+    const hasErrors = errors.length > 0;
+    const canProceed = validationChecked && !hasErrors;
 
     let reviewBtnLabel = 'Review & Validate';
     if (spatialCheckLoading) {
       reviewBtnLabel = 'Checking locations\u2026';
-    } else if (errorCount > 0) {
-      reviewBtnLabel = `Review & Fix (${errorCount} error${errorCount !== 1 ? 's' : ''})`;
+    } else if (validationChecked && hasErrors) {
+      reviewBtnLabel = `Review & Revalidate (${errors.length} error${errors.length !== 1 ? 's' : ''})`;
     }
 
     return (
@@ -129,6 +135,15 @@ class SupplyChainEntriesList extends PureComponent {
             Clear all
           </button>
         </div>
+
+        {validationChecked && (
+          <ValidationSummaryBar
+            entries={entries}
+            outsideLandIds={outsideLandIds}
+            spatialCheckError={spatialCheckError}
+            analysisError={analysisError}
+          />
+        )}
 
         <ReviewEntryList
           entries={entries}
@@ -144,8 +159,8 @@ class SupplyChainEntriesList extends PureComponent {
           onApplyQuickFix={this.applyQuickFix}
         />
 
-        {screen !== 'review' && (
-          <div className="entries-list-footer">
+        <div className="entries-list-footer">
+          {!canProceed && (
             <button
               type="button"
               className={`review-btn${spatialCheckLoading ? ' -loading' : ''}`}
@@ -154,8 +169,36 @@ class SupplyChainEntriesList extends PureComponent {
             >
               {reviewBtnLabel}
             </button>
-          </div>
-        )}
+          )}
+
+          {canProceed && (
+            <div className="review-footer-actions">
+              <button
+                type="button"
+                className="submit-btn -primary"
+                disabled={validCount === 0}
+                onClick={onRunAnalysis}
+              >
+                Run Analysis ({validCount})
+              </button>
+              <button
+                type="button"
+                className="submit-btn"
+                disabled={validCount === 0}
+                onClick={onApplyValidEntries}
+              >
+                Apply {validCount} to map
+              </button>
+              <button
+                type="button"
+                className="submit-btn -secondary"
+                onClick={onOpenReview}
+              >
+                Revalidate
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     );
   }
@@ -165,12 +208,16 @@ SupplyChainEntriesList.propTypes = {
   entries: PropTypes.array,
   outsideLandIds: PropTypes.array,
   phase: PropTypes.string,
-  screen: PropTypes.string,
+  validationChecked: PropTypes.bool,
   spatialCheckLoading: PropTypes.bool,
+  spatialCheckError: PropTypes.bool,
+  analysisError: PropTypes.string,
   setEntries: PropTypes.func.isRequired,
   onRemoveEntry: PropTypes.func.isRequired,
   onClearAll: PropTypes.func.isRequired,
   onOpenReview: PropTypes.func.isRequired,
+  onRunAnalysis: PropTypes.func.isRequired,
+  onApplyValidEntries: PropTypes.func.isRequired,
   clearOutsideLandId: PropTypes.func.isRequired,
 };
 
@@ -178,8 +225,10 @@ SupplyChainEntriesList.defaultProps = {
   entries: [],
   outsideLandIds: [],
   phase: 'idle',
-  screen: 'input',
+  validationChecked: false,
   spatialCheckLoading: false,
+  spatialCheckError: false,
+  analysisError: null,
 };
 
 export default SupplyChainEntriesList;
