@@ -28,8 +28,8 @@ const ReviewEntryList = ({
     return (
       <div className="inline-edit-form">
         {editDraft.type === 'latlong'
-          ? renderLatlongFields(editDraft, onSetDraftField, editDraftErrors)
-          : renderCountryFields(editDraft, onSetDraftField, editDraftErrors)}
+          ? renderLatlongFields(editDraft, onSetDraftField, editDraftErrors, { lightSurface: true })
+          : renderCountryFields(editDraft, onSetDraftField, editDraftErrors, { lightSurface: true })}
         <div className="inline-form-actions">
           <button type="button" className="cancel-edit-btn" onClick={onCancelEdit}>
             Cancel

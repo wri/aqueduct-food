@@ -82,16 +82,28 @@ export function formatResultCell(value) {
   return String(value);
 }
 
+function entryByIdMap(analysisEntries) {
+  const byId = {};
+  analysisEntries.forEach((e) => { byId[String(e.id)] = e; });
+  return byId;
+}
+
+// Resolves business_unit for a result/error row, preferring the API value and
+// falling back to the source entry's businessUnit.
+export function businessUnitForUniqueId(uniqueId, analysisEntries, apiValue) {
+  const entry = entryByIdMap(analysisEntries)[String(uniqueId)];
+  return apiValue || (entry && entry.businessUnit) || '';
+}
+
 // Joins each API result row with its source entry (by unique_id) so we can
 // surface business_unit + any other input metadata the API doesn't echo back.
 export function augmentResults(rows, analysisEntries) {
-  const byId = {};
-  analysisEntries.forEach((e) => { byId[String(e.id)] = e; });
+  const byId = entryByIdMap(analysisEntries);
   return rows.map((row) => {
     const entry = byId[String(row.unique_id)];
     return {
       ...row,
-      business_unit: row.business_unit || (entry && entry.businessUnit) || '',
+      business_unit: businessUnitForUniqueId(row.unique_id, analysisEntries, row.business_unit),
     };
   });
 }

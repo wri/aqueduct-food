@@ -305,18 +305,21 @@
     padding: ($space-1 * 1.5) ($space-1 * 1.5) ($space-1);
     border-top: 1px solid #e2e8f0;
     background: #f8fafc; // slate-50
+    color: #0f172a; // reset sidebar white text inheritance
+  }
 
-    .entry-form {
+  // Shared light-surface form styling for inline edit (also keyed by class from JS)
+  .inline-edit-form .entry-form.-light-surface,
+  .entry-form.-light-surface {
+    display: flex;
+    flex-direction: column;
+    gap: $space-1;
+
+    .form-row.-two-col {
       display: flex;
-      flex-direction: column;
-      gap: $space-1;
+      gap: ($space-1 * 0.75);
 
-      .form-row.-two-col {
-        display: flex;
-        gap: ($space-1 * 0.75);
-
-        .form-field { flex: 1; }
-      }
+      .form-field { flex: 1; }
     }
 
     .form-field {
@@ -330,7 +333,7 @@
     .field-label {
       font-size: $font-size-small;
       font-weight: 500;
-      color: #334155; // slate-700
+      color: #334155 !important; // slate-700
       display: flex;
       align-items: baseline;
       gap: 4px;
@@ -345,26 +348,26 @@
     .optional-mark {
       font-size: 11px;
       font-weight: 400;
-      color: #94a3b8;
+      color: #64748b !important; // slate-500
     }
 
     .field-input {
       width: 100%;
-      background: #fff;
-      border: 1px solid #cbd5e1; // slate-300
+      background: #fff !important;
+      border: 1px solid #cbd5e1 !important; // slate-300
       border-radius: 4px;
-      color: #0f172a;
+      color: #0f172a !important;
       font-size: $font-size-default;
       font-family: inherit;
       padding: ($space-1 * 0.75) $space-1;
       transition: border-color 0.15s;
       box-sizing: border-box;
 
-      &::placeholder { color: #94a3b8; }
+      &::placeholder { color: #94a3b8 !important; }
 
       &:focus {
         outline: none;
-        border-color: palette(blue, primary);
+        border-color: palette(blue, primary) !important;
       }
 
       &[type='number'] {
@@ -381,6 +384,65 @@
       font-size: 11px;
       color: #dc2626; // red-600
       margin-top: 2px;
+    }
+
+    // aqueduct-components defaults assume a dark (blue) panel background
+    .c-custom-select {
+      border-bottom-color: #cbd5e1; // slate-300
+
+      &:after {
+        border-bottom-color: #64748b; // slate-500
+      }
+
+      .custom-select-text {
+        color: #0f172a !important;
+        font-size: $font-size-default;
+        font-weight: 500;
+      }
+
+      .custom-select-search {
+        color: #0f172a !important;
+      }
+    }
+
+    .c-radio {
+      label {
+        color: #475569 !important; // slate-600
+        font-size: $font-size-small;
+
+        &:hover {
+          color: #0f172a !important;
+        }
+
+        span {
+          border-color: #94a3b8; // slate-400
+        }
+      }
+
+      input[type='radio']:checked + label {
+        color: #0f172a !important;
+
+        span {
+          border-color: palette(blue, primary);
+
+          &:after {
+            background: palette(blue, primary);
+          }
+        }
+      }
+
+      &.-inline,
+      &.-secondary {
+        display: flex;
+        flex-wrap: wrap;
+        gap: ($space-1 * 0.75) ($space-1 * 1.5);
+      }
+    }
+
+    .c-radio-box.-inline {
+      display: flex;
+      flex-wrap: wrap;
+      gap: ($space-1 * 0.75) ($space-1 * 1.5);
     }
   }
 

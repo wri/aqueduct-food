@@ -10,9 +10,13 @@ import {
 // ─── Shared field-set renderers (no `this`) ──────────────────────────────────
 // Exported so the review screen's inline edit form can reuse the same fields.
 
-export function renderLatlongFields(form, setField, errs) {
+export function renderLatlongFields(form, setField, errs, { lightSurface = false } = {}) {
+  const entryFormClass = lightSurface ? 'entry-form -light-surface' : 'entry-form';
+  const selectClass = lightSurface ? '-gray' : undefined;
+  const radioClass = lightSurface ? '-inline -secondary' : '-inline';
+
   return (
-    <div className="entry-form">
+    <div className={entryFormClass}>
       <div className="form-row -two-col">
         <div className={`form-field${errs.latitude ? ' -invalid' : ''}`}>
           <span className="field-label">
@@ -72,6 +76,7 @@ export function renderLatlongFields(form, setField, errs) {
           </span>
           <CustomSelect
             search
+            className={selectClass}
             options={SORTED_CROP_OPTIONS}
             value={form.crop}
             onValueChange={selected => setField('crop', selected ? selected.value : null)}
@@ -90,7 +95,7 @@ export function renderLatlongFields(form, setField, errs) {
             items={IRRIGATION_OPTIONS}
             selected={form.irrigation}
             onChange={({ value }) => setField('irrigation', value)}
-            className="-inline"
+            className={radioClass}
           />
           {errs.irrigation && <span className="field-error">{errs.irrigation}</span>}
         </div>
@@ -116,15 +121,20 @@ export function renderLatlongFields(form, setField, errs) {
   );
 }
 
-export function renderCountryFields(form, setField, errs) {
+export function renderCountryFields(form, setField, errs, { lightSurface = false } = {}) {
+  const entryFormClass = lightSurface ? 'entry-form -light-surface' : 'entry-form';
+  const selectClass = lightSurface ? '-gray' : undefined;
+  const radioClass = lightSurface ? '-inline -secondary' : '-inline';
+
   return (
-    <div className="entry-form">
+    <div className={entryFormClass}>
       <div className={`form-row${errs.country ? ' -invalid' : ''}`}>
         <div className="form-field">
           <span className="field-label">
             Country <span className="required-mark">*</span>
           </span>
           <CountrySelect
+            className={selectClass}
             value={form.country !== null ? form.country : undefined}
             onValueChange={(selected) => {
               setField('country', selected ? selected.value : null);
@@ -157,6 +167,7 @@ export function renderCountryFields(form, setField, errs) {
           </span>
           <CustomSelect
             search
+            className={selectClass}
             options={SORTED_CROP_OPTIONS}
             value={form.crop}
             onValueChange={selected => setField('crop', selected ? selected.value : null)}
@@ -175,7 +186,7 @@ export function renderCountryFields(form, setField, errs) {
             items={IRRIGATION_OPTIONS}
             selected={form.irrigation}
             onChange={({ value }) => setField('irrigation', value)}
-            className="-inline"
+            className={radioClass}
           />
           {errs.irrigation && <span className="field-error">{errs.irrigation}</span>}
         </div>

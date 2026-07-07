@@ -13,6 +13,7 @@
     background-color: #fff;
     border: 1px solid #e2e8f0; // slate-200
     box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+    color: #334155; // slate-700 — override .c-input-panel white text
   }
 
   // The results screen already provides its own internal spacing.
@@ -108,5 +109,40 @@
         color: #cbd5e1; // slate-300
       }
     }
+  }
+
+  .analysis-errors {
+    background: #fef2f2; // red-50
+    border: 1px solid #fecaca; // red-200
+    border-radius: 6px;
+    padding: $space-1;
+
+    .review-section-title {
+      margin-bottom: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #b91c1c; // red-700
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: $space-1;
+      font-size: 12px;
+      color: #7f1d1d; // red-900
+
+      li {
+        list-style: disc;
+        list-style-position: inside;
+        margin-bottom: 4px;
+
+        strong { color: #991b1b; } // red-800
+      }
+    }
+  }
+
+  .analysis-loading .progress-text {
+    color: #64748b; // slate-500
   }
 }
