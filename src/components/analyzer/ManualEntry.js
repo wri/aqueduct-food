@@ -1,11 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { CustomSelect, RadioGroup } from 'aqueduct-components';
+import { CustomSelect, RadioGroup, IRRIGATION_OPTIONS } from 'aqueduct-components';
 import CountrySelect from 'components/country-select';
 import {
   ENTRY_MODES,
   SORTED_CROP_OPTIONS,
-  FILTERED_IRRIGATION_OPTIONS,
 } from 'constants/supply-analyzer';
 
 // ─── Shared field-set renderers (no `this`) ──────────────────────────────────
@@ -88,7 +87,7 @@ export function renderLatlongFields(form, setField, errs) {
           </span>
           <RadioGroup
             name={`irrigation-${form.latitude || 'new'}`}
-            items={FILTERED_IRRIGATION_OPTIONS}
+            items={IRRIGATION_OPTIONS}
             selected={form.irrigation}
             onChange={({ value }) => setField('irrigation', value)}
             className="-inline"
@@ -173,7 +172,7 @@ export function renderCountryFields(form, setField, errs) {
           </span>
           <RadioGroup
             name={`country-irrigation-${form.country || 'new'}`}
-            items={FILTERED_IRRIGATION_OPTIONS}
+            items={IRRIGATION_OPTIONS}
             selected={form.irrigation}
             onChange={({ value }) => setField('irrigation', value)}
             className="-inline"

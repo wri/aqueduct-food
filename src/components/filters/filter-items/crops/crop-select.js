@@ -83,7 +83,7 @@ CropSelect.defaultProps = {
   crop: null,
   onCropChange: () => {},
   irrigationOptions: IRRIGATION_OPTIONS,
-  irrigation: null,
+  irrigation: 'all',
   onIrrigationChange: () => {},
   className: ''
 };

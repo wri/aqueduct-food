@@ -32,7 +32,7 @@ export const INITIAL_LATLONG_FORM = {
   longitude: '',
   radius: '',
   crop: null,
-  irrigation: null,
+  irrigation: 'all',
   volume: '',
 };
 
@@ -41,7 +41,7 @@ export const INITIAL_COUNTRY_FORM = {
   countryName: '',
   state: '',
   crop: null,
-  irrigation: null,
+  irrigation: 'all',
   volume: '',
 };
 
@@ -49,7 +49,6 @@ export const SORTED_CROP_OPTIONS = CROP_OPTIONS
   .filter(c => c.value !== 'all')
   .sort((a, b) => (a.label > b.label ? 1 : -1));
 
-export const FILTERED_IRRIGATION_OPTIONS = IRRIGATION_OPTIONS.filter(i => i.value !== 'all');
 export const VALID_IRRIGATION_VALUES = new Set(IRRIGATION_OPTIONS.map(i => i.value));
 export const VALID_CROP_VALUES = new Set(CROP_OPTIONS.map(c => c.value));
 
