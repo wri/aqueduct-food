@@ -193,9 +193,8 @@ const Results = ({
               const businessUnit = businessUnitForUniqueId(e.unique_id, analysisEntries, e.business_unit);
               return (
                 <li key={`api-${e.unique_id}`}>
-                  <strong>{e.unique_id}</strong>
-                  {businessUnit && <> — <strong>{businessUnit}</strong></>}
-                  {' — '}{e.reason || 'no basin matched'}
+                  {businessUnit && <><strong>{businessUnit}</strong>{' — '}</>}
+                  no crop data for the selected area
                 </li>
               );
             })}
@@ -203,9 +202,8 @@ const Results = ({
               const businessUnit = businessUnitForUniqueId(s.unique_id, analysisEntries, s.business_unit);
               return (
                 <li key={`skip-${s.unique_id}`}>
-                  <strong>{s.unique_id}</strong>
-                  {businessUnit && <> — <strong>{businessUnit}</strong></>}
-                  {' — '}{s.reason}
+                  {businessUnit && <><strong>{businessUnit}</strong>{' — '}</>}
+                  no crop data for the selected area
                 </li>
               );
             })}

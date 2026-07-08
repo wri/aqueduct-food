@@ -12,25 +12,7 @@ const SupplyChainResults = ({
   phase, results, entries, view, onViewChange, onBack,
 }) => {
   if (phase === 'analyzing') {
-    const count = entries.length;
-    return (
-      <div className="c-input-panel -results c-supply-chain-results">
-        <div className="review-screen">
-          <div className="review-header">
-            <span className="review-title">Running Analysis…</span>
-          </div>
-          <div className="analysis-loading">
-            <div className="progress-bar indeterminate">
-              <div className="value indeterminate" />
-            </div>
-            <p className="progress-text">
-              Sending {count} location{count !== 1 ? 's' : ''} to the
-              Aqueduct food-supply-chain analyzer…
-            </p>
-          </div>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   if (phase === 'results') {

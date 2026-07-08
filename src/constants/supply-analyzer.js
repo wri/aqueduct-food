@@ -34,7 +34,7 @@ export const INITIAL_LATLONG_FORM = {
   radius: '',
   crop: null,
   irrigation: 'all',
-  volume: '',
+  volume: '1000',
 };
 
 export const INITIAL_COUNTRY_FORM = {
@@ -43,7 +43,7 @@ export const INITIAL_COUNTRY_FORM = {
   state: '',
   crop: null,
   irrigation: 'all',
-  volume: '',
+  volume: '1000',
 };
 
 export const SORTED_CROP_OPTIONS = CROP_OPTIONS
@@ -74,3 +74,6 @@ export const IRRIGATION_API_VALUES = {
 // Default radius (km) sent to the analysis endpoint when a lat/long entry
 // has no radius. The endpoint requires a positive buffer around point inputs.
 export const DEFAULT_RADIUS_KM = 50;
+
+// Default volume (MT) pre-filled in manual entry forms.
+export const DEFAULT_VOLUME = 1000;

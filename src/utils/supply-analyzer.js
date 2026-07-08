@@ -5,6 +5,7 @@ import {
   CROP_COMMODITY_NAMES,
   IRRIGATION_API_VALUES,
   DEFAULT_RADIUS_KM,
+  DEFAULT_VOLUME,
 } from 'constants/supply-analyzer';
 
 // ─── Business unit auto-population ────────────────────────────────────────────
@@ -169,7 +170,7 @@ export function parseCSVText(text) {
         radius: get('radius_km'),
         crop,
         irrigation,
-        volume: get('volume'),
+        volume: get('volume') || String(DEFAULT_VOLUME),
       });
     } else if (type === 'country') {
       const country = get('country_iso');
@@ -196,7 +197,7 @@ export function parseCSVText(text) {
         state: get('state'),
         crop,
         irrigation,
-        volume: get('volume'),
+        volume: get('volume') || String(DEFAULT_VOLUME),
       });
     } else {
       skipped.push({ row: rowNum, reasons: ['unknown type'] });
@@ -238,6 +239,40 @@ export function summariseEntry(entry) {
 }
 
 // ─── Validation ───────────────────────────────────────────────────────────────
+
+function getVolumeValidationIssue(volume) {
+  if (volume === '' || volume === null || volume === undefined) {
+    return {
+      field: 'volume',
+      severity: 'error',
+      message: 'Volume is required',
+    };
+  }
+  const parsed = parseFloat(volume);
+  if (Number.isNaN(parsed)) {
+    return {
+      field: 'volume',
+      severity: 'error',
+      message: 'Volume must be a number',
+    };
+  }
+  if (parsed <= 0) {
+    return {
+      field: 'volume',
+      severity: 'error',
+      message: 'Volume must be greater than 0',
+    };
+  }
+  return null;
+}
+
+function applyVolumeFieldErrors(form, errors) {
+  const issue = getVolumeValidationIssue(form.volume);
+  if (!issue) return;
+  if (issue.message === 'Volume is required') errors.volume = 'Required';
+  else if (issue.message === 'Volume must be greater than 0') errors.volume = 'Must be greater than 0';
+  else errors.volume = 'Must be a number';
+}
 
 /** Space-optimised iterative Levenshtein distance. */
 function levenshtein(a, b) {
@@ -367,13 +402,8 @@ export function validateEntry(entry) {
       issues.push({ field: 'irrigation', severity: 'error', message: 'Irrigation type is required (SBTN)' });
     }
 
-    if (!entry.volume) {
-      issues.push({
-        field: 'volume',
-        severity: 'warning',
-        message: 'Volume is recommended for SBTN water-withdrawal analysis',
-      });
-    }
+    const volumeIssue = getVolumeValidationIssue(entry.volume);
+    if (volumeIssue) issues.push(volumeIssue);
   }
 
   if (entry.type === 'country') {
@@ -394,13 +424,9 @@ export function validateEntry(entry) {
     if (!entry.irrigation) {
       issues.push({ field: 'irrigation', severity: 'error', message: 'Irrigation type is required (SBTN)' });
     }
-    if (!entry.volume) {
-      issues.push({
-        field: 'volume',
-        severity: 'warning',
-        message: 'Volume is recommended for SBTN water-withdrawal analysis',
-      });
-    }
+
+    const countryVolumeIssue = getVolumeValidationIssue(entry.volume);
+    if (countryVolumeIssue) issues.push(countryVolumeIssue);
   }
 
   return issues;
@@ -432,6 +458,7 @@ export function validateLatlongFields(form) {
 
   if (!form.crop) errors.crop = 'Required';
   if (!form.irrigation) errors.irrigation = 'Required';
+  applyVolumeFieldErrors(form, errors);
   return errors;
 }
 
@@ -444,6 +471,7 @@ export function validateCountryFields(form) {
   if (!form.country) errors.country = 'Required';
   if (!form.crop) errors.crop = 'Required';
   if (!form.irrigation) errors.irrigation = 'Required';
+  applyVolumeFieldErrors(form, errors);
   return errors;
 }
 

@@ -101,20 +101,21 @@ export function renderLatlongFields(form, setField, errs, { lightSurface = false
         </div>
       </div>
 
-      <div className="form-row">
+      <div className={`form-row${errs.volume ? ' -invalid' : ''}`}>
         <div className="form-field">
           <span className="field-label">
-            Volume <span className="optional-mark">(optional)</span>
+            Volume <span className="required-mark">*</span>
           </span>
           <input
             type="number"
             className="field-input"
             placeholder="e.g. 1000"
-            min="0"
+            min="1"
             step="any"
             value={form.volume}
-            onChange={e => setField('volume', e.target.value, false)}
+            onChange={e => setField('volume', e.target.value)}
           />
+          {errs.volume && <span className="field-error">{errs.volume}</span>}
         </div>
       </div>
     </div>
@@ -192,20 +193,21 @@ export function renderCountryFields(form, setField, errs, { lightSurface = false
         </div>
       </div>
 
-      <div className="form-row">
+      <div className={`form-row${errs.volume ? ' -invalid' : ''}`}>
         <div className="form-field">
           <span className="field-label">
-            Volume <span className="optional-mark">(optional)</span>
+            Volume <span className="required-mark">*</span>
           </span>
           <input
             type="number"
             className="field-input"
             placeholder="e.g. 1000"
-            min="0"
+            min="1"
             step="any"
             value={form.volume}
-            onChange={e => setField('volume', e.target.value, false)}
+            onChange={e => setField('volume', e.target.value)}
           />
+          {errs.volume && <span className="field-error">{errs.volume}</span>}
         </div>
       </div>
     </div>
