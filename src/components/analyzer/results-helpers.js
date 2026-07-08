@@ -17,7 +17,7 @@ export const RESULT_COLUMN_LABELS = {
   iso_code: 'ISO',
   country: 'Country',
   state: 'State',
-  commodity_code: 'Crop',
+  commodity: 'Crop',
   irrigation: 'Irrigation',
   total_volume: 'Total Volume (MT)',
   bws_raw: 'BWS Raw',
@@ -37,7 +37,7 @@ const HIDDEN_RESULT_COLUMNS = new Set(['unique_id']);
 
 export const GROUP_KEY = {
   watershed: 'pfaf_id',
-  crop: 'commodity_code',
+  crop: 'commodity',
   business_unit: 'business_unit',
 };
 
@@ -95,14 +95,20 @@ export function businessUnitForUniqueId(uniqueId, analysisEntries, apiValue) {
   return apiValue || (entry && entry.businessUnit) || '';
 }
 
+// Crop display name from an API result row. Accepts the new `commodity`
+// field and falls back to legacy `commodity_code` during transition.
+export function resultCommodity(row) {
+  return row.commodity || row.commodity_code || '';
+}
+
 // Joins each API result row with its source entry (by unique_id) so we can
 // surface business_unit + any other input metadata the API doesn't echo back.
 export function augmentResults(rows, analysisEntries) {
-  const byId = entryByIdMap(analysisEntries);
   return rows.map((row) => {
-    const entry = byId[String(row.unique_id)];
+    const { commodity_code, ...rest } = row;
     return {
-      ...row,
+      ...rest,
+      commodity: row.commodity || commodity_code || '',
       business_unit: businessUnitForUniqueId(row.unique_id, analysisEntries, row.business_unit),
     };
   });
@@ -111,7 +117,7 @@ export function augmentResults(rows, analysisEntries) {
 export function applyResultFilters(rows, resultFilters) {
   return rows.filter((row) => {
     if (resultFilters.watershed && String(row.pfaf_id) !== resultFilters.watershed) return false;
-    if (resultFilters.crop && row.commodity_code !== resultFilters.crop) return false;
+    if (resultFilters.crop && resultCommodity(row) !== resultFilters.crop) return false;
     if (resultFilters.businessUnit && (row.business_unit || '') !== resultFilters.businessUnit) return false;
     return true;
   });

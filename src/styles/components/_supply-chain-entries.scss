@@ -322,6 +322,12 @@
       .form-field { flex: 1; }
     }
 
+    .form-row {
+      &.-invalid .c-custom-select {
+        border-color: #ef4444 !important;
+      }
+    }
+
     .form-field {
       display: flex;
       flex-direction: column;
@@ -386,22 +392,34 @@
       margin-top: 2px;
     }
 
-    // aqueduct-components defaults assume a dark (blue) panel background
+    // Match .field-input so the crop/country selects read as dropdowns on the
+    // light edit surface (.-gray from aqueduct-components removes the border).
     .c-custom-select {
-      border-bottom-color: #cbd5e1; // slate-300
+      background: #fff !important;
+      border: 1px solid #cbd5e1 !important; // slate-300
+      border-radius: 4px;
+      box-sizing: border-box;
+      transition: border-color 0.15s;
 
       &:after {
+        right: $space-1;
         border-bottom-color: #64748b; // slate-500
       }
 
       .custom-select-text {
         color: #0f172a !important;
         font-size: $font-size-default;
-        font-weight: 500;
+        font-weight: 400;
+        min-height: unset;
+        max-height: none;
+        line-height: 1.4;
+        padding: ($space-1 * 0.75) ($space-1 * 2.5) ($space-1 * 0.75) $space-1;
       }
 
       .custom-select-search {
         color: #0f172a !important;
+        padding-left: $space-1;
+        padding-right: ($space-1 * 2.5);
       }
     }
 

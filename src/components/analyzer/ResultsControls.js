@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { RadioGroup } from 'aqueduct-components';
 
 import { ANALYSIS_INDICATORS } from 'constants/analysis-indicators';
-import { augmentResults } from './results-helpers';
+import { augmentResults, resultCommodity } from './results-helpers';
 
 // Results controls (header): Back + title, the analysis indicator selector,
 // group-by, the watershed / crop / business-unit filters and the sort select.
@@ -25,7 +25,7 @@ const ResultsControls = ({
 
   const augmented = augmentResults(analysisResults.results, analysisEntries);
   const watershedOptions = [...new Set(augmented.map(r => r.pfaf_id).filter(v => v != null))].sort((a, b) => a - b);
-  const cropOptions = [...new Set(augmented.map(r => r.commodity_code).filter(Boolean))].sort();
+  const cropOptions = [...new Set(augmented.map(r => resultCommodity(r)).filter(Boolean))].sort();
   const businessUnitOptions = [...new Set(augmented.map(r => r.business_unit).filter(Boolean))].sort();
 
   const selectedIndicator = ANALYSIS_INDICATORS.find(i => i.key === activeIndicator);

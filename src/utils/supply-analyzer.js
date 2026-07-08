@@ -2,7 +2,7 @@ import { CROP_OPTIONS } from 'constants/crops';
 import {
   VALID_CROP_VALUES,
   VALID_IRRIGATION_VALUES,
-  CROP_COMMODITY_CODES,
+  CROP_COMMODITY_NAMES,
   IRRIGATION_API_VALUES,
   DEFAULT_RADIUS_KM,
 } from 'constants/supply-analyzer';
@@ -573,15 +573,15 @@ export function classifyEntries(entries = [], outsideLandIds = []) {
  * - country entries with a state → state mode (country, state)
  * - country entries without a state → country mode (iso_code)
  *
- * Returns `null` if the entry can't be mapped (e.g. missing crop code).
+ * Returns `null` if the entry can't be mapped (e.g. missing crop name).
  *
  * @param {Object} entry - InputPanel entry object
  * @returns {Object|null} location payload for POST .../locations
  */
 export function entryToApiLocation(entry) {
-  const commodityCode = CROP_COMMODITY_CODES[entry.crop];
+  const commodity = CROP_COMMODITY_NAMES[entry.crop];
   const irrigation = IRRIGATION_API_VALUES[entry.irrigation];
-  if (!commodityCode || !irrigation) return null;
+  if (!commodity || !irrigation) return null;
 
   const volume = parseFloat(entry.volume);
   const volumeFields = !Number.isNaN(volume) && volume > 0
@@ -597,7 +597,7 @@ export function entryToApiLocation(entry) {
       lng: parseFloat(entry.longitude),
       radius: radiusKm,
       radius_units: 'km',
-      commodity_code: commodityCode,
+      commodity,
       irrigation,
       ...volumeFields,
     };
@@ -606,7 +606,7 @@ export function entryToApiLocation(entry) {
   if (entry.type === 'country') {
     const base = {
       unique_id: String(entry.id),
-      commodity_code: commodityCode,
+      commodity,
       irrigation,
       ...volumeFields,
     };

@@ -140,7 +140,7 @@ export const runFoodSupplyChainAnalysis = (entries, { buffer, geometry, simplify
     if (!location) {
       skipped.push({
         unique_id: String(entry.id),
-        reason: 'Could not map entry to a commodity_code / irrigation the API understands',
+        reason: 'Could not map entry to a commodity / irrigation the API understands',
       });
       return;
     }

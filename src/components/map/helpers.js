@@ -238,7 +238,7 @@ const BASIN_POPUP_LABELS = {
   country: 'Country',
   state: 'State',
   iso_code: 'ISO',
-  commodity_code: 'Crop',
+  commodity: 'Crop',
   irrigation: 'Irrigation',
   total_volume: 'Total Volume (MT)',
   bws_label: 'BWS Label',
@@ -272,18 +272,23 @@ const formatBasinValue = (value) => {
 };
 
 const buildBasinPopup = (properties = {}) => {
-  const title = properties.business_unit || properties.country
-    || (properties.pfaf_id != null ? `Basin ${properties.pfaf_id}` : 'Basin');
-  const subtitle = properties.pfaf_id != null ? `PFAF ${escapeHTML(properties.pfaf_id)}` : '';
+  const commodity = properties.commodity || properties.commodity_code;
+  const popupProps = commodity != null && commodity !== ''
+    ? { ...properties, commodity }
+    : properties;
+  const title = popupProps.business_unit || popupProps.country
+    || (popupProps.pfaf_id != null ? `Basin ${popupProps.pfaf_id}` : 'Basin');
+  const subtitle = popupProps.pfaf_id != null ? `PFAF ${escapeHTML(popupProps.pfaf_id)}` : '';
 
   const orderedKeys = Object.keys(BASIN_POPUP_LABELS)
-    .filter(key => !BASIN_POPUP_HEADER_KEYS.has(key) && key in properties);
-  const extraKeys = Object.keys(properties)
-    .filter(key => !(key in BASIN_POPUP_LABELS) && !BASIN_POPUP_HEADER_KEYS.has(key));
+    .filter(key => !BASIN_POPUP_HEADER_KEYS.has(key) && key in popupProps);
+  const extraKeys = Object.keys(popupProps)
+    .filter(key => !(key in BASIN_POPUP_LABELS) && !BASIN_POPUP_HEADER_KEYS.has(key)
+      && key !== 'commodity_code');
 
   const rows = [...orderedKeys, ...extraKeys].map((key) => {
     const label = BASIN_POPUP_LABELS[key] || key;
-    return `<div class="dc"><span class="dt">${escapeHTML(label)}</span><span class="dd">${formatBasinValue(properties[key])}</span></div>`;
+    return `<div class="dc"><span class="dt">${escapeHTML(label)}</span><span class="dd">${formatBasinValue(popupProps[key])}</span></div>`;
   }).join('');
 
   return `<div class="c-infowindow">
