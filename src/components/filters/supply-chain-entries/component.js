@@ -31,6 +31,13 @@ class SupplyChainEntriesList extends PureComponent {
     this.applyQuickFix = this.applyQuickFix.bind(this);
   }
 
+  componentDidMount() {
+    const { entries, validationChecked, spatialCheckLoading, onOpenReview } = this.props;
+    if (entries.length && !validationChecked && !spatialCheckLoading) {
+      onOpenReview();
+    }
+  }
+
   setDraftField(field, value) {
     this.setState(({ editDraft }) => ({
       editDraft: { ...editDraft, [field]: value },
@@ -106,7 +113,6 @@ class SupplyChainEntriesList extends PureComponent {
       onClearAll,
       onOpenReview,
       onRunAnalysis,
-      onApplyValidEntries,
     } = this.props;
     const { editingId, editDraft, editDraftErrors } = this.state;
 
@@ -116,14 +122,7 @@ class SupplyChainEntriesList extends PureComponent {
 
     const { errors, validCount } = classifyEntries(entries, outsideLandIds);
     const hasErrors = errors.length > 0;
-    const canProceed = validationChecked && !hasErrors;
-
-    let reviewBtnLabel = 'Review & Validate';
-    if (spatialCheckLoading) {
-      reviewBtnLabel = 'Checking locations\u2026';
-    } else if (validationChecked && hasErrors) {
-      reviewBtnLabel = `Review & Revalidate (${errors.length} error${errors.length !== 1 ? 's' : ''})`;
-    }
+    const canProceed = !spatialCheckLoading && !hasErrors;
 
     return (
       <div className="c-supply-chain-entries">
@@ -136,14 +135,13 @@ class SupplyChainEntriesList extends PureComponent {
           </button>
         </div>
 
-        {validationChecked && (
-          <ValidationSummaryBar
-            entries={entries}
-            outsideLandIds={outsideLandIds}
-            spatialCheckError={spatialCheckError}
-            analysisError={analysisError}
-          />
-        )}
+        <ValidationSummaryBar
+          entries={entries}
+          outsideLandIds={outsideLandIds}
+          spatialCheckLoading={spatialCheckLoading}
+          spatialCheckError={spatialCheckError}
+          analysisError={analysisError}
+        />
 
         <ReviewEntryList
           entries={entries}
@@ -160,14 +158,14 @@ class SupplyChainEntriesList extends PureComponent {
         />
 
         <div className="entries-list-footer">
-          {!canProceed && (
+          {spatialCheckError && (
             <button
               type="button"
-              className={`review-btn${spatialCheckLoading ? ' -loading' : ''}`}
+              className="review-btn"
               disabled={spatialCheckLoading}
               onClick={onOpenReview}
             >
-              {reviewBtnLabel}
+              Retry land-boundary check
             </button>
           )}
 
@@ -180,21 +178,6 @@ class SupplyChainEntriesList extends PureComponent {
                 onClick={onRunAnalysis}
               >
                 Run Analysis ({validCount})
-              </button>
-              <button
-                type="button"
-                className="submit-btn"
-                disabled={validCount === 0}
-                onClick={onApplyValidEntries}
-              >
-                Apply {validCount} to map
-              </button>
-              <button
-                type="button"
-                className="submit-btn -secondary"
-                onClick={onOpenReview}
-              >
-                Revalidate
               </button>
             </div>
           )}
@@ -217,7 +200,6 @@ SupplyChainEntriesList.propTypes = {
   onClearAll: PropTypes.func.isRequired,
   onOpenReview: PropTypes.func.isRequired,
   onRunAnalysis: PropTypes.func.isRequired,
-  onApplyValidEntries: PropTypes.func.isRequired,
   clearOutsideLandId: PropTypes.func.isRequired,
 };
 

@@ -183,9 +183,14 @@ export const getSupplyChainLocationsLayer = (entries = []) => {
       coordinates: [parseFloat(entry.longitude), parseFloat(entry.latitude)],
     },
     properties: {
+      businessUnit: entry.businessUnit,
+      latitude: entry.latitude,
+      longitude: entry.longitude,
       radiusM: entry.radius ? parseFloat(entry.radius) * 1000 : null,
+      radiusKm: entry.radius ? parseFloat(entry.radius) : null,
       crop: entry.crop,
       irrigation: entry.irrigation,
+      volume: entry.volume,
     },
   }));
 
@@ -212,6 +217,7 @@ export const getSupplyChainLocationsLayer = (entries = []) => {
             fillOpacity: 0.85,
           });
         },
+        onEachFeature: bindLocationPopup,
       },
     },
     legendConfig: {},
@@ -269,6 +275,45 @@ const formatBasinValue = (value) => {
     return value.toFixed(Math.abs(value) >= 100 ? 2 : 4);
   }
   return escapeHTML(value);
+};
+
+const buildLocationPopup = (properties = {}) => {
+  const title = properties.businessUnit || 'Location';
+  const cropLabel = CROP_OPTIONS.find(c => c.value === properties.crop)?.label
+    || properties.crop;
+  const irrigation = properties.irrigation
+    ? capitalize(properties.irrigation)
+    : null;
+
+  const rows = [
+    cropLabel && { label: 'Crop', value: cropLabel },
+    irrigation && { label: 'Irrigation', value: irrigation },
+    properties.radiusKm != null && { label: 'Radius', value: `${properties.radiusKm} km` },
+    properties.volume && { label: 'Volume', value: properties.volume },
+    properties.latitude != null && properties.longitude != null && {
+      label: 'Coordinates',
+      value: `${parseFloat(properties.latitude).toFixed(4)}, ${parseFloat(properties.longitude).toFixed(4)}`,
+    },
+  ].filter(Boolean);
+
+  const body = rows.map(({ label, value }) => (
+    `<div class="dc"><span class="dt">${escapeHTML(label)}</span><span class="dd">${formatBasinValue(value)}</span></div>`
+  )).join('');
+
+  return `<div class="c-infowindow">
+    <h3>${escapeHTML(title)}</h3>
+    ${body ? `<div class="dl">${body}</div>` : ''}
+  </div>`;
+};
+
+const bindLocationPopup = (feature, layer) => {
+  if (feature && feature.properties) {
+    layer.bindPopup(buildLocationPopup(feature.properties), {
+      closeButton: true,
+      className: 'basin-popup',
+      maxHeight: 240,
+    });
+  }
 };
 
 const buildBasinPopup = (properties = {}) => {

@@ -11,7 +11,7 @@ import { DEFAULT_ANALYSIS_VIEW } from 'constants/analysis-indicators';
 // the phase, results and the shared view state all live here in Redux.
 //
 //   phase: 'idle' | 'analyzing' | 'results'
-//   validationChecked — user ran Review & Validate; summary shown on entries list
+//   validationChecked — spatial + field validation has completed for current entries
 const initialState = {
   phase: 'idle',
   results: null, // { results, errors, skipped, geojson }

@@ -9,7 +9,6 @@ import {
 import {
   openSupplyChainReview,
   runSupplyChainAnalysis,
-  applyValidEntriesToMap,
 } from 'actions/supplyChainAnalysis';
 
 import SupplyChainEntriesList from './component';
@@ -30,7 +29,6 @@ export default connect(
     onClearAll: clearSupplyChainEntries,
     onOpenReview: openSupplyChainReview,
     onRunAnalysis: runSupplyChainAnalysis,
-    onApplyValidEntries: applyValidEntriesToMap,
     clearOutsideLandId,
   },
 )(SupplyChainEntriesList);

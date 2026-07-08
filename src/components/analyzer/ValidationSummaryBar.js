@@ -6,6 +6,7 @@ import { classifyEntries } from 'utils/supply-analyzer';
 const ValidationSummaryBar = ({
   entries,
   outsideLandIds,
+  spatialCheckLoading,
   spatialCheckError,
   analysisError,
 }) => {
@@ -13,6 +14,12 @@ const ValidationSummaryBar = ({
 
   return (
     <div className="validation-summary">
+      {spatialCheckLoading && (
+        <div className="spatial-check-notice">
+          Checking land boundaries&hellip;
+        </div>
+      )}
+
       {spatialCheckError && (
         <div className="spatial-check-notice">
           Land-boundary check unavailable — spatial errors may not be shown.
@@ -51,12 +58,14 @@ const ValidationSummaryBar = ({
 ValidationSummaryBar.propTypes = {
   entries: PropTypes.array.isRequired,
   outsideLandIds: PropTypes.array,
+  spatialCheckLoading: PropTypes.bool,
   spatialCheckError: PropTypes.bool,
   analysisError: PropTypes.string,
 };
 
 ValidationSummaryBar.defaultProps = {
   outsideLandIds: [],
+  spatialCheckLoading: false,
   spatialCheckError: false,
   analysisError: null,
 };

@@ -10,6 +10,8 @@ import { setFilters } from 'actions/filters';
 import { classifyEntries, entryStatus } from 'utils/supply-analyzer';
 import { checkPointsOutsideLand, runFoodSupplyChainAnalysis } from 'services/analysis';
 
+let validationTimer = null;
+
 function getValidEntries(state) {
   const entries = state.supplyChainEntries || [];
   const outsideLandIds = state.supplyChainOutsideLand || [];
@@ -35,7 +37,7 @@ export function resetSupplyChainAnalysis() {
   return { type: RESET_SUPPLY_CHAIN_ANALYSIS };
 }
 
-export function openSupplyChainReview() {
+export function runSupplyChainValidation() {
   return (dispatch, getState) => {
     const entries = getState().supplyChainEntries || [];
     const latlngEntries = entries.filter(e => e.type === 'latlong');
@@ -47,6 +49,7 @@ export function openSupplyChainReview() {
         spatialCheckLoading: false,
         spatialCheckError,
       }));
+      dispatch(applyValidEntriesToMap());
     };
 
     if (!latlngEntries.length) {
@@ -62,10 +65,29 @@ export function openSupplyChainReview() {
   };
 }
 
+/** Debounced validation — runs after entries change (add, edit, bulk upload). */
+export function validateSupplyChainEntries() {
+  return (dispatch) => {
+    if (validationTimer) clearTimeout(validationTimer);
+    validationTimer = setTimeout(() => {
+      validationTimer = null;
+      dispatch(runSupplyChainValidation());
+    }, 300);
+  };
+}
+
+// Kept for explicit re-check (e.g. after a spatial API failure).
+export function openSupplyChainReview() {
+  return (dispatch) => {
+    if (validationTimer) clearTimeout(validationTimer);
+    dispatch(runSupplyChainValidation());
+  };
+}
+
 export function applyValidEntriesToMap() {
   return (dispatch, getState) => {
-    const valid = getValidEntries(getState());
-    if (!valid.length) return;
+    const valid = getValidEntries(getState())
+      .filter(entry => entry.type === 'latlong');
     dispatch(setFilters({ supplyChainLocations: valid }));
   };
 }
@@ -103,6 +125,8 @@ export default {
   setSupplyChainReview,
   resetSupplyChainAnalysis,
   openSupplyChainReview,
+  validateSupplyChainEntries,
+  runSupplyChainValidation,
   applyValidEntriesToMap,
   runSupplyChainAnalysis,
 };

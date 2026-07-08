@@ -448,19 +448,6 @@
           }
         }
       }
-
-      &.-inline,
-      &.-secondary {
-        display: flex;
-        flex-wrap: wrap;
-        gap: ($space-1 * 0.75) ($space-1 * 1.5);
-      }
-    }
-
-    .c-radio-box.-inline {
-      display: flex;
-      flex-wrap: wrap;
-      gap: ($space-1 * 0.75) ($space-1 * 1.5);
     }
   }
 
