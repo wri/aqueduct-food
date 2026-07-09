@@ -1,8 +1,7 @@
 import {
   COMPARE_SET_COUNTRY,
-  COMPARE_EMPTY_COUNTRIES
-}
-  from 'constants/compare';
+  COMPARE_EMPTY_COUNTRIES,
+} from 'constants/compare';
 
 const initialState = {
   countries: []

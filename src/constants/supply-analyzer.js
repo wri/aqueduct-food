@@ -21,6 +21,7 @@ export const SET_SUPPLY_CHAIN_OUTSIDE_LAND = 'SET_SUPPLY_CHAIN_OUTSIDE_LAND';
 export const SET_SUPPLY_CHAIN_ANALYSIS = 'SET_SUPPLY_CHAIN_ANALYSIS';
 export const SET_SUPPLY_CHAIN_ANALYSIS_VIEW = 'SET_SUPPLY_CHAIN_ANALYSIS_VIEW';
 export const RESET_SUPPLY_CHAIN_ANALYSIS = 'RESET_SUPPLY_CHAIN_ANALYSIS';
+export const SET_SUPPLY_CHAIN_REVIEW = 'SET_SUPPLY_CHAIN_REVIEW';
 
 export const ENTRY_MODES = [
   { value: 'latlong', label: 'Lat / Long' },
@@ -32,8 +33,8 @@ export const INITIAL_LATLONG_FORM = {
   longitude: '',
   radius: '',
   crop: null,
-  irrigation: null,
-  volume: '',
+  irrigation: 'all',
+  volume: '1000',
 };
 
 export const INITIAL_COUNTRY_FORM = {
@@ -41,70 +42,26 @@ export const INITIAL_COUNTRY_FORM = {
   countryName: '',
   state: '',
   crop: null,
-  irrigation: null,
-  volume: '',
+  irrigation: 'all',
+  volume: '1000',
 };
 
 export const SORTED_CROP_OPTIONS = CROP_OPTIONS
   .filter(c => c.value !== 'all')
   .sort((a, b) => (a.label > b.label ? 1 : -1));
 
-export const FILTERED_IRRIGATION_OPTIONS = IRRIGATION_OPTIONS.filter(i => i.value !== 'all');
 export const VALID_IRRIGATION_VALUES = new Set(IRRIGATION_OPTIONS.map(i => i.value));
 export const VALID_CROP_VALUES = new Set(CROP_OPTIONS.map(c => c.value));
 
 // ─── Analysis API field mappings ─────────────────────────────────────────────
 
-// Maps the lowercase crop slug used in the UI to the SPAM 4-letter
-// commodity_code expected by the food-supply-chain analysis endpoint.
-export const CROP_COMMODITY_CODES = {
-  'arabic coffee': 'ACOF',
-  banana: 'BANA',
-  barley: 'BARL',
-  bean: 'BEAN',
-  cassava: 'CASS',
-  chickpea: 'CHIC',
-  citrus: 'CITR',
-  cocoa: 'COCO',
-  coconut: 'CNUT',
-  cotton: 'COTT',
-  cowpea: 'COWP',
-  groundnut: 'GROU',
-  lentil: 'LENT',
-  maize: 'MAIZ',
-  oilpalm: 'OILP',
-  onion: 'ONIO',
-  'other cereals': 'OCER',
-  'other fibre crops': 'OFIB',
-  'other oil crops': 'OOIL',
-  'other pulses': 'OPUL',
-  'other roots': 'ORTS',
-  'other tropical fruit': 'TROF',
-  'other vegetables': 'VEGE',
-  'pearl millet': 'PMIL',
-  'pigeon pea': 'PIGE',
-  plantain: 'PLNT',
-  potato: 'POTA',
-  rapeseed: 'RAPE',
-  'rest of crops': 'REST',
-  rice: 'RICE',
-  'robusta coffee': 'RCOF',
-  rubber: 'RUBB',
-  'sesame seed': 'SESA',
-  'small millet': 'SMIL',
-  sorghum: 'SORG',
-  soybean: 'SOYB',
-  sugarbeet: 'SUGB',
-  sugarcane: 'SUGC',
-  sunflower: 'SUNF',
-  'sweet potato': 'SWPO',
-  tea: 'TEAS',
-  'temperate fruit': 'TEMF',
-  tobacco: 'TOBA',
-  tomato: 'TOMA',
-  wheat: 'WHEA',
-  yams: 'YAMS',
-};
+// Maps the lowercase crop slug used in the UI to the display name expected by
+// the food-supply-chain analysis endpoint (e.g. banana → "Banana").
+export const CROP_COMMODITY_NAMES = Object.fromEntries(
+  CROP_OPTIONS
+    .filter(c => c.value !== 'all')
+    .map(c => [c.value, c.label]),
+);
 
 // Maps the lowercase irrigation slug used in the UI to the case the
 // analysis endpoint expects ("All", "Irrigated", "Rainfed").
@@ -117,3 +74,6 @@ export const IRRIGATION_API_VALUES = {
 // Default radius (km) sent to the analysis endpoint when a lat/long entry
 // has no radius. The endpoint requires a positive buffer around point inputs.
 export const DEFAULT_RADIUS_KM = 50;
+
+// Default volume (MT) pre-filled in manual entry forms.
+export const DEFAULT_VOLUME = 1000;

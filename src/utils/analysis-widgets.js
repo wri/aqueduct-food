@@ -90,7 +90,7 @@ export const productionByCrop = (rows) => {
   const grouped = rollups(
     rows,
     group => sum(group, getProduction),
-    row => row.commodity_code || '—',
+    row => row.commodity || '—',
   )
     .map(([label, value]) => ({ label, value }))
     .filter(d => d.value > 0);
@@ -126,7 +126,7 @@ const productionByDimensionAndRisk = (rows, indicatorKey, accessor) => rollups(
   .sort((a, b) => b.total - a.total);
 
 export const productionByCropAndRisk = (rows, indicatorKey) => productionByDimensionAndRisk(
-  rows, indicatorKey, row => row.commodity_code || '—',
+  rows, indicatorKey, row => row.commodity || '—',
 );
 
 export const productionByIrrigationAndRisk = (rows, indicatorKey) => productionByDimensionAndRisk(
@@ -138,7 +138,7 @@ export const productionByIrrigationAndRisk = (rows, indicatorKey) => productionB
 // then a crop + location composite, and only falls back to the basin id.
 export const getHotspotLabel = (row) => {
   if (row.business_unit) return String(row.business_unit);
-  const parts = [row.commodity_code, row.state || row.country].filter(Boolean);
+  const parts = [row.commodity, row.state || row.country].filter(Boolean);
   if (parts.length) return parts.join(' — ');
   return row.pfaf_id != null ? `Basin ${row.pfaf_id}` : '—';
 };
@@ -169,7 +169,7 @@ export const getScatterData = (rows, indicatorKey) => rows
       x: info.normalized,
       y: getProduction(row),
       band: info.band,
-      label: `Basin ${row.pfaf_id != null ? row.pfaf_id : '—'}${row.commodity_code ? ` · ${row.commodity_code}` : ''}`,
+      label: `Basin ${row.pfaf_id != null ? row.pfaf_id : '—'}${row.commodity ? ` · ${row.commodity}` : ''}`,
     };
   })
   .filter(d => d.x !== null && d.y > 0);

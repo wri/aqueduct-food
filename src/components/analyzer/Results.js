@@ -10,6 +10,7 @@ import {
   augmentResults,
   applyResultFilters,
   applyResultSort,
+  businessUnitForUniqueId,
 } from './results-helpers';
 import AnalyzerWidgets, { SummaryMetrics } from './widgets';
 
@@ -188,16 +189,24 @@ const Results = ({
         <div className="analysis-errors">
           <p className="review-section-title">Locations that did not match a basin</p>
           <ul>
-            {(errors || []).map(e => (
-              <li key={`api-${e.unique_id}`}>
-                <strong>{e.unique_id}</strong> — {e.reason || 'no basin matched'}
-              </li>
-            ))}
-            {(skipped || []).map(s => (
-              <li key={`skip-${s.unique_id}`}>
-                <strong>{s.unique_id}</strong> — {s.reason}
-              </li>
-            ))}
+            {(errors || []).map((e) => {
+              const businessUnit = businessUnitForUniqueId(e.unique_id, analysisEntries, e.business_unit);
+              return (
+                <li key={`api-${e.unique_id}`}>
+                  {businessUnit && <><strong>{businessUnit}</strong>{' — '}</>}
+                  no crop data for the selected area
+                </li>
+              );
+            })}
+            {(skipped || []).map((s) => {
+              const businessUnit = businessUnitForUniqueId(s.unique_id, analysisEntries, s.business_unit);
+              return (
+                <li key={`skip-${s.unique_id}`}>
+                  {businessUnit && <><strong>{businessUnit}</strong>{' — '}</>}
+                  no crop data for the selected area
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}

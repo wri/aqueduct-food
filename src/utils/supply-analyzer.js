@@ -2,9 +2,10 @@ import { CROP_OPTIONS } from 'constants/crops';
 import {
   VALID_CROP_VALUES,
   VALID_IRRIGATION_VALUES,
-  CROP_COMMODITY_CODES,
+  CROP_COMMODITY_NAMES,
   IRRIGATION_API_VALUES,
   DEFAULT_RADIUS_KM,
+  DEFAULT_VOLUME,
 } from 'constants/supply-analyzer';
 
 // ─── Business unit auto-population ────────────────────────────────────────────
@@ -169,7 +170,7 @@ export function parseCSVText(text) {
         radius: get('radius_km'),
         crop,
         irrigation,
-        volume: get('volume'),
+        volume: get('volume') || String(DEFAULT_VOLUME),
       });
     } else if (type === 'country') {
       const country = get('country_iso');
@@ -196,7 +197,7 @@ export function parseCSVText(text) {
         state: get('state'),
         crop,
         irrigation,
-        volume: get('volume'),
+        volume: get('volume') || String(DEFAULT_VOLUME),
       });
     } else {
       skipped.push({ row: rowNum, reasons: ['unknown type'] });
@@ -238,6 +239,40 @@ export function summariseEntry(entry) {
 }
 
 // ─── Validation ───────────────────────────────────────────────────────────────
+
+function getVolumeValidationIssue(volume) {
+  if (volume === '' || volume === null || volume === undefined) {
+    return {
+      field: 'volume',
+      severity: 'error',
+      message: 'Volume is required',
+    };
+  }
+  const parsed = parseFloat(volume);
+  if (Number.isNaN(parsed)) {
+    return {
+      field: 'volume',
+      severity: 'error',
+      message: 'Volume must be a number',
+    };
+  }
+  if (parsed <= 0) {
+    return {
+      field: 'volume',
+      severity: 'error',
+      message: 'Volume must be greater than 0',
+    };
+  }
+  return null;
+}
+
+function getVolumeFieldError(volume) {
+  const issue = getVolumeValidationIssue(volume);
+  if (!issue) return null;
+  if (issue.message === 'Volume is required') return 'Required';
+  if (issue.message === 'Volume must be greater than 0') return 'Must be greater than 0';
+  return 'Must be a number';
+}
 
 /** Space-optimised iterative Levenshtein distance. */
 function levenshtein(a, b) {
@@ -367,13 +402,8 @@ export function validateEntry(entry) {
       issues.push({ field: 'irrigation', severity: 'error', message: 'Irrigation type is required (SBTN)' });
     }
 
-    if (!entry.volume) {
-      issues.push({
-        field: 'volume',
-        severity: 'warning',
-        message: 'Volume is recommended for SBTN water-withdrawal analysis',
-      });
-    }
+    const volumeIssue = getVolumeValidationIssue(entry.volume);
+    if (volumeIssue) issues.push(volumeIssue);
   }
 
   if (entry.type === 'country') {
@@ -394,13 +424,9 @@ export function validateEntry(entry) {
     if (!entry.irrigation) {
       issues.push({ field: 'irrigation', severity: 'error', message: 'Irrigation type is required (SBTN)' });
     }
-    if (!entry.volume) {
-      issues.push({
-        field: 'volume',
-        severity: 'warning',
-        message: 'Volume is recommended for SBTN water-withdrawal analysis',
-      });
-    }
+
+    const countryVolumeIssue = getVolumeValidationIssue(entry.volume);
+    if (countryVolumeIssue) issues.push(countryVolumeIssue);
   }
 
   return issues;
@@ -432,6 +458,8 @@ export function validateLatlongFields(form) {
 
   if (!form.crop) errors.crop = 'Required';
   if (!form.irrigation) errors.irrigation = 'Required';
+  const volumeError = getVolumeFieldError(form.volume);
+  if (volumeError) errors.volume = volumeError;
   return errors;
 }
 
@@ -444,6 +472,8 @@ export function validateCountryFields(form) {
   if (!form.country) errors.country = 'Required';
   if (!form.crop) errors.crop = 'Required';
   if (!form.irrigation) errors.irrigation = 'Required';
+  const volumeError = getVolumeFieldError(form.volume);
+  if (volumeError) errors.volume = volumeError;
   return errors;
 }
 
@@ -573,15 +603,15 @@ export function classifyEntries(entries = [], outsideLandIds = []) {
  * - country entries with a state → state mode (country, state)
  * - country entries without a state → country mode (iso_code)
  *
- * Returns `null` if the entry can't be mapped (e.g. missing crop code).
+ * Returns `null` if the entry can't be mapped (e.g. missing crop name).
  *
  * @param {Object} entry - InputPanel entry object
  * @returns {Object|null} location payload for POST .../locations
  */
 export function entryToApiLocation(entry) {
-  const commodityCode = CROP_COMMODITY_CODES[entry.crop];
+  const commodity = CROP_COMMODITY_NAMES[entry.crop];
   const irrigation = IRRIGATION_API_VALUES[entry.irrigation];
-  if (!commodityCode || !irrigation) return null;
+  if (!commodity || !irrigation) return null;
 
   const volume = parseFloat(entry.volume);
   const volumeFields = !Number.isNaN(volume) && volume > 0
@@ -597,7 +627,7 @@ export function entryToApiLocation(entry) {
       lng: parseFloat(entry.longitude),
       radius: radiusKm,
       radius_units: 'km',
-      commodity_code: commodityCode,
+      commodity,
       irrigation,
       ...volumeFields,
     };
@@ -606,7 +636,7 @@ export function entryToApiLocation(entry) {
   if (entry.type === 'country') {
     const base = {
       unique_id: String(entry.id),
-      commodity_code: commodityCode,
+      commodity,
       irrigation,
       ...volumeFields,
     };

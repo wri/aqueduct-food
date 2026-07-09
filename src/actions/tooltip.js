@@ -4,9 +4,8 @@ import {
   TOOLTIP_LOADING,
   TOOLTIP_SET_CHILDREN_PROPS,
   TOOLTIP_SET_POSITION,
-  TOOLTIP_FOLLOW_TOGGLE
-}
-  from 'constants/ui';
+  TOOLTIP_FOLLOW_TOGGLE,
+} from 'constants/ui';
 
 export function setTooltipChildren(children) {
   return dispatch => dispatch({ type: TOOLTIP_SET_CHILDREN, payload: children });

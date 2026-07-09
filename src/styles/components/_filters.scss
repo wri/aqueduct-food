@@ -194,6 +194,9 @@
     margin-top: 2px;
   }
 
+  // Inline irrigation radios (All / Irrigated / Rainfed) — layout/dot centering
+  // is handled by the global .c-radio-box.-inline rule in _filters.scss.
+
   // ── Panel footer (action buttons row) ─────────────────────────────────
   .panel-footer {
     display: flex;
@@ -1190,6 +1193,58 @@
         background-color: #AFC7FF;
         border: 1px solid palette(blue, light);
       }
+    }
+  }
+}
+
+// Inline radio groups (irrigation All / Irrigated / Rainfed).
+.c-radio-box.-inline {
+  align-items: center;
+  flex-wrap: wrap;
+  gap: ($space-1 * 0.75) ($space-1 * 1.5);
+
+  .radio-container {
+    margin: 0;
+    align-items: center;
+  }
+
+  .c-radio label {
+    display: inline-flex;
+    align-items: center;
+    min-height: 15px;
+    line-height: 1.25;
+  }
+
+  .c-radio label span {
+    box-sizing: border-box;
+    width: 15px;
+    height: 15px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateY(-50%);
+
+    &:after {
+      position: static;
+      top: auto;
+      left: auto;
+      flex: 0 0 7px;
+      width: 7px;
+      height: 7px;
+      margin: 0;
+      opacity: 0;
+      transform: none;
+      transition: opacity 0.1s linear;
+    }
+  }
+
+  .c-radio input[type='radio']:checked + label span {
+    width: 15px;
+    height: 15px;
+
+    &:after {
+      opacity: 1;
+      transform: none;
     }
   }
 }

@@ -1,8 +1,10 @@
 import {
   SET_SUPPLY_CHAIN_ENTRIES,
   SET_SUPPLY_CHAIN_OUTSIDE_LAND,
+  SET_SUPPLY_CHAIN_REVIEW,
   SUPPLY_CHAIN_ENTRIES_LS_KEY,
 } from 'constants/supply-analyzer';
+import { validateSupplyChainEntries, applyValidEntriesToMap } from 'actions/supplyChainAnalysis';
 
 // Persists the entries to localStorage (mirroring the previous InputPanel
 // behaviour) and updates the store.
@@ -15,6 +17,18 @@ export function setSupplyChainEntries(entries) {
     } catch (_) { /* storage quota exceeded or private mode */ }
 
     dispatch({ type: SET_SUPPLY_CHAIN_ENTRIES, payload: entries });
+
+    if (!entries.length) {
+      dispatch({
+        type: SET_SUPPLY_CHAIN_REVIEW,
+        payload: { validationChecked: false, spatialCheckLoading: false, spatialCheckError: false },
+      });
+      dispatch({ type: SET_SUPPLY_CHAIN_OUTSIDE_LAND, payload: [] });
+      dispatch(applyValidEntriesToMap());
+      return;
+    }
+
+    dispatch(validateSupplyChainEntries());
   };
 }
 

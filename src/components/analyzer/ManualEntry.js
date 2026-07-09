@@ -1,19 +1,22 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { CustomSelect, RadioGroup } from 'aqueduct-components';
+import { CustomSelect, RadioGroup, IRRIGATION_OPTIONS } from 'aqueduct-components';
 import CountrySelect from 'components/country-select';
 import {
   ENTRY_MODES,
   SORTED_CROP_OPTIONS,
-  FILTERED_IRRIGATION_OPTIONS,
 } from 'constants/supply-analyzer';
 
 // ─── Shared field-set renderers (no `this`) ──────────────────────────────────
 // Exported so the review screen's inline edit form can reuse the same fields.
 
-export function renderLatlongFields(form, setField, errs) {
+export function renderLatlongFields(form, setField, errs, { lightSurface = false } = {}) {
+  const entryFormClass = lightSurface ? 'entry-form -light-surface' : 'entry-form';
+  const selectClass = lightSurface ? '-gray' : undefined;
+  const radioClass = lightSurface ? '-inline -secondary' : '-inline';
+
   return (
-    <div className="entry-form">
+    <div className={entryFormClass}>
       <div className="form-row -two-col">
         <div className={`form-field${errs.latitude ? ' -invalid' : ''}`}>
           <span className="field-label">
@@ -73,6 +76,7 @@ export function renderLatlongFields(form, setField, errs) {
           </span>
           <CustomSelect
             search
+            className={selectClass}
             options={SORTED_CROP_OPTIONS}
             value={form.crop}
             onValueChange={selected => setField('crop', selected ? selected.value : null)}
@@ -88,44 +92,50 @@ export function renderLatlongFields(form, setField, errs) {
           </span>
           <RadioGroup
             name={`irrigation-${form.latitude || 'new'}`}
-            items={FILTERED_IRRIGATION_OPTIONS}
+            items={IRRIGATION_OPTIONS}
             selected={form.irrigation}
             onChange={({ value }) => setField('irrigation', value)}
-            className="-inline"
+            className={radioClass}
           />
           {errs.irrigation && <span className="field-error">{errs.irrigation}</span>}
         </div>
       </div>
 
-      <div className="form-row">
+      <div className={`form-row${errs.volume ? ' -invalid' : ''}`}>
         <div className="form-field">
           <span className="field-label">
-            Volume <span className="optional-mark">(optional)</span>
+            Volume <span className="required-mark">*</span>
           </span>
           <input
             type="number"
             className="field-input"
             placeholder="e.g. 1000"
-            min="0"
+            min="1"
             step="any"
             value={form.volume}
-            onChange={e => setField('volume', e.target.value, false)}
+            onChange={e => setField('volume', e.target.value)}
           />
+          {errs.volume && <span className="field-error">{errs.volume}</span>}
         </div>
       </div>
     </div>
   );
 }
 
-export function renderCountryFields(form, setField, errs) {
+export function renderCountryFields(form, setField, errs, { lightSurface = false } = {}) {
+  const entryFormClass = lightSurface ? 'entry-form -light-surface' : 'entry-form';
+  const selectClass = lightSurface ? '-gray' : undefined;
+  const radioClass = lightSurface ? '-inline -secondary' : '-inline';
+
   return (
-    <div className="entry-form">
+    <div className={entryFormClass}>
       <div className={`form-row${errs.country ? ' -invalid' : ''}`}>
         <div className="form-field">
           <span className="field-label">
             Country <span className="required-mark">*</span>
           </span>
           <CountrySelect
+            className={selectClass}
             value={form.country !== null ? form.country : undefined}
             onValueChange={(selected) => {
               setField('country', selected ? selected.value : null);
@@ -158,6 +168,7 @@ export function renderCountryFields(form, setField, errs) {
           </span>
           <CustomSelect
             search
+            className={selectClass}
             options={SORTED_CROP_OPTIONS}
             value={form.crop}
             onValueChange={selected => setField('crop', selected ? selected.value : null)}
@@ -173,29 +184,30 @@ export function renderCountryFields(form, setField, errs) {
           </span>
           <RadioGroup
             name={`country-irrigation-${form.country || 'new'}`}
-            items={FILTERED_IRRIGATION_OPTIONS}
+            items={IRRIGATION_OPTIONS}
             selected={form.irrigation}
             onChange={({ value }) => setField('irrigation', value)}
-            className="-inline"
+            className={radioClass}
           />
           {errs.irrigation && <span className="field-error">{errs.irrigation}</span>}
         </div>
       </div>
 
-      <div className="form-row">
+      <div className={`form-row${errs.volume ? ' -invalid' : ''}`}>
         <div className="form-field">
           <span className="field-label">
-            Volume <span className="optional-mark">(optional)</span>
+            Volume <span className="required-mark">*</span>
           </span>
           <input
             type="number"
             className="field-input"
             placeholder="e.g. 1000"
-            min="0"
+            min="1"
             step="any"
             value={form.volume}
-            onChange={e => setField('volume', e.target.value, false)}
+            onChange={e => setField('volume', e.target.value)}
           />
+          {errs.volume && <span className="field-error">{errs.volume}</span>}
         </div>
       </div>
     </div>

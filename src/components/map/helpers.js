@@ -155,6 +155,61 @@ const SUPPLY_CHAIN_LAYER_STYLE = {
   fillOpacity: 0.35,
 };
 
+const escapeHTML = value => String(value)
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;');
+
+const formatBasinValue = (value) => {
+  if (value === null || value === undefined || value === '') return '—';
+  if (typeof value === 'number') {
+    if (!Number.isFinite(value)) return String(value);
+    if (Number.isInteger(value)) return value.toLocaleString();
+    return value.toFixed(Math.abs(value) >= 100 ? 2 : 4);
+  }
+  return escapeHTML(value);
+};
+
+const buildLocationPopup = (properties = {}) => {
+  const title = properties.businessUnit || 'Location';
+  const cropLabel = CROP_OPTIONS.find(c => c.value === properties.crop)?.label
+    || properties.crop;
+  const irrigation = properties.irrigation
+    ? capitalize(properties.irrigation)
+    : null;
+
+  const rows = [
+    cropLabel && { label: 'Crop', value: cropLabel },
+    irrigation && { label: 'Irrigation', value: irrigation },
+    properties.radiusKm != null && { label: 'Radius', value: `${properties.radiusKm} km` },
+    properties.volume && { label: 'Volume', value: properties.volume },
+    properties.latitude != null && properties.longitude != null && {
+      label: 'Coordinates',
+      value: `${parseFloat(properties.latitude).toFixed(4)}, ${parseFloat(properties.longitude).toFixed(4)}`,
+    },
+  ].filter(Boolean);
+
+  const body = rows.map(({ label, value }) => (
+    `<div class="dc"><span class="dt">${escapeHTML(label)}</span><span class="dd">${formatBasinValue(value)}</span></div>`
+  )).join('');
+
+  return `<div class="c-infowindow">
+    <h3>${escapeHTML(title)}</h3>
+    ${body ? `<div class="dl">${body}</div>` : ''}
+  </div>`;
+};
+
+const bindLocationPopup = (feature, layer) => {
+  if (feature && feature.properties) {
+    layer.bindPopup(buildLocationPopup(feature.properties), {
+      closeButton: true,
+      className: 'basin-popup',
+      maxHeight: 240,
+    });
+  }
+};
+
 /**
  * Converts valid (non-erroring) lat/long supply-chain entries into a
  * Leaflet geoJSON layer spec ready for LayerManager.
@@ -183,9 +238,14 @@ export const getSupplyChainLocationsLayer = (entries = []) => {
       coordinates: [parseFloat(entry.longitude), parseFloat(entry.latitude)],
     },
     properties: {
+      businessUnit: entry.businessUnit,
+      latitude: entry.latitude,
+      longitude: entry.longitude,
       radiusM: entry.radius ? parseFloat(entry.radius) * 1000 : null,
+      radiusKm: entry.radius ? parseFloat(entry.radius) : null,
       crop: entry.crop,
       irrigation: entry.irrigation,
+      volume: entry.volume,
     },
   }));
 
@@ -212,6 +272,7 @@ export const getSupplyChainLocationsLayer = (entries = []) => {
             fillOpacity: 0.85,
           });
         },
+        onEachFeature: bindLocationPopup,
       },
     },
     legendConfig: {},
@@ -238,7 +299,7 @@ const BASIN_POPUP_LABELS = {
   country: 'Country',
   state: 'State',
   iso_code: 'ISO',
-  commodity_code: 'Crop',
+  commodity: 'Crop',
   irrigation: 'Irrigation',
   total_volume: 'Total Volume (MT)',
   bws_label: 'BWS Label',
@@ -255,35 +316,24 @@ const BASIN_POPUP_LABELS = {
 // Keys handled in the popup header (title) so they aren't repeated in the body.
 const BASIN_POPUP_HEADER_KEYS = new Set(['unique_id', 'business_unit', 'pfaf_id']);
 
-const escapeHTML = value => String(value)
-  .replace(/&/g, '&amp;')
-  .replace(/</g, '&lt;')
-  .replace(/>/g, '&gt;')
-  .replace(/"/g, '&quot;');
-
-const formatBasinValue = (value) => {
-  if (value === null || value === undefined || value === '') return '—';
-  if (typeof value === 'number') {
-    if (!Number.isFinite(value)) return String(value);
-    if (Number.isInteger(value)) return value.toLocaleString();
-    return value.toFixed(Math.abs(value) >= 100 ? 2 : 4);
-  }
-  return escapeHTML(value);
-};
-
 const buildBasinPopup = (properties = {}) => {
-  const title = properties.business_unit || properties.country
-    || (properties.pfaf_id != null ? `Basin ${properties.pfaf_id}` : 'Basin');
-  const subtitle = properties.pfaf_id != null ? `PFAF ${escapeHTML(properties.pfaf_id)}` : '';
+  const commodity = properties.commodity || properties.commodity_code;
+  const popupProps = commodity != null && commodity !== ''
+    ? { ...properties, commodity }
+    : properties;
+  const title = popupProps.business_unit || popupProps.country
+    || (popupProps.pfaf_id != null ? `Basin ${popupProps.pfaf_id}` : 'Basin');
+  const subtitle = popupProps.pfaf_id != null ? `PFAF ${escapeHTML(popupProps.pfaf_id)}` : '';
 
   const orderedKeys = Object.keys(BASIN_POPUP_LABELS)
-    .filter(key => !BASIN_POPUP_HEADER_KEYS.has(key) && key in properties);
-  const extraKeys = Object.keys(properties)
-    .filter(key => !(key in BASIN_POPUP_LABELS) && !BASIN_POPUP_HEADER_KEYS.has(key));
+    .filter(key => !BASIN_POPUP_HEADER_KEYS.has(key) && key in popupProps);
+  const extraKeys = Object.keys(popupProps)
+    .filter(key => !(key in BASIN_POPUP_LABELS) && !BASIN_POPUP_HEADER_KEYS.has(key)
+      && key !== 'commodity_code');
 
   const rows = [...orderedKeys, ...extraKeys].map((key) => {
     const label = BASIN_POPUP_LABELS[key] || key;
-    return `<div class="dc"><span class="dt">${escapeHTML(label)}</span><span class="dd">${formatBasinValue(properties[key])}</span></div>`;
+    return `<div class="dc"><span class="dt">${escapeHTML(label)}</span><span class="dd">${formatBasinValue(popupProps[key])}</span></div>`;
   }).join('');
 
   return `<div class="c-infowindow">
