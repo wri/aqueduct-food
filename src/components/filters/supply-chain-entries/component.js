@@ -105,7 +105,6 @@ class SupplyChainEntriesList extends PureComponent {
       entries,
       outsideLandIds,
       phase,
-      validationChecked,
       spatialCheckLoading,
       spatialCheckError,
       analysisError,

@@ -266,12 +266,12 @@ function getVolumeValidationIssue(volume) {
   return null;
 }
 
-function applyVolumeFieldErrors(form, errors) {
-  const issue = getVolumeValidationIssue(form.volume);
-  if (!issue) return;
-  if (issue.message === 'Volume is required') errors.volume = 'Required';
-  else if (issue.message === 'Volume must be greater than 0') errors.volume = 'Must be greater than 0';
-  else errors.volume = 'Must be a number';
+function getVolumeFieldError(volume) {
+  const issue = getVolumeValidationIssue(volume);
+  if (!issue) return null;
+  if (issue.message === 'Volume is required') return 'Required';
+  if (issue.message === 'Volume must be greater than 0') return 'Must be greater than 0';
+  return 'Must be a number';
 }
 
 /** Space-optimised iterative Levenshtein distance. */
@@ -458,7 +458,8 @@ export function validateLatlongFields(form) {
 
   if (!form.crop) errors.crop = 'Required';
   if (!form.irrigation) errors.irrigation = 'Required';
-  applyVolumeFieldErrors(form, errors);
+  const volumeError = getVolumeFieldError(form.volume);
+  if (volumeError) errors.volume = volumeError;
   return errors;
 }
 
@@ -471,7 +472,8 @@ export function validateCountryFields(form) {
   if (!form.country) errors.country = 'Required';
   if (!form.crop) errors.crop = 'Required';
   if (!form.irrigation) errors.irrigation = 'Required';
-  applyVolumeFieldErrors(form, errors);
+  const volumeError = getVolumeFieldError(form.volume);
+  if (volumeError) errors.volume = volumeError;
   return errors;
 }
 

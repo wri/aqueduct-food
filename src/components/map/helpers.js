@@ -155,6 +155,61 @@ const SUPPLY_CHAIN_LAYER_STYLE = {
   fillOpacity: 0.35,
 };
 
+const escapeHTML = value => String(value)
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;');
+
+const formatBasinValue = (value) => {
+  if (value === null || value === undefined || value === '') return '—';
+  if (typeof value === 'number') {
+    if (!Number.isFinite(value)) return String(value);
+    if (Number.isInteger(value)) return value.toLocaleString();
+    return value.toFixed(Math.abs(value) >= 100 ? 2 : 4);
+  }
+  return escapeHTML(value);
+};
+
+const buildLocationPopup = (properties = {}) => {
+  const title = properties.businessUnit || 'Location';
+  const cropLabel = CROP_OPTIONS.find(c => c.value === properties.crop)?.label
+    || properties.crop;
+  const irrigation = properties.irrigation
+    ? capitalize(properties.irrigation)
+    : null;
+
+  const rows = [
+    cropLabel && { label: 'Crop', value: cropLabel },
+    irrigation && { label: 'Irrigation', value: irrigation },
+    properties.radiusKm != null && { label: 'Radius', value: `${properties.radiusKm} km` },
+    properties.volume && { label: 'Volume', value: properties.volume },
+    properties.latitude != null && properties.longitude != null && {
+      label: 'Coordinates',
+      value: `${parseFloat(properties.latitude).toFixed(4)}, ${parseFloat(properties.longitude).toFixed(4)}`,
+    },
+  ].filter(Boolean);
+
+  const body = rows.map(({ label, value }) => (
+    `<div class="dc"><span class="dt">${escapeHTML(label)}</span><span class="dd">${formatBasinValue(value)}</span></div>`
+  )).join('');
+
+  return `<div class="c-infowindow">
+    <h3>${escapeHTML(title)}</h3>
+    ${body ? `<div class="dl">${body}</div>` : ''}
+  </div>`;
+};
+
+const bindLocationPopup = (feature, layer) => {
+  if (feature && feature.properties) {
+    layer.bindPopup(buildLocationPopup(feature.properties), {
+      closeButton: true,
+      className: 'basin-popup',
+      maxHeight: 240,
+    });
+  }
+};
+
 /**
  * Converts valid (non-erroring) lat/long supply-chain entries into a
  * Leaflet geoJSON layer spec ready for LayerManager.
@@ -260,61 +315,6 @@ const BASIN_POPUP_LABELS = {
 
 // Keys handled in the popup header (title) so they aren't repeated in the body.
 const BASIN_POPUP_HEADER_KEYS = new Set(['unique_id', 'business_unit', 'pfaf_id']);
-
-const escapeHTML = value => String(value)
-  .replace(/&/g, '&amp;')
-  .replace(/</g, '&lt;')
-  .replace(/>/g, '&gt;')
-  .replace(/"/g, '&quot;');
-
-const formatBasinValue = (value) => {
-  if (value === null || value === undefined || value === '') return '—';
-  if (typeof value === 'number') {
-    if (!Number.isFinite(value)) return String(value);
-    if (Number.isInteger(value)) return value.toLocaleString();
-    return value.toFixed(Math.abs(value) >= 100 ? 2 : 4);
-  }
-  return escapeHTML(value);
-};
-
-const buildLocationPopup = (properties = {}) => {
-  const title = properties.businessUnit || 'Location';
-  const cropLabel = CROP_OPTIONS.find(c => c.value === properties.crop)?.label
-    || properties.crop;
-  const irrigation = properties.irrigation
-    ? capitalize(properties.irrigation)
-    : null;
-
-  const rows = [
-    cropLabel && { label: 'Crop', value: cropLabel },
-    irrigation && { label: 'Irrigation', value: irrigation },
-    properties.radiusKm != null && { label: 'Radius', value: `${properties.radiusKm} km` },
-    properties.volume && { label: 'Volume', value: properties.volume },
-    properties.latitude != null && properties.longitude != null && {
-      label: 'Coordinates',
-      value: `${parseFloat(properties.latitude).toFixed(4)}, ${parseFloat(properties.longitude).toFixed(4)}`,
-    },
-  ].filter(Boolean);
-
-  const body = rows.map(({ label, value }) => (
-    `<div class="dc"><span class="dt">${escapeHTML(label)}</span><span class="dd">${formatBasinValue(value)}</span></div>`
-  )).join('');
-
-  return `<div class="c-infowindow">
-    <h3>${escapeHTML(title)}</h3>
-    ${body ? `<div class="dl">${body}</div>` : ''}
-  </div>`;
-};
-
-const bindLocationPopup = (feature, layer) => {
-  if (feature && feature.properties) {
-    layer.bindPopup(buildLocationPopup(feature.properties), {
-      closeButton: true,
-      className: 'basin-popup',
-      maxHeight: 240,
-    });
-  }
-};
 
 const buildBasinPopup = (properties = {}) => {
   const commodity = properties.commodity || properties.commodity_code;

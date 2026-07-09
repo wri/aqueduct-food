@@ -3,9 +3,9 @@ import {
   SET_SUPPLY_CHAIN_ANALYSIS_VIEW,
   RESET_SUPPLY_CHAIN_ANALYSIS,
   SET_SUPPLY_CHAIN_REVIEW,
+  SET_SUPPLY_CHAIN_OUTSIDE_LAND,
 } from 'constants/supply-analyzer';
 import { DEFAULT_ANALYSIS_VIEW } from 'constants/analysis-indicators';
-import { setOutsideLandIds } from 'actions/supplyChainEntries';
 import { setFilters } from 'actions/filters';
 import { classifyEntries, entryStatus } from 'utils/supply-analyzer';
 import { checkPointsOutsideLand, runFoodSupplyChainAnalysis } from 'services/analysis';
@@ -37,13 +37,21 @@ export function resetSupplyChainAnalysis() {
   return { type: RESET_SUPPLY_CHAIN_ANALYSIS };
 }
 
+export function applyValidEntriesToMap() {
+  return (dispatch, getState) => {
+    const valid = getValidEntries(getState())
+      .filter(entry => entry.type === 'latlong');
+    dispatch(setFilters({ supplyChainLocations: valid }));
+  };
+}
+
 export function runSupplyChainValidation() {
   return (dispatch, getState) => {
     const entries = getState().supplyChainEntries || [];
     const latlngEntries = entries.filter(e => e.type === 'latlong');
 
     const finishValidation = (outsideLandIds, spatialCheckError = false) => {
-      dispatch(setOutsideLandIds(Array.from(outsideLandIds)));
+      dispatch({ type: SET_SUPPLY_CHAIN_OUTSIDE_LAND, payload: Array.from(outsideLandIds) });
       dispatch(setSupplyChainReview({
         validationChecked: true,
         spatialCheckLoading: false,
@@ -81,14 +89,6 @@ export function openSupplyChainReview() {
   return (dispatch) => {
     if (validationTimer) clearTimeout(validationTimer);
     dispatch(runSupplyChainValidation());
-  };
-}
-
-export function applyValidEntriesToMap() {
-  return (dispatch, getState) => {
-    const valid = getValidEntries(getState())
-      .filter(entry => entry.type === 'latlong');
-    dispatch(setFilters({ supplyChainLocations: valid }));
   };
 }
 
