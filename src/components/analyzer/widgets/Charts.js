@@ -9,7 +9,7 @@ import { RISK_BANDS, RISK_BAND_KEYS } from 'utils/analysis-widgets';
 // container width via `width="100%"`, so it stays crisp at any panel size.
 
 // Light / slate palette to match the analyzer redesign.
-const ACCENT = '#3b82f6'; // blue-500
+const ACCENT = RISK_BANDS.high.color; // Aqueduct high (orange-red)
 const AXIS = '#e2e8f0'; // slate-200
 const LABEL = '#334155'; // slate-700
 const MUTED = '#64748b'; // slate-500
@@ -17,6 +17,50 @@ const MUTED = '#64748b'; // slate-500
 const truncate = (text, maxChars) => {
   const str = String(text);
   return str.length > maxChars ? `${str.slice(0, maxChars - 1)}…` : str;
+};
+
+// ─── Instant hover tooltip ─────────────────────────────────────────────────────
+// SVG <title> tooltips only appear after the browser's ~1s hover delay, which
+// felt sluggish. This custom tooltip follows the cursor and shows immediately.
+
+const useChartTooltip = () => {
+  const wrapRef = React.useRef(null);
+  const [tip, setTip] = React.useState(null);
+
+  const show = (event, content) => {
+    const wrap = wrapRef.current;
+    if (!wrap) return;
+    const bounds = wrap.getBoundingClientRect();
+    setTip({
+      content,
+      x: event.clientX - bounds.left,
+      y: event.clientY - bounds.top,
+    });
+  };
+  const hide = () => setTip(null);
+
+  return { wrapRef, tip, show, hide };
+};
+
+const ChartTooltip = ({ tip }) => {
+  if (!tip) return null;
+  return (
+    <div className="aw-tooltip" style={{ left: tip.x, top: tip.y }}>
+      {tip.content}
+    </div>
+  );
+};
+
+ChartTooltip.propTypes = {
+  tip: PropTypes.shape({
+    content: PropTypes.node,
+    x: PropTypes.number,
+    y: PropTypes.number,
+  }),
+};
+
+ChartTooltip.defaultProps = {
+  tip: null,
 };
 
 // ─── ChartCard ───────────────────────────────────────────────────────────────
@@ -175,47 +219,51 @@ export const StackedBarChart = ({ data, formatValue, bands }) => {
   const H = data.length * rowH + 4;
   const barMax = W - labelW - valueW;
   const maxTotal = d3max(data, d => d.total) || 1;
+  const { wrapRef, tip, show, hide } = useChartTooltip();
 
   return (
-    <svg className="aw-svg" viewBox={`0 0 ${W} ${H}`} width="100%" preserveAspectRatio="xMinYMin meet">
-      {data.map((d, i) => {
-        const y = i * rowH;
-        const barH = rowH - 12;
-        const scale = maxTotal > 0 ? barMax / maxTotal : 0;
-        let offset = labelW;
-        return (
-          <g key={d.label}>
-            <text x={labelW - 6} y={y + rowH / 2} textAnchor="end" dominantBaseline="central" fontSize="11" fill={LABEL}>
-              {truncate(d.label, 11)}
-            </text>
-            {bands.map((band) => {
-              const segValue = d.segments[band] || 0;
-              if (segValue <= 0) return null;
-              const segW = segValue * scale;
-              const x = offset;
-              offset += segW;
-              return (
-                <rect
-                  key={band}
-                  x={x}
-                  y={y + (rowH - barH) / 2}
-                  width={Math.max(segW, 0.5)}
-                  height={barH}
-                  fill={RISK_BANDS[band].color}
-                  stroke="#fff"
-                  strokeWidth="0.5"
-                >
-                  <title>{`${RISK_BANDS[band].label}: ${formatValue(segValue)}`}</title>
-                </rect>
-              );
-            })}
-            <text x={offset + 5} y={y + rowH / 2} dominantBaseline="central" fontSize="10" fill={MUTED}>
-              {formatValue(d.total)}
-            </text>
-          </g>
-        );
-      })}
-    </svg>
+    <div className="aw-chart-wrap" ref={wrapRef}>
+      <svg className="aw-svg" viewBox={`0 0 ${W} ${H}`} width="100%" preserveAspectRatio="xMinYMin meet">
+        {data.map((d, i) => {
+          const y = i * rowH;
+          const barH = rowH - 12;
+          const scale = maxTotal > 0 ? barMax / maxTotal : 0;
+          let offset = labelW;
+          return (
+            <g key={d.label}>
+              <text x={labelW - 6} y={y + rowH / 2} textAnchor="end" dominantBaseline="central" fontSize="11" fill={LABEL}>
+                {truncate(d.label, 11)}
+              </text>
+              {bands.map((band) => {
+                const segValue = d.segments[band] || 0;
+                if (segValue <= 0) return null;
+                const segW = segValue * scale;
+                const x = offset;
+                offset += segW;
+                return (
+                  <rect
+                    key={band}
+                    x={x}
+                    y={y + (rowH - barH) / 2}
+                    width={Math.max(segW, 0.5)}
+                    height={barH}
+                    fill={RISK_BANDS[band].color}
+                    stroke="#fff"
+                    strokeWidth="0.5"
+                    onMouseMove={e => show(e, `${d.label} · ${RISK_BANDS[band].label}: ${formatValue(segValue)}`)}
+                    onMouseLeave={hide}
+                  />
+                );
+              })}
+              <text x={offset + 5} y={y + rowH / 2} dominantBaseline="central" fontSize="10" fill={MUTED}>
+                {formatValue(d.total)}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+      <ChartTooltip tip={tip} />
+    </div>
   );
 };
 
@@ -257,41 +305,54 @@ export const ScatterPlot = ({
     { value: 0.5, label: 'Med' },
     { value: 1, label: 'High' },
   ];
+  const { wrapRef, tip, show, hide } = useChartTooltip();
 
   return (
-    <svg className="aw-svg" viewBox={`0 0 ${W} ${H}`} width="100%" preserveAspectRatio="xMinYMin meet">
-      {/* Y grid + ticks */}
-      {yTicks.map((t) => {
-        const y = yScale(t);
-        return (
-          <g key={`y-${t}`}>
-            <line x1={padL} y1={y} x2={W - padR} y2={y} stroke={AXIS} strokeDasharray="2 3" />
-            <text x={padL - 5} y={y} textAnchor="end" dominantBaseline="central" fontSize="9" fill={MUTED}>
-              {formatY(t)}
-            </text>
-          </g>
-        );
-      })}
+    <div className="aw-chart-wrap" ref={wrapRef}>
+      <svg className="aw-svg" viewBox={`0 0 ${W} ${H}`} width="100%" preserveAspectRatio="xMinYMin meet">
+        {/* Y grid + ticks */}
+        {yTicks.map((t) => {
+          const y = yScale(t);
+          return (
+            <g key={`y-${t}`}>
+              <line x1={padL} y1={y} x2={W - padR} y2={y} stroke={AXIS} strokeDasharray="2 3" />
+              <text x={padL - 5} y={y} textAnchor="end" dominantBaseline="central" fontSize="9" fill={MUTED}>
+                {formatY(t)}
+              </text>
+            </g>
+          );
+        })}
 
-      {/* X axis */}
-      <line x1={padL} y1={padT + plotH} x2={W - padR} y2={padT + plotH} stroke={AXIS} />
-      {xTicks.map(t => (
-        <text key={t.label} x={xScale(t.value)} y={padT + plotH + 12} textAnchor="middle" fontSize="9" fill={MUTED}>
-          {t.label}
+        {/* X axis */}
+        <line x1={padL} y1={padT + plotH} x2={W - padR} y2={padT + plotH} stroke={AXIS} />
+        {xTicks.map(t => (
+          <text key={t.label} x={xScale(t.value)} y={padT + plotH + 12} textAnchor="middle" fontSize="9" fill={MUTED}>
+            {t.label}
+          </text>
+        ))}
+        <text x={padL + plotW / 2} y={H - 1} textAnchor="middle" fontSize="9" fill={MUTED}>
+          {xLabel}
         </text>
-      ))}
-      <text x={padL + plotW / 2} y={H - 1} textAnchor="middle" fontSize="9" fill={MUTED}>
-        {xLabel}
-      </text>
 
-      {/* Points */}
-      {data.map((d, i) => (
-        // eslint-disable-next-line react/no-array-index-key
-        <circle key={`${d.label}-${i}`} cx={xScale(d.x)} cy={yScale(d.y)} r="3.5" fill={RISK_BANDS[d.band].color} fillOpacity="0.85" stroke="#fff" strokeWidth="0.75">
-          <title>{`${d.label} — ${formatY(d.y)}`}</title>
-        </circle>
-      ))}
-    </svg>
+        {/* Points */}
+        {data.map((d, i) => (
+          <circle
+            // eslint-disable-next-line react/no-array-index-key
+            key={`${d.label}-${i}`}
+            cx={xScale(d.x)}
+            cy={yScale(d.y)}
+            r="3.5"
+            fill={RISK_BANDS[d.band].color}
+            fillOpacity="0.85"
+            stroke="#fff"
+            strokeWidth="0.75"
+            onMouseMove={e => show(e, `${d.label} — ${formatY(d.y)}`)}
+            onMouseLeave={hide}
+          />
+        ))}
+      </svg>
+      <ChartTooltip tip={tip} />
+    </div>
   );
 };
 

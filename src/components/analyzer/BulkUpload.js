@@ -50,8 +50,9 @@ const BulkUpload = ({
 }) => (
   <div className="input-panel-body">
     <p className="bulk-description">
-      Download the CSV template, fill in your data, then upload the completed file.
-      Valid rows will be appended to the current locations list.
+      Download the Excel template, fill in the <code>data_entry</code> sheet, then
+      upload the completed file (.xlsx / .xlsm or .csv). Valid rows will be appended
+      to the current locations list.
     </p>
 
     <button type="button" className="template-btn" onClick={downloadTemplate}>
@@ -70,7 +71,7 @@ const BulkUpload = ({
     >
       <input
         type="file"
-        accept=".csv"
+        accept=".csv,.xlsx,.xlsm,.xls"
         ref={fileInputRef}
         style={{ display: 'none' }}
         onChange={e => onFileChange(e.target.files[0])}
@@ -84,7 +85,7 @@ const BulkUpload = ({
         )
         : (
           <span className="dropzone-hint">
-            Drop CSV here or <strong>click to browse</strong>
+            Drop Excel / CSV here or <strong>click to browse</strong>
           </span>
         )
       }

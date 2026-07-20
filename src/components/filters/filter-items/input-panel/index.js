@@ -12,9 +12,11 @@ import {
 } from 'constants/supply-analyzer';
 import {
   parseCSVText,
+  parseTemplateRows,
   validateLatlongFields,
   validateCountryFields,
   fillMissingBusinessUnits,
+  INPUT_TEMPLATE_SHEET,
 } from 'utils/supply-analyzer';
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -98,9 +100,7 @@ class InputPanel extends PureComponent {
     const { uploadFile } = this.state;
     if (!uploadFile) return;
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const { parsed, skipped } = parseCSVText(e.target.result);
+    const finish = ({ parsed, skipped }) => {
       const { entries, setEntries } = this.props;
       setEntries(fillMissingBusinessUnits([...entries, ...parsed]));
       this.setState({
@@ -108,10 +108,36 @@ class InputPanel extends PureComponent {
         bulkResult: { added: parsed.length, skipped },
       });
     };
-    reader.onerror = () => {
+    const fail = () => {
       this.setState({ bulkResult: { added: 0, skipped: [], readError: true } });
     };
-    reader.readAsText(uploadFile);
+
+    const name = (uploadFile.name || '').toLowerCase();
+    const isExcel = /\.(xlsx|xlsm|xls)$/.test(name);
+    const reader = new FileReader();
+    reader.onerror = fail;
+
+    if (isExcel) {
+      // Parse the pretty Excel template's `data_entry` sheet. SheetJS is loaded
+      // lazily so it stays out of the main bundle until an Excel file is used.
+      reader.onload = (e) => {
+        import('xlsx')
+          .then((mod) => {
+            const XLSX = mod.default || mod;
+            const wb = XLSX.read(e.target.result, { type: 'array' });
+            const sheetName = wb.SheetNames.find(n => n.toLowerCase() === INPUT_TEMPLATE_SHEET)
+              || wb.SheetNames[0];
+            const sheet = wb.Sheets[sheetName];
+            const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, blankrows: false, defval: '' });
+            finish(parseTemplateRows(rows));
+          })
+          .catch(fail);
+      };
+      reader.readAsArrayBuffer(uploadFile);
+    } else {
+      reader.onload = e => finish(parseCSVText(e.target.result));
+      reader.readAsText(uploadFile);
+    }
   }
 
   render() {

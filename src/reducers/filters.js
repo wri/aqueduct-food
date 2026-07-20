@@ -26,7 +26,13 @@ export default function (state = initialState, action) {
       return newState;
     }
     case RESET_FILTERS: {
-      return { ...initialState, scope: state.scope };
+      // Keep the supply-chain analysis map state (input locations + matched
+      // basins) so resetting the filters doesn't wipe the user's basins/points
+      // off the map — those are cleared by the analyzer flow, not the filters.
+      const next = { ...initialState, scope: state.scope };
+      if (state.supplyChainLocations) next.supplyChainLocations = state.supplyChainLocations;
+      if (state.supplyChainBasins) next.supplyChainBasins = state.supplyChainBasins;
+      return next;
     }
     default:
       return state;

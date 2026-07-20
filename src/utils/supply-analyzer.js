@@ -83,38 +83,169 @@ export function fillMissingBusinessUnits(entries) {
   });
 }
 
-// ─── CSV template ─────────────────────────────────────────────────────────────
+// ─── Input template ─────────────────────────────────────────────────────────
+// The downloadable, nicely formatted Excel workbook. Served as a static asset
+// from `public/templates`. Filled copies are converted on upload (see
+// `parseTemplateRows` below and the input-panel upload handler).
 
-function generateTemplateCSV() {
-  const rows = [
-    ['type', 'latitude', 'longitude', 'radius_km', 'country_iso', 'state', 'crop', 'irrigation', 'volume'],
-    ['latlong', '1.2921', '-76.8219', '50', '', '', 'wheat', 'irrigated', '1000'],
-    ['latlong', '-1.2921', '-74.8219', '50', '', '', 'wheat', 'irrigated', '1000'],
-    ['latlong', '0.2921', '-72.8219', '50', '', '', 'wheat', 'irrigated', '1000'],
-    ['latlong', '3.2921', '-70.8219', '50', '', '', 'wheat', 'irrigated', '1000'],
-    ['latlong', '-3.2921', '-68.8219', '50', '', '', 'wheat', 'irrigated', '1000'],
-    ['latlong', '12.2921', '-73', '50', '', '', 'wheat', 'irrigated', '1000'],
-    ['latlong', '36', '-119', '90', '', '', 'wheat', 'irrigated', '1000'],
-    ['latlong', '36', '-119', '70', '', '', 'wheat', 'irrigated', '1000'],
-    ['latlong', '36', '-119', '10', '', '', 'wheat', 'irrigated', '1000'],
-    ['latlong', '38.898992', '-77.007986', '100', '', '', 'wheat', 'rainfed', '450'],
-    ['latlong', '-23.568232', '-46.693983', '20', '', '', 'wheat', 'all', '0.1'],
-    ['country', '', '', '', 'USA', 'California', 'maize', 'irrigated', '500'],
-    ['country', '', '', '', 'ARG', '', 'soybean', 'all', '1000'],
-    ['country', '', '', '', 'KEN', 'Nairobi', 'maize', 'rainfed', ''],
-  ];
-  return rows.map(r => r.join(',')).join('\n');
-}
+export const INPUT_TEMPLATE_FILENAME = 'AqueductFood_SupplyChain_Input_Template_All_Data_Levels.xlsm';
+export const INPUT_TEMPLATE_URL = `/templates/${INPUT_TEMPLATE_FILENAME}`;
+export const INPUT_TEMPLATE_SHEET = 'data_entry';
 
 export function downloadTemplate() {
-  const csv = generateTemplateCSV();
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url;
-  a.download = 'location-input-template.csv';
+  a.href = INPUT_TEMPLATE_URL;
+  a.download = INPUT_TEMPLATE_FILENAME;
+  a.rel = 'noopener';
   a.click();
-  URL.revokeObjectURL(url);
+}
+
+// ─── Excel template (data_entry sheet) parsing ────────────────────────────────
+// Maps the pretty Excel template onto entry objects. The sheet's row 1 is a
+// decorative "banner" (merged group headers), so it is dropped and row 2 is
+// treated as the real header row. A `type` column is derived per row:
+// `latlong` when latitude + longitude are present, otherwise `country`.
+
+// Possible header texts (row 2) for each field, matched case-insensitively and
+// ignoring punctuation/whitespace. Adjust here if the template headers change.
+const TEMPLATE_HEADER_ALIASES = {
+  businessUnit: ['business unit', 'business details'],
+  latitude: ['latitude', 'lat'],
+  longitude: ['longitude', 'long', 'lon', 'lng'],
+  radius: ['radius km', 'radius', 'radius m'],
+  countryIso: ['iso code', 'country iso', 'country code'],
+  countryName: ['country'],
+  state: ['state', 'province', 'state province'],
+  crop: ['commodity', 'crop', 'crop type', 'material type'],
+  cropCode: ['commodity code'],
+  volume: ['total volume mt', 'total volume', 'volume mt', 'volume', 'quantity'],
+  irrigation: ['irrigation', 'irrigation type'],
+};
+
+// Template commodity labels/codes → the tool's crop values.
+const CROP_LABEL_TO_VALUE = CROP_OPTIONS.reduce((acc, option) => {
+  acc[option.label.toLowerCase()] = option.value;
+  acc[option.value.toLowerCase()] = option.value;
+  return acc;
+}, {});
+
+const normalizeTemplateHeader = value => String(value == null ? '' : value)
+  .toLowerCase()
+  .replace(/[^a-z0-9]+/g, ' ')
+  .trim();
+
+function resolveTemplateHeaders(headerRow = []) {
+  const normalized = headerRow.map(normalizeTemplateHeader);
+  const resolved = {};
+  Object.keys(TEMPLATE_HEADER_ALIASES).forEach((key) => {
+    const aliases = TEMPLATE_HEADER_ALIASES[key];
+    const idx = normalized.findIndex(header => header && aliases.includes(header));
+    if (idx !== -1) resolved[key] = idx;
+  });
+  return resolved;
+}
+
+const templateCell = (row, idx) => (idx == null || row[idx] == null ? '' : String(row[idx]).trim());
+
+// Template irrigation labels (Rainfed / Irrigated / Both / Unknown) → tool values.
+function normalizeTemplateIrrigation(value) {
+  const v = String(value || '').toLowerCase().trim();
+  if (v === 'rainfed') return 'rainfed';
+  if (v === 'irrigated') return 'irrigated';
+  return 'all';
+}
+
+function normalizeTemplateCrop(label, code) {
+  const byLabel = CROP_LABEL_TO_VALUE[String(label || '').toLowerCase().trim()];
+  if (byLabel) return byLabel;
+  const byCode = CROP_LABEL_TO_VALUE[String(code || '').toLowerCase().trim()];
+  if (byCode) return byCode;
+  return String(label || code || '').toLowerCase().trim();
+}
+
+/**
+ * Converts the `data_entry` sheet (an array-of-arrays that still includes the
+ * row-1 banner) into validated entry objects, mirroring `parseCSVText`.
+ *
+ * @param {Array<Array>} rows - sheet rows (e.g. XLSX.utils.sheet_to_json(sheet, { header: 1 }))
+ * @returns {{ parsed: Object[], skipped: { row: number, reasons: string[] }[] }}
+ */
+export function parseTemplateRows(rows) {
+  if (!rows || rows.length < 3) return { parsed: [], skipped: [] };
+
+  const [, headerRow, ...dataRows] = rows; // drop the banner row
+  const cols = resolveTemplateHeaders(headerRow);
+  const parsed = [];
+  const skipped = [];
+  const base = Date.now();
+
+  dataRows.forEach((row, i) => {
+    if (!row || row.every(cell => String(cell == null ? '' : cell).trim() === '')) return;
+    const rowNum = i + 3; // banner + header + 1-based data offset
+
+    const crop = normalizeTemplateCrop(templateCell(row, cols.crop), templateCell(row, cols.cropCode));
+    const irrigation = normalizeTemplateIrrigation(templateCell(row, cols.irrigation));
+    const businessUnit = templateCell(row, cols.businessUnit);
+    const volume = templateCell(row, cols.volume) || String(DEFAULT_VOLUME);
+    const latitude = templateCell(row, cols.latitude);
+    const longitude = templateCell(row, cols.longitude);
+    const cropOk = VALID_CROP_VALUES.has(crop);
+    const irrigOk = VALID_IRRIGATION_VALUES.has(irrigation);
+
+    if (latitude !== '' && longitude !== '') {
+      const lat = parseFloat(latitude);
+      const lng = parseFloat(longitude);
+      const latOk = !Number.isNaN(lat) && lat >= -90 && lat <= 90;
+      const lngOk = !Number.isNaN(lng) && lng >= -180 && lng <= 180;
+
+      if (!latOk || !lngOk || !cropOk || !irrigOk) {
+        const reasons = [];
+        if (!latOk) reasons.push('latitude');
+        if (!lngOk) reasons.push('longitude');
+        if (!cropOk) reasons.push('crop');
+        if (!irrigOk) reasons.push('irrigation');
+        skipped.push({ row: rowNum, reasons });
+        return;
+      }
+
+      parsed.push({
+        id: base + i,
+        type: 'latlong',
+        latitude: String(lat),
+        longitude: String(lng),
+        radius: templateCell(row, cols.radius),
+        crop,
+        irrigation,
+        volume,
+        ...(businessUnit && { businessUnit }),
+      });
+    } else {
+      const country = templateCell(row, cols.countryIso) || templateCell(row, cols.countryName);
+
+      if (!country || !cropOk || !irrigOk) {
+        const reasons = [];
+        if (!country) reasons.push('country');
+        if (!cropOk) reasons.push('crop');
+        if (!irrigOk) reasons.push('irrigation');
+        skipped.push({ row: rowNum, reasons });
+        return;
+      }
+
+      parsed.push({
+        id: base + i,
+        type: 'country',
+        country,
+        countryName: templateCell(row, cols.countryName) || country,
+        state: templateCell(row, cols.state),
+        crop,
+        irrigation,
+        volume,
+        ...(businessUnit && { businessUnit }),
+      });
+    }
+  });
+
+  return { parsed, skipped };
 }
 
 // ─── CSV parsing ──────────────────────────────────────────────────────────────
@@ -171,6 +302,7 @@ export function parseCSVText(text) {
         crop,
         irrigation,
         volume: get('volume') || String(DEFAULT_VOLUME),
+        ...(get('business_unit') && { businessUnit: get('business_unit') }),
       });
     } else if (type === 'country') {
       const country = get('country_iso');
@@ -198,6 +330,7 @@ export function parseCSVText(text) {
         crop,
         irrigation,
         volume: get('volume') || String(DEFAULT_VOLUME),
+        ...(get('business_unit') && { businessUnit: get('business_unit') }),
       });
     } else {
       skipped.push({ row: rowNum, reasons: ['unknown type'] });
@@ -653,6 +786,7 @@ export function entryToApiLocation(entry) {
 export default {
   downloadTemplate,
   parseCSVText,
+  parseTemplateRows,
   summariseEntry,
   spatialHeuristicWarning,
   validateEntry,

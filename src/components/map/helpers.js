@@ -11,6 +11,7 @@ import { fetchQuery } from 'services/query';
 import { reduceParams, reduceSqlParams } from 'utils/layers/params-parser';
 import { getMarkerLayer } from 'utils/layers/markers/bubble-layer';
 import { validateEntry, entryStatus } from 'utils/supply-analyzer';
+import { bwsCatColor, AQUEDUCT_NO_DATA_COLOR } from 'utils/analysis-widgets';
 
 // constants
 import { CROP_OPTIONS } from 'constants/crops';
@@ -279,16 +280,35 @@ export const getSupplyChainLocationsLayer = (entries = []) => {
   };
 };
 
-// Blue outline for the basins returned by the food-supply-chain analysis.
-// Fill is kept faint so the basin reads as an outlined region without hiding
-// the underlying water-risk choropleth or the red input markers on top.
+// Basins returned by the food-supply-chain analysis are filled with the
+// official Aqueduct Baseline Water Stress ramp so their colour matches the
+// rest of the tool. The fill is driven by the basin's BWS category and is kept
+// constant regardless of the active results indicator (e.g. SBTN).
 const SUPPLY_CHAIN_BASIN_STYLE = {
-  color: '#2E57B8',
-  weight: 2,
-  opacity: 0.95,
+  color: '#334155',
+  weight: 1.25,
+  opacity: 0.9,
   fill: true,
-  fillColor: '#2E57B8',
-  fillOpacity: 0.06,
+  fillOpacity: 0.65,
+};
+
+// Resolves the Aqueduct BWS category for a basin feature, preferring the
+// explicit category and falling back to the score, then to no-data.
+const basinBwsCat = (properties = {}) => {
+  const toNum = (v) => {
+    if (v === null || v === undefined || v === '') return null;
+    const n = typeof v === 'number' ? v : parseFloat(v);
+    return Number.isFinite(n) ? n : null;
+  };
+  const cat = toNum(properties.bws_cat);
+  if (cat !== null) return cat;
+  return toNum(properties.bws_score);
+};
+
+const supplyChainBasinStyle = (feature) => {
+  const cat = basinBwsCat(feature && feature.properties);
+  const fillColor = cat === null ? AQUEDUCT_NO_DATA_COLOR : bwsCatColor(cat);
+  return { ...SUPPLY_CHAIN_BASIN_STYLE, fillColor };
 };
 
 // Friendly labels + display order for the basin popup. Mirrors the analysis
@@ -366,7 +386,7 @@ export const getSupplyChainBasinsLayer = (geojson) => {
       parse: false,
       body: geojson,
       options: {
-        style: () => ({ ...SUPPLY_CHAIN_BASIN_STYLE }),
+        style: supplyChainBasinStyle,
         // Bind a popup with the basin's analysis row. Kept as a live function
         // (layerConfig.parse === false) so it survives un-serialised.
         onEachFeature: (feature, layer) => {

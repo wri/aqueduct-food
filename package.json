@@ -106,7 +106,8 @@
     "webpack-dev-server": "^3.7.2",
     "webpack-merge": "^4.2.1",
     "whatwg-fetch": "^2.0.1",
-    "wri-json-api-serializer": "^1.0.1"
+    "wri-json-api-serializer": "^1.0.1",
+    "xlsx": "^0.18.5"
   },
   "overrides": {
     "websocket-driver": "0.7.4"

@@ -3,6 +3,8 @@ import { toastr } from 'react-redux-toastr';
 
 // constants
 import { SET_FILTERS, RESET_FILTERS } from 'constants/filters';
+import { SET_SUPPLY_CHAIN_ANALYSIS_VIEW } from 'constants/supply-analyzer';
+import { DEFAULT_ANALYSIS_VIEW } from 'constants/analysis-indicators';
 import MESSAGES from 'constants/messages';
 import {
   BASELINE_WATER_INDICATORS,
@@ -44,8 +46,25 @@ export function setFilters(filters) {
 }
 
 export function resetFilters() {
-  return (dispatch) => {
+  return (dispatch, getState) => {
+    const { filters: { scope } } = getState();
+
     dispatch({ type: RESET_FILTERS });
+
+    // In the supply-chain analyzer the meaningful filters are the results
+    // filters (watershed / crop / business unit) which live in the analysis
+    // view, so clear those back to their defaults too. Dispatched as a raw
+    // action to avoid an actions <-> actions import cycle.
+    if (scope === 'supply_chain') {
+      dispatch({
+        type: SET_SUPPLY_CHAIN_ANALYSIS_VIEW,
+        payload: {
+          resultFilters: { ...DEFAULT_ANALYSIS_VIEW.resultFilters },
+          resultSort: DEFAULT_ANALYSIS_VIEW.resultSort,
+          resultGrouping: DEFAULT_ANALYSIS_VIEW.resultGrouping,
+        },
+      });
+    }
   };
 }
 

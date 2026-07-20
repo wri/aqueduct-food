@@ -1,7 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import { toggleModal, InfoModal, Icon } from 'aqueduct-components';
 
 import { ANALYSIS_INDICATORS } from 'constants/analysis-indicators';
+import { APP_DEFINITIONS } from 'constants/definitions';
 import {
   computeSummary,
   productionByCrop,
@@ -26,11 +29,29 @@ import {
 
 // ─── Summary metrics ──────────────────────────────────────────────────────────
 
-export const SummaryMetrics = ({ rows, indicator }) => {
-  const { totalProduction, pctHighRisk, locations } = computeSummary(rows, indicator);
+const HIGH_RISK_INFO_SLUG = 'production-high-risk';
+
+const SummaryMetricsComponent = ({ rows, indicator, toggleModal: openModal }) => {
+  const { totalVolume, pctHighRisk, locations } = computeSummary(rows, indicator);
+
+  // Opens the same InfoModal used by the Timeframe / Water Risk help buttons.
+  const showHighRiskInfo = () => {
+    const { props, ...info } = APP_DEFINITIONS[HIGH_RISK_INFO_SLUG] || {};
+    openModal(true, {
+      children: InfoModal,
+      childrenProps: { info, ...props },
+    });
+  };
+
   const metrics = [
-    { key: 'production', label: 'Total Production', value: formatMT(totalProduction), unit: 'MT' },
-    { key: 'risk', label: 'Production Under High Risk', value: formatPct(pctHighRisk), unit: '' },
+    { key: 'production', label: 'Total Volume', value: formatMT(totalVolume), unit: 'MT' },
+    {
+      key: 'risk',
+      label: 'Production Under High Risk',
+      value: formatPct(pctHighRisk),
+      unit: '',
+      onInfo: showHighRiskInfo,
+    },
     { key: 'locations', label: 'Locations', value: locations.toLocaleString(), unit: '' },
   ];
 
@@ -42,17 +63,32 @@ export const SummaryMetrics = ({ rows, indicator }) => {
             {metric.value}
             {metric.unit && <span className="aw-metric-unit">{metric.unit}</span>}
           </span>
-          <span className="aw-metric-label">{metric.label}</span>
+          <span className="aw-metric-label">
+            {metric.label}
+            {metric.onInfo && (
+              <button
+                type="button"
+                className="aw-metric-info"
+                onClick={metric.onInfo}
+                aria-label={`About ${metric.label}`}
+              >
+                <Icon name="icon-question" className="aw-metric-info-icon" />
+              </button>
+            )}
+          </span>
         </div>
       ))}
     </div>
   );
 };
 
-SummaryMetrics.propTypes = {
+SummaryMetricsComponent.propTypes = {
   rows: PropTypes.array.isRequired,
   indicator: PropTypes.string.isRequired,
+  toggleModal: PropTypes.func.isRequired,
 };
+
+export const SummaryMetrics = connect(null, { toggleModal })(SummaryMetricsComponent);
 
 // ─── Charts section ───────────────────────────────────────────────────────────
 
@@ -68,6 +104,13 @@ const AnalyzerWidgets = ({ rows, indicator }) => {
   const indicatorMeta = ANALYSIS_INDICATORS.find(i => i.key === indicator);
   const riskLabel = indicatorMeta ? indicatorMeta.label : 'Water risk';
 
+  // Caption for the hotspots chart depends on the active indicator: Water
+  // Stress vs. the SBTN targets analyses.
+  const isWaterStress = indicator === 'water_stress';
+  const hotspotSubtitle = isWaterStress
+    ? 'Volume sourced of each business unit with high or extremely high water stress'
+    : 'Volume sourced of each business unit above SBTN Quantity targets';
+
   const hotspots = getHotspots(rows, indicator);
   const byCrop = productionByCrop(rows);
   const byCropRisk = productionByCropAndRisk(rows, indicator);
@@ -78,7 +121,7 @@ const AnalyzerWidgets = ({ rows, indicator }) => {
     <div className="aw-charts">
       <ChartCard
         title="High-Risk Hotspots"
-        subtitle={`Business units flagged High for ${riskLabel}, ranked by production`}
+        subtitle={hotspotSubtitle}
         isEmpty={!hotspots.length}
         emptyLabel="No high-risk locations in the current selection."
       >
@@ -91,8 +134,8 @@ const AnalyzerWidgets = ({ rows, indicator }) => {
       </ChartCard>
 
       <ChartCard
-        title="Total Production by Crop"
-        subtitle="Production in MT and share of total (filter by region / business unit above)"
+        title="Total Volume of Crop Sourced"
+        subtitle="Volume of crop sourced as a share of total volume sourced for the business unit"
         isEmpty={!byCrop.length}
       >
         <HorizontalBarChart
@@ -103,7 +146,7 @@ const AnalyzerWidgets = ({ rows, indicator }) => {
 
       <ChartCard
         title="Production by Crop & Risk Distribution"
-        subtitle="Production in MT split by risk band"
+        subtitle="Risk distribution for total volume of crop sourced, separated by crop"
         isEmpty={!byCropRisk.length}
       >
         <RiskLegend />
@@ -112,7 +155,7 @@ const AnalyzerWidgets = ({ rows, indicator }) => {
 
       <ChartCard
         title="Irrigation vs Risk"
-        subtitle="Production in MT by irrigation type, split by risk band"
+        subtitle="Risk distribution for total volume of crop sourced, separated by irrigation type"
         isEmpty={!byIrrigationRisk.length}
       >
         <RiskLegend />
@@ -121,7 +164,7 @@ const AnalyzerWidgets = ({ rows, indicator }) => {
 
       <ChartCard
         title="Production vs Risk"
-        subtitle="Each point is one basin result"
+        subtitle="Volume of crop sourced from basin and basin risk"
         isEmpty={!scatter.length}
       >
         <RiskLegend />
