@@ -126,6 +126,10 @@ export const APP_DEFINITIONS = {
     `,
     source: 'For baseline and future water risk indicators & methodology, see <a href="https://mapspam.info/data/" target="_blank" rel="noopener noreferrer">Aqueduct 4.0</a>. For Food Security projections see <a href="https://cgspace.cgiar.org/items/7b88a53b-5f32-4405-a7d5-a0e25677b9a8" target="_blank" rel="noopener noreferrer">IFPRI IMPACT Model 3.4</a>.'
   },
+  'production-high-risk': {
+    title: 'Production Under High Risk',
+    description: '<p>Percentage of production sourced from basins with a score of 4 or 5.</p>'
+  },
   area: {
     title: 'Area',
     source: '<a href="http://mapspam.info/data/" target="_blank" rel="noopener noreferrer">MapSPAM 2010</a>'

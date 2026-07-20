@@ -7,15 +7,29 @@ import { sum, rollups } from 'd3-array';
 import { format } from 'd3-format';
 
 // ─── Risk bands ────────────────────────────────────────────────────────────
-// Aqueduct-style ramp (red → orange → yellow → green), matching the
-// supply-chain analyzer redesign.
+// Official Aqueduct water-risk ramp (yellow → dark red), matching the
+// Baseline Water Stress legend used across the rest of the tool.
+
+// Aqueduct BWS ramp indexed by category (0 Low … 4 Extremely High). Used by
+// both the charts (below) and the supply-chain basin polygons on the map so
+// the colours stay consistent regardless of the active indicator.
+export const AQUEDUCT_BWS_COLORS = ['#FFFF99', '#FFE600', '#FF9900', '#FF1900', '#990000'];
+export const AQUEDUCT_NO_DATA_COLOR = '#4E4E4E';
+
+// Maps an Aqueduct BWS category (0..4) to its ramp colour.
+export const bwsCatColor = (cat) => {
+  const n = typeof cat === 'number' ? cat : parseFloat(cat);
+  if (!Number.isFinite(n)) return AQUEDUCT_NO_DATA_COLOR;
+  const idx = Math.max(0, Math.min(AQUEDUCT_BWS_COLORS.length - 1, Math.round(n)));
+  return AQUEDUCT_BWS_COLORS[idx];
+};
 
 export const RISK_BANDS = {
-  extreme: { key: 'extreme', label: 'Extremely High', color: '#ef4444' },
-  high: { key: 'high', label: 'High', color: '#fb923c' },
-  medium: { key: 'medium', label: 'Medium', color: '#fde047' },
-  low: { key: 'low', label: 'Low', color: '#86efac' },
-  none: { key: 'none', label: 'No data', color: '#cbd5e1' },
+  extreme: { key: 'extreme', label: 'Extremely High', color: '#990000' },
+  high: { key: 'high', label: 'High', color: '#FF1900' },
+  medium: { key: 'medium', label: 'Medium', color: '#FF9900' },
+  low: { key: 'low', label: 'Low', color: '#FFE600' },
+  none: { key: 'none', label: 'No data', color: AQUEDUCT_NO_DATA_COLOR },
 };
 
 // Stacking / display order (worst first).
@@ -32,8 +46,20 @@ const toNumber = (value) => {
   return Number.isFinite(n) ? n : null;
 };
 
-// Production in MT for a result row (the "Total Volume" the user submitted).
-export const getProduction = row => (toNumber(row.total_volume) || 0);
+// Raw input volume (MT) the user submitted for a location. Echoed onto every
+// basin row for that location, so it must be de-duplicated per unique_id when
+// summing across rows (see computeSummary).
+export const getInputVolume = row => (toNumber(row.total_volume) || 0);
+
+// Volume sourced from a basin (MT) — the share of the location's volume that
+// falls in this basin (basin production ÷ summed production × input volume).
+// This is the "Sourced from Basin" number and is what every chart/metric that
+// reflects risk to the user's own production should use.
+export const getSourced = row => (toNumber(row.production_sourced_from_basin) || 0);
+
+// Back-compat alias. The charts now aggregate the volume sourced from each
+// basin rather than the raw submitted volume.
+export const getProduction = getSourced;
 
 /**
  * Classifies a result row into a risk band for the active indicator, using
@@ -74,15 +100,27 @@ export const isHighRisk = (row, indicatorKey) => HIGH_RISK_BANDS.has(getRiskInfo
 // ─── Aggregations ────────────────────────────────────────────────────────────
 
 export const computeSummary = (rows, indicatorKey) => {
-  const totalProduction = sum(rows, getProduction);
-  const highRiskProduction = sum(
+  // Total Volume = the sum of each location's submitted input volume. A single
+  // location can span several basins (one result row each), so de-duplicate by
+  // unique_id before summing to avoid multiplying the volume by its basin count.
+  const volumeByLocation = new Map();
+  rows.forEach((row) => {
+    const id = row.unique_id != null ? String(row.unique_id) : `${row.pfaf_id}`;
+    if (!volumeByLocation.has(id)) volumeByLocation.set(id, getInputVolume(row));
+  });
+  const totalVolume = sum([...volumeByLocation.values()]);
+
+  // "Production under high risk" is expressed in terms of the volume sourced
+  // from basins scored high / extremely high, as a share of all sourced volume.
+  const totalSourced = sum(rows, getSourced);
+  const highRiskSourced = sum(
     rows.filter(row => isHighRisk(row, indicatorKey)),
-    getProduction,
+    getSourced,
   );
-  const pctHighRisk = totalProduction > 0 ? (highRiskProduction / totalProduction) * 100 : 0;
+  const pctHighRisk = totalSourced > 0 ? (highRiskSourced / totalSourced) * 100 : 0;
   const locations = new Set(rows.map(row => row.unique_id)).size;
   return {
-    totalProduction, highRiskProduction, pctHighRisk, locations,
+    totalVolume, totalSourced, highRiskSourced, pctHighRisk, locations,
   };
 };
 
