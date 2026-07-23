@@ -3,6 +3,7 @@ require('dotenv').config({ silent: true });
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 const isProduction = process.env.NODE_ENV;
 
@@ -112,6 +113,11 @@ const config = {
       inject: 'body',
       filename: 'index.html'
     }),
+    // Copy static assets (templates, images, robots.txt) into dist so they ship
+    // with the production build. Dev server already serves `public/` via contentBase.
+    new CopyWebpackPlugin([
+      { from: path.join(__dirname, '..', '..', 'public'), to: '.' },
+    ]),
     new webpack.HotModuleReplacementPlugin(),
     new webpack.DefinePlugin({
       // 'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
