@@ -172,6 +172,26 @@ export const runFoodSupplyChainAnalysis = (entries, { buffer, geometry, simplify
 };
 
 /**
+ * Fetches the GADM level-1 states/provinces for a country, used to populate the
+ * state dropdown in the country-based manual entry form.
+ *
+ * @param {Object} params
+ * @param {string} [params.isoCode] - 3-letter ISO code (preferred), e.g. "COL"
+ * @param {string} [params.country] - country name fallback, e.g. "Colombia"
+ * @returns {Promise<{ gid_1: string, state: string }[]>}
+ */
+export const fetchSupplyChainStates = ({ isoCode, country } = {}) => {
+  const params = {};
+  if (isoCode) params.iso_code = isoCode;
+  else if (country) params.country = country;
+  if (!params.iso_code && !params.country) return Promise.resolve([]);
+
+  return axios
+    .get(`${ANALYSIS_BASE}/food-supply-chain/gid1`, { params })
+    .then(({ data = {} }) => data.states || []);
+};
+
+/**
  * Checks which of the provided lat/lng entries fall outside land boundaries.
  *
  * @param {Object[]} entries - lat/lng InputPanel entries (must have .id, .latitude, .longitude)

@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { CustomSelect, RadioGroup, IRRIGATION_OPTIONS } from 'aqueduct-components';
 import CountrySelect from 'components/country-select';
+import StateSelect from 'components/analyzer/StateSelect';
 import {
   ENTRY_MODES,
   SORTED_CROP_OPTIONS,
@@ -151,12 +152,12 @@ export function renderCountryFields(form, setField, errs, { lightSurface = false
           <span className="field-label">
             State <span className="optional-mark">(optional)</span>
           </span>
-          <input
-            type="text"
-            className="field-input"
-            placeholder="e.g. Nairobi County"
+          <StateSelect
+            isoCode={form.country || null}
+            country={form.countryName || null}
             value={form.state}
-            onChange={e => setField('state', e.target.value, false)}
+            className={selectClass}
+            onChange={value => setField('state', value, false)}
           />
         </div>
       </div>
