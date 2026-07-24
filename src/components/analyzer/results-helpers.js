@@ -32,8 +32,15 @@ export const RESULT_COLUMN_LABELS = {
 };
 const RESULT_COLUMN_ORDER = Object.keys(RESULT_COLUMN_LABELS);
 
-// Always-hidden columns in the on-screen results table (exported in CSV).
-const HIDDEN_RESULT_COLUMNS = new Set(['unique_id']);
+// Always-hidden columns in the on-screen results table (still present in CSV /
+// API payloads where applicable).
+const HIDDEN_RESULT_COLUMNS = new Set([
+  'unique_id',
+  'country',
+  'basin_production',
+  'summed_production',
+  'gid_1',
+]);
 
 export const GROUP_KEY = {
   watershed: 'pfaf_id',
