@@ -360,7 +360,7 @@ export function summariseEntry(entry) {
       entry.radius ? `${entry.radius} km` : null,
       cropLabel || '—',
       entry.irrigation || null,
-      entry.volume ? `Vol: ${entry.volume}` : null,
+      entry.volume ? `Vol (MT): ${entry.volume}` : null,
     ].filter(Boolean).join(' · ');
   }
   const cropLabel = CROP_OPTIONS.find(c => c.value === entry.crop)?.label || entry.crop;
@@ -369,7 +369,7 @@ export function summariseEntry(entry) {
     entry.state || null,
     cropLabel || null,
     entry.irrigation || null,
-    entry.volume ? `Vol: ${entry.volume}` : null,
+    entry.volume ? `Vol (MT): ${entry.volume}` : null,
   ].filter(Boolean).join(' · ');
 }
 
@@ -380,7 +380,7 @@ function getVolumeValidationIssue(volume) {
     return {
       field: 'volume',
       severity: 'error',
-      message: 'Volume is required',
+      message: 'Volume (MT) is required',
     };
   }
   const parsed = parseFloat(volume);
@@ -388,14 +388,14 @@ function getVolumeValidationIssue(volume) {
     return {
       field: 'volume',
       severity: 'error',
-      message: 'Volume must be a number',
+      message: 'Volume (MT) must be a number',
     };
   }
   if (parsed <= 0) {
     return {
       field: 'volume',
       severity: 'error',
-      message: 'Volume must be greater than 0',
+      message: 'Volume (MT) must be greater than 0',
     };
   }
   return null;
@@ -404,8 +404,8 @@ function getVolumeValidationIssue(volume) {
 function getVolumeFieldError(volume) {
   const issue = getVolumeValidationIssue(volume);
   if (!issue) return null;
-  if (issue.message === 'Volume is required') return 'Required';
-  if (issue.message === 'Volume must be greater than 0') return 'Must be greater than 0';
+  if (issue.message === 'Volume (MT) is required') return 'Required';
+  if (issue.message === 'Volume (MT) must be greater than 0') return 'Must be greater than 0';
   return 'Must be a number';
 }
 

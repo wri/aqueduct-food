@@ -184,7 +184,7 @@ const buildLocationPopup = (properties = {}) => {
     cropLabel && { label: 'Crop', value: cropLabel },
     irrigation && { label: 'Irrigation', value: irrigation },
     properties.radiusKm != null && { label: 'Radius', value: `${properties.radiusKm} km` },
-    properties.volume && { label: 'Volume', value: properties.volume },
+    properties.volume && { label: 'Volume (MT)', value: properties.volume },
     properties.latitude != null && properties.longitude != null && {
       label: 'Coordinates',
       value: `${parseFloat(properties.latitude).toFixed(4)}, ${parseFloat(properties.longitude).toFixed(4)}`,

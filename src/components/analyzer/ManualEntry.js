@@ -105,7 +105,7 @@ export function renderLatlongFields(form, setField, errs, { lightSurface = false
       <div className={`form-row${errs.volume ? ' -invalid' : ''}`}>
         <div className="form-field">
           <span className="field-label">
-            Volume <span className="required-mark">*</span>
+            Volume (MT) <span className="required-mark">*</span>
           </span>
           <input
             type="number"
@@ -197,7 +197,7 @@ export function renderCountryFields(form, setField, errs, { lightSurface = false
       <div className={`form-row${errs.volume ? ' -invalid' : ''}`}>
         <div className="form-field">
           <span className="field-label">
-            Volume <span className="required-mark">*</span>
+            Volume (MT) <span className="required-mark">*</span>
           </span>
           <input
             type="number"
