@@ -1108,6 +1108,7 @@
         }
 
         .cell-info {
+          position: relative;
           display: inline-flex;
           align-items: center;
           justify-content: center;
@@ -1126,17 +1127,20 @@
 
           &:hover,
           &:focus {
+            z-index: 20;
             background: palette(blue, light);
             color: palette(blue, darkest);
             outline: none;
           }
 
-          // Tooltip rendered from the [data-info] attribute on hover/focus.
+          // Tooltip from [data-info]. Anchored to the icon (not the whole cell)
+          // and opened *below* so the first table row isn't clipped by the
+          // scroll container (overflow-x:auto forces overflow-y to clip too).
           &:hover::after,
           &:focus::after {
             content: attr(data-info);
             position: absolute;
-            bottom: calc(100% + 4px);
+            top: calc(100% + 6px);
             left: 50%;
             transform: translateX(-50%);
             min-width: 220px;
@@ -1152,7 +1156,7 @@
             white-space: normal;
             border-radius: 4px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            z-index: 10;
+            z-index: 30;
             pointer-events: none;
           }
         }

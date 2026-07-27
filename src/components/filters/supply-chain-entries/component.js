@@ -72,11 +72,7 @@ class SupplyChainEntriesList extends PureComponent {
 
     const updated = entries.map((e) => {
       if (e.id !== editingId) return e;
-      // Country entries' auto-slugs depend on country/state, so clear the slug
-      // on edit and let fillMissingBusinessUnits recompute it.
-      const next = { ...editDraft, id: editingId };
-      if (next.type === 'country') next.businessUnit = '';
-      return next;
+      return { ...editDraft, id: editingId };
     });
 
     setEntries(fillMissingBusinessUnits(updated));

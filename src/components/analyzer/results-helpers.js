@@ -38,6 +38,7 @@ const RESULT_COLUMN_ORDER = Object.keys(RESULT_COLUMN_LABELS);
 const HIDDEN_RESULT_COLUMNS = new Set([
   'unique_id',
   'country',
+  'iso_code',
   'basin_production',
   'summed_production',
   'gid_1',
@@ -86,6 +87,10 @@ export function formatResultCell(value, columnKey) {
   if (columnKey === 'irrigation') {
     return formatIrrigationLabel(value) || '—';
   }
+  // Basin / PFAF ids are identifiers — never insert thousands separators.
+  if (columnKey === 'pfaf_id') {
+    return String(value);
+  }
   if (typeof value === 'number') {
     if (!Number.isFinite(value)) return String(value);
     if (Number.isInteger(value)) return value.toLocaleString();
@@ -100,11 +105,14 @@ function entryByIdMap(analysisEntries) {
   return byId;
 }
 
-// Resolves business_unit for a result/error row, preferring the API value and
-// falling back to the source entry's businessUnit.
+// Resolves business_unit for a result/error row. Prefers the user-facing entry
+// value (manual / upload) over anything the API echoes back, so a location
+// name returned by the API never replaces the entry's business unit.
 export function businessUnitForUniqueId(uniqueId, analysisEntries, apiValue) {
   const entry = entryByIdMap(analysisEntries)[String(uniqueId)];
-  return apiValue || (entry && entry.businessUnit) || '';
+  const fromEntry = entry && entry.businessUnit && String(entry.businessUnit).trim();
+  if (fromEntry) return fromEntry;
+  return apiValue || '';
 }
 
 // Crop display name from an API result row. Accepts the new `commodity`
