@@ -9,7 +9,7 @@ export const ANALYSIS_INDICATORS = [
     key: 'water_stress',
     label: 'Water Stress',
     shortLabel: 'BWS',
-    description: 'Aqueduct Baseline Water Stress (BWS) — share of available water withdrawn by all users in a basin.',
+    description: 'Aqueduct Baseline Water Stress (BWS) – competition over renewable, available water OR ratio of water demand to renewable, available water',
     columns: ['bws_label', 'bws_score', 'bws_cat', 'bws_raw', 'production_sourced_from_basin'],
   },
   {

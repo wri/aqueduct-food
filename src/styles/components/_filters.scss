@@ -971,6 +971,18 @@
         color: rgba(255, 255, 255, 0.85);
       }
     }
+
+    // Greyed out while the Charts tab is active (grouping only applies to Table).
+    &.-disabled {
+      opacity: 0.4;
+      pointer-events: none;
+      user-select: none;
+
+      .results-grouping-label,
+      .c-radio label {
+        color: rgba(255, 255, 255, 0.45);
+      }
+    }
   }
 
   // ── Filter / sort row ──────────────────────────────────────────────────

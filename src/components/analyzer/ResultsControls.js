@@ -15,6 +15,7 @@ const ResultsControls = ({
   resultFilters,
   resultSort,
   resultGrouping,
+  resultView,
   onActiveIndicatorChange,
   onResultFilterChange,
   onResultSortChange,
@@ -29,6 +30,8 @@ const ResultsControls = ({
   const businessUnitOptions = [...new Set(augmented.map(r => r.business_unit).filter(Boolean))].sort();
 
   const selectedIndicator = ANALYSIS_INDICATORS.find(i => i.key === activeIndicator);
+  // Group-by only applies to the table view; grey it out while Charts is active.
+  const groupingDisabled = resultView === 'charts';
 
   return (
     <div className="review-screen">
@@ -59,7 +62,7 @@ const ResultsControls = ({
       </div>
 
       {/* Group-by radio */}
-      <div className="results-grouping">
+      <div className={`results-grouping${groupingDisabled ? ' -disabled' : ''}`}>
         <span className="results-grouping-label">Group by</span>
         <RadioGroup
           name="result-grouping"
@@ -71,7 +74,9 @@ const ResultsControls = ({
             { value: 'business_unit', label: 'Business Unit' },
           ]}
           selected={resultGrouping}
-          onChange={({ value }) => onResultGroupingChange(value)}
+          onChange={({ value }) => {
+            if (!groupingDisabled) onResultGroupingChange(value);
+          }}
         />
       </div>
 
@@ -144,6 +149,7 @@ ResultsControls.propTypes = {
   resultFilters: PropTypes.object.isRequired,
   resultSort: PropTypes.string.isRequired,
   resultGrouping: PropTypes.string.isRequired,
+  resultView: PropTypes.string,
   onActiveIndicatorChange: PropTypes.func.isRequired,
   onResultFilterChange: PropTypes.func.isRequired,
   onResultSortChange: PropTypes.func.isRequired,
@@ -154,6 +160,7 @@ ResultsControls.propTypes = {
 ResultsControls.defaultProps = {
   analysisResults: null,
   analysisEntries: [],
+  resultView: 'table',
 };
 
 export default ResultsControls;
