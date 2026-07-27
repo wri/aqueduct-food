@@ -15,7 +15,6 @@ import {
   formatMT,
   formatMTLong,
   formatPct,
-  RISK_BANDS,
 } from 'utils/analysis-widgets';
 
 import {
@@ -25,6 +24,7 @@ import {
   HorizontalBarChart,
   StackedBarChart,
   ScatterPlot,
+  AQUEDUCT_BLUE,
 } from './Charts';
 
 // ─── Summary metrics ──────────────────────────────────────────────────────────
@@ -108,7 +108,7 @@ const AnalyzerWidgets = ({ rows, indicator }) => {
   // Stress vs. the SBTN targets analyses.
   const isWaterStress = indicator === 'water_stress';
   const hotspotSubtitle = isWaterStress
-    ? 'Volume sourced of each business unit with high or extremely high water stress'
+    ? 'Volume sourced by each business unit exposed to high-to-extremely high water stress'
     : 'Volume sourced of each business unit above SBTN Quantity targets';
 
   const hotspots = getHotspots(rows, indicator);
@@ -129,7 +129,7 @@ const AnalyzerWidgets = ({ rows, indicator }) => {
           data={hotspots}
           formatValue={formatMTLong}
           formatShare={formatPct}
-          barColor={RISK_BANDS.extreme.color}
+          barColor={AQUEDUCT_BLUE}
         />
       </ChartCard>
 
@@ -141,6 +141,7 @@ const AnalyzerWidgets = ({ rows, indicator }) => {
         <HorizontalBarChart
           data={byCrop}
           formatValue={(value, datum) => `${formatMT(value)} (${formatPct(datum.pct)})`}
+          barColor={AQUEDUCT_BLUE}
         />
       </ChartCard>
 
@@ -163,8 +164,8 @@ const AnalyzerWidgets = ({ rows, indicator }) => {
       </ChartCard>
 
       <ChartCard
-        title="Production vs Risk"
-        subtitle="Volume of crop sourced from basin and basin risk"
+        title="Basin Comparison of Production and Risk"
+        subtitle="Volume of crop source vs. risk score per basin"
         isEmpty={!scatter.length}
       >
         <RiskLegend />

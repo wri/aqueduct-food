@@ -53,6 +53,34 @@ export const SORTED_CROP_OPTIONS = CROP_OPTIONS
 export const VALID_IRRIGATION_VALUES = new Set(IRRIGATION_OPTIONS.map(i => i.value));
 export const VALID_CROP_VALUES = new Set(CROP_OPTIONS.map(c => c.value));
 
+// Display labels for irrigation throughout the supply-chain analyzer. The
+// underlying value stays `all` / `irrigated` / `rainfed`; "Both" and "Unknown"
+// from templates/API responses are shown as "All/Unknown".
+export const SUPPLY_CHAIN_IRRIGATION_OPTIONS = [
+  { value: 'all', label: 'All/Unknown' },
+  { value: 'irrigated', label: 'Irrigated' },
+  { value: 'rainfed', label: 'Rainfed' },
+];
+
+/**
+ * Normalises any irrigation string (UI slug, API value, or template label)
+ * to the display label used across the tool.
+ *
+ * @param {string} value
+ * @returns {string}
+ */
+export function formatIrrigationLabel(value) {
+  const v = String(value == null ? '' : value).toLowerCase().trim();
+  if (!v) return '';
+  if (v === 'irrigated') return 'Irrigated';
+  if (v === 'rainfed') return 'Rainfed';
+  // all / both / unknown / "all/unknown" → single display label
+  if (v === 'all' || v === 'both' || v === 'unknown' || v === 'all/unknown') {
+    return 'All/Unknown';
+  }
+  return String(value);
+}
+
 // ─── Analysis API field mappings ─────────────────────────────────────────────
 
 // Maps the lowercase crop slug used in the UI to the display name expected by

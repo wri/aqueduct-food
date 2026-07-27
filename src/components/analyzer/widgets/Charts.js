@@ -8,8 +8,9 @@ import { RISK_BANDS, RISK_BAND_KEYS } from 'utils/analysis-widgets';
 // sidebar. Each chart draws into a fixed viewBox and stretches to the
 // container width via `width="100%"`, so it stays crisp at any panel size.
 
-// Light / slate palette to match the analyzer redesign.
-const ACCENT = RISK_BANDS.high.color; // Aqueduct high (orange-red)
+// Aqueduct brand blue for non-risk magnitude charts (hotspots, crop volume).
+export const AQUEDUCT_BLUE = '#2E57B8';
+const ACCENT = AQUEDUCT_BLUE;
 const AXIS = '#e2e8f0'; // slate-200
 const LABEL = '#334155'; // slate-700
 const MUTED = '#64748b'; // slate-500
@@ -289,7 +290,7 @@ export const ScatterPlot = ({
   const W = 320;
   const H = 210;
   const padL = 44;
-  const padR = 12;
+  const padR = 18;
   const padT = 10;
   const padB = 26;
   const plotW = W - padL - padR;
@@ -301,9 +302,9 @@ export const ScatterPlot = ({
 
   const yTicks = [0, 0.5, 1].map(t => t * maxY);
   const xTicks = [
-    { value: 0, label: 'Low' },
-    { value: 0.5, label: 'Med' },
-    { value: 1, label: 'High' },
+    { value: 0, label: 'Low', anchor: 'start' },
+    { value: 0.5, label: 'Med', anchor: 'middle' },
+    { value: 1, label: 'Extremely High', anchor: 'end' },
   ];
   const { wrapRef, tip, show, hide } = useChartTooltip();
 
@@ -326,7 +327,7 @@ export const ScatterPlot = ({
         {/* X axis */}
         <line x1={padL} y1={padT + plotH} x2={W - padR} y2={padT + plotH} stroke={AXIS} />
         {xTicks.map(t => (
-          <text key={t.label} x={xScale(t.value)} y={padT + plotH + 12} textAnchor="middle" fontSize="9" fill={MUTED}>
+          <text key={t.label} x={xScale(t.value)} y={padT + plotH + 12} textAnchor={t.anchor} fontSize="8" fill={MUTED}>
             {t.label}
           </text>
         ))}

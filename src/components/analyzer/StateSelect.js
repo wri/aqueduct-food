@@ -72,18 +72,21 @@ class StateSelect extends React.Component {
       );
     }
 
+    // Leading "none selected" option so users can clear a prior choice.
     // Keep the current value selectable even if it isn't in the fetched list
     // (e.g. legacy typed values or values from an uploaded file).
-    const selectOptions = value && !options.some(o => o.value === value)
+    const noneOption = { value: '', label: 'Select a state / province' };
+    const withCurrent = value && !options.some(o => o.value === value)
       ? [{ value, label: value }, ...options]
       : options;
+    const selectOptions = [noneOption, ...withCurrent];
 
     return (
       <CustomSelect
         search
         className={className}
         options={selectOptions}
-        value={value || null}
+        value={value || ''}
         placeholder={loading ? 'Loading states…' : 'Select a state / province'}
         onValueChange={this.handleChange}
       />

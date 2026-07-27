@@ -20,6 +20,7 @@ const SupplyChainResultsControls = ({
       resultFilters={view.resultFilters}
       resultSort={view.resultSort}
       resultGrouping={view.resultGrouping}
+      resultView={view.resultView}
       onActiveIndicatorChange={value => onViewChange({ activeIndicator: value })}
       onResultFilterChange={(field, value) => onViewChange({
         resultFilters: { ...view.resultFilters, [field]: value },

@@ -6,35 +6,25 @@ import {
   IRRIGATION_API_VALUES,
   DEFAULT_RADIUS_KM,
   DEFAULT_VOLUME,
+  formatIrrigationLabel,
 } from 'constants/supply-analyzer';
 
 // ─── Business unit auto-population ────────────────────────────────────────────
 
-function slugifyForBusinessUnit(str) {
-  return String(str || '')
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
-}
-
 /**
  * Computes the auto-generated business_unit for a single entry, given the
- * set of business_units already taken by other entries. Convention:
+ * set of business_units already taken by other entries.
  *
- *   - latlong entries → `point1`, `point2`, … (next index after the current max)
- *   - country entries → `<country>` (e.g. `argentina`)
- *   - country + state → `<country>-<state>` (e.g. `colombia-santander`)
- *
- * Country/state slugs that clash with an existing entry get a `-2`, `-3`, …
- * suffix so each entry stays uniquely addressable.
+ * Manual entries (lat/long and country) get sequential `point1`, `point2`, …
+ * names — never the location itself (country/state), so Business Unit stays a
+ * stable identifier distinct from geography. Uploaded templates that already
+ * supply a Business Unit are left untouched by `fillMissingBusinessUnits`.
  */
 export function defaultBusinessUnitFor(entry, taken) {
   if (!entry) return '';
   const takenSet = taken instanceof Set ? taken : new Set(taken);
 
-  if (entry.type === 'latlong') {
+  if (entry.type === 'latlong' || entry.type === 'country') {
     let max = 0;
     takenSet.forEach((bu) => {
       const match = /^point(\d+)$/.exec(bu);
@@ -44,17 +34,6 @@ export function defaultBusinessUnitFor(entry, taken) {
       }
     });
     return `point${max + 1}`;
-  }
-
-  if (entry.type === 'country') {
-    const country = slugifyForBusinessUnit(entry.countryName || entry.country);
-    const state = slugifyForBusinessUnit(entry.state);
-    const base = state ? `${country}-${state}` : country;
-    if (!base) return '';
-    if (!takenSet.has(base)) return base;
-    let n = 2;
-    while (takenSet.has(`${base}-${n}`)) n += 1;
-    return `${base}-${n}`;
   }
 
   return '';
@@ -149,7 +128,8 @@ function resolveTemplateHeaders(headerRow = []) {
 
 const templateCell = (row, idx) => (idx == null || row[idx] == null ? '' : String(row[idx]).trim());
 
-// Template irrigation labels (Rainfed / Irrigated / Both / Unknown) → tool values.
+// Template irrigation labels (Rainfed / Irrigated / Both / Unknown / All) →
+// tool values. Both / Unknown / All collapse to `all` (shown as All/Unknown).
 function normalizeTemplateIrrigation(value) {
   const v = String(value || '').toLowerCase().trim();
   if (v === 'rainfed') return 'rainfed';
@@ -359,8 +339,8 @@ export function summariseEntry(entry) {
       `${lat}, ${lng}`,
       entry.radius ? `${entry.radius} km` : null,
       cropLabel || '—',
-      entry.irrigation || null,
-      entry.volume ? `Vol: ${entry.volume}` : null,
+      formatIrrigationLabel(entry.irrigation) || null,
+      entry.volume ? `Vol (MT): ${entry.volume}` : null,
     ].filter(Boolean).join(' · ');
   }
   const cropLabel = CROP_OPTIONS.find(c => c.value === entry.crop)?.label || entry.crop;
@@ -368,8 +348,8 @@ export function summariseEntry(entry) {
     entry.countryName || entry.country,
     entry.state || null,
     cropLabel || null,
-    entry.irrigation || null,
-    entry.volume ? `Vol: ${entry.volume}` : null,
+    formatIrrigationLabel(entry.irrigation) || null,
+    entry.volume ? `Vol (MT): ${entry.volume}` : null,
   ].filter(Boolean).join(' · ');
 }
 
@@ -380,7 +360,7 @@ function getVolumeValidationIssue(volume) {
     return {
       field: 'volume',
       severity: 'error',
-      message: 'Volume is required',
+      message: 'Volume (MT) is required',
     };
   }
   const parsed = parseFloat(volume);
@@ -388,14 +368,14 @@ function getVolumeValidationIssue(volume) {
     return {
       field: 'volume',
       severity: 'error',
-      message: 'Volume must be a number',
+      message: 'Volume (MT) must be a number',
     };
   }
   if (parsed <= 0) {
     return {
       field: 'volume',
       severity: 'error',
-      message: 'Volume must be greater than 0',
+      message: 'Volume (MT) must be greater than 0',
     };
   }
   return null;
@@ -404,8 +384,8 @@ function getVolumeValidationIssue(volume) {
 function getVolumeFieldError(volume) {
   const issue = getVolumeValidationIssue(volume);
   if (!issue) return null;
-  if (issue.message === 'Volume is required') return 'Required';
-  if (issue.message === 'Volume must be greater than 0') return 'Must be greater than 0';
+  if (issue.message === 'Volume (MT) is required') return 'Required';
+  if (issue.message === 'Volume (MT) must be greater than 0') return 'Must be greater than 0';
   return 'Must be a number';
 }
 

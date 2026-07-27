@@ -3,6 +3,7 @@ import {
   INDICATOR_COLUMN_KEYS,
   computeRiskScore,
 } from 'constants/analysis-indicators';
+import { formatIrrigationLabel } from 'constants/supply-analyzer';
 
 // Shared helpers for the analysis results screen, used by both the controls
 // (header) and the data table/charts (section below).
@@ -28,12 +29,20 @@ export const RESULT_COLUMN_LABELS = {
   sbtn_qual_max: 'SBTN Qual',
   basin_production: 'Basin Production',
   summed_production: 'Summed Production',
-  production_sourced_from_basin: 'Sourced From Basin',
+  production_sourced_from_basin: 'Sourced From Basin (MT)',
 };
 const RESULT_COLUMN_ORDER = Object.keys(RESULT_COLUMN_LABELS);
 
-// Always-hidden columns in the on-screen results table (exported in CSV).
-const HIDDEN_RESULT_COLUMNS = new Set(['unique_id']);
+// Always-hidden columns in the on-screen results table (still present in CSV /
+// API payloads where applicable).
+const HIDDEN_RESULT_COLUMNS = new Set([
+  'unique_id',
+  'country',
+  'iso_code',
+  'basin_production',
+  'summed_production',
+  'gid_1',
+]);
 
 export const GROUP_KEY = {
   watershed: 'pfaf_id',
@@ -71,9 +80,17 @@ export function getResultColumns(rows, activeIndicatorKey) {
 }
 
 // Renders a value for a results-table cell. Numbers get a sensible decimal
-// truncation; nullish values get an em-dash placeholder.
-export function formatResultCell(value) {
+// truncation; nullish values get an em-dash placeholder. Pass `columnKey` so
+// irrigation values are normalised to Irrigated / Rainfed / All/Unknown.
+export function formatResultCell(value, columnKey) {
   if (value === null || value === undefined || value === '') return '—';
+  if (columnKey === 'irrigation') {
+    return formatIrrigationLabel(value) || '—';
+  }
+  // Basin / PFAF ids are identifiers — never insert thousands separators.
+  if (columnKey === 'pfaf_id') {
+    return String(value);
+  }
   if (typeof value === 'number') {
     if (!Number.isFinite(value)) return String(value);
     if (Number.isInteger(value)) return value.toLocaleString();
@@ -88,11 +105,14 @@ function entryByIdMap(analysisEntries) {
   return byId;
 }
 
-// Resolves business_unit for a result/error row, preferring the API value and
-// falling back to the source entry's businessUnit.
+// Resolves business_unit for a result/error row. Prefers the user-facing entry
+// value (manual / upload) over anything the API echoes back, so a location
+// name returned by the API never replaces the entry's business unit.
 export function businessUnitForUniqueId(uniqueId, analysisEntries, apiValue) {
   const entry = entryByIdMap(analysisEntries)[String(uniqueId)];
-  return apiValue || (entry && entry.businessUnit) || '';
+  const fromEntry = entry && entry.businessUnit && String(entry.businessUnit).trim();
+  if (fromEntry) return fromEntry;
+  return apiValue || '';
 }
 
 // Crop display name from an API result row. Accepts the new `commodity`

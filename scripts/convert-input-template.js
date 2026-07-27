@@ -150,7 +150,7 @@ function normalizeIrrigation(value) {
   const v = normalize(value);
   if (v === 'rainfed') return 'rainfed';
   if (v === 'irrigated') return 'irrigated';
-  return 'all'; // Both / Unknown / All / blank
+  return 'all'; // Both / Unknown / All / blank → All/Unknown in the UI
 }
 
 function normalizeCrop(label, code) {

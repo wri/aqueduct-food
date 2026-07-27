@@ -9,7 +9,7 @@ export const ANALYSIS_INDICATORS = [
     key: 'water_stress',
     label: 'Water Stress',
     shortLabel: 'BWS',
-    description: 'Aqueduct Baseline Water Stress (BWS) — share of available water withdrawn by all users in a basin.',
+    description: 'Aqueduct Baseline Water Stress (BWS) – competition over renewable, available water OR ratio of water demand to renewable, available water',
     columns: ['bws_label', 'bws_score', 'bws_cat', 'bws_raw', 'production_sourced_from_basin'],
   },
   {
@@ -17,14 +17,14 @@ export const ANALYSIS_INDICATORS = [
     label: 'SBTN Quantity',
     shortLabel: 'SBTN Q',
     description: 'Science-Based Targets Network — basin-level water-quantity pressure (1 Very Low … 5 Very High).',
-    columns: ['sbtn_quant_max', 'total_volume', 'summed_production', 'production_sourced_from_basin', 'basin_production'],
+    columns: ['sbtn_quant_max', 'total_volume', 'production_sourced_from_basin'],
   },
   {
     key: 'sbtn_quality',
     label: 'SBTN Quality',
     shortLabel: 'SBTN Qual',
     description: 'Science-Based Targets Network — basin-level water-quality pressure (1 Very Low … 5 Very High).',
-    columns: ['sbtn_qual_max', 'total_volume', 'summed_production', 'production_sourced_from_basin', 'basin_production'],
+    columns: ['sbtn_qual_max', 'total_volume', 'production_sourced_from_basin'],
   },
 ];
 

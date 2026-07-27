@@ -15,6 +15,7 @@ import { bwsCatColor, AQUEDUCT_NO_DATA_COLOR } from 'utils/analysis-widgets';
 
 // constants
 import { CROP_OPTIONS } from 'constants/crops';
+import { formatIrrigationLabel } from 'constants/supply-analyzer';
 import { ZOOM_DISPLAYS_TOP } from './constants';
 
 export const getBuckets = (layer = {}, filters = {}) => {
@@ -177,14 +178,14 @@ const buildLocationPopup = (properties = {}) => {
   const cropLabel = CROP_OPTIONS.find(c => c.value === properties.crop)?.label
     || properties.crop;
   const irrigation = properties.irrigation
-    ? capitalize(properties.irrigation)
+    ? formatIrrigationLabel(properties.irrigation)
     : null;
 
   const rows = [
     cropLabel && { label: 'Crop', value: cropLabel },
     irrigation && { label: 'Irrigation', value: irrigation },
     properties.radiusKm != null && { label: 'Radius', value: `${properties.radiusKm} km` },
-    properties.volume && { label: 'Volume', value: properties.volume },
+    properties.volume && { label: 'Volume (MT)', value: properties.volume },
     properties.latitude != null && properties.longitude != null && {
       label: 'Coordinates',
       value: `${parseFloat(properties.latitude).toFixed(4)}, ${parseFloat(properties.longitude).toFixed(4)}`,
@@ -330,7 +331,7 @@ const BASIN_POPUP_LABELS = {
   sbtn_qual_max: 'SBTN Quality',
   basin_production: 'Basin Production',
   summed_production: 'Summed Production',
-  production_sourced_from_basin: 'Sourced From Basin',
+  production_sourced_from_basin: 'Sourced From Basin (MT)',
 };
 
 // Keys handled in the popup header (title) so they aren't repeated in the body.
@@ -353,7 +354,11 @@ const buildBasinPopup = (properties = {}) => {
 
   const rows = [...orderedKeys, ...extraKeys].map((key) => {
     const label = BASIN_POPUP_LABELS[key] || key;
-    return `<div class="dc"><span class="dt">${escapeHTML(label)}</span><span class="dd">${formatBasinValue(popupProps[key])}</span></div>`;
+    const raw = popupProps[key];
+    const display = key === 'irrigation'
+      ? escapeHTML(formatIrrigationLabel(raw))
+      : formatBasinValue(raw);
+    return `<div class="dc"><span class="dt">${escapeHTML(label)}</span><span class="dd">${display}</span></div>`;
   }).join('');
 
   return `<div class="c-infowindow">
