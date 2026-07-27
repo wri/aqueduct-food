@@ -106,7 +106,7 @@ const Results = ({
                 const numericTitle = typeof row[key] === 'number' ? String(row[key]) : undefined;
                 return (
                   <td key={key} title={!tooltip ? numericTitle : undefined}>
-                    <span className="cell-value">{formatResultCell(row[key])}</span>
+                    <span className="cell-value">{formatResultCell(row[key], key)}</span>
                     {tooltip && (
                       <span
                         className="cell-info"

@@ -6,6 +6,7 @@ import {
   IRRIGATION_API_VALUES,
   DEFAULT_RADIUS_KM,
   DEFAULT_VOLUME,
+  formatIrrigationLabel,
 } from 'constants/supply-analyzer';
 
 // ─── Business unit auto-population ────────────────────────────────────────────
@@ -149,7 +150,8 @@ function resolveTemplateHeaders(headerRow = []) {
 
 const templateCell = (row, idx) => (idx == null || row[idx] == null ? '' : String(row[idx]).trim());
 
-// Template irrigation labels (Rainfed / Irrigated / Both / Unknown) → tool values.
+// Template irrigation labels (Rainfed / Irrigated / Both / Unknown / All) →
+// tool values. Both / Unknown / All collapse to `all` (shown as All/Unknown).
 function normalizeTemplateIrrigation(value) {
   const v = String(value || '').toLowerCase().trim();
   if (v === 'rainfed') return 'rainfed';
@@ -359,7 +361,7 @@ export function summariseEntry(entry) {
       `${lat}, ${lng}`,
       entry.radius ? `${entry.radius} km` : null,
       cropLabel || '—',
-      entry.irrigation || null,
+      formatIrrigationLabel(entry.irrigation) || null,
       entry.volume ? `Vol (MT): ${entry.volume}` : null,
     ].filter(Boolean).join(' · ');
   }
@@ -368,7 +370,7 @@ export function summariseEntry(entry) {
     entry.countryName || entry.country,
     entry.state || null,
     cropLabel || null,
-    entry.irrigation || null,
+    formatIrrigationLabel(entry.irrigation) || null,
     entry.volume ? `Vol (MT): ${entry.volume}` : null,
   ].filter(Boolean).join(' · ');
 }

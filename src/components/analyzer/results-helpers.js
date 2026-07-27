@@ -3,6 +3,7 @@ import {
   INDICATOR_COLUMN_KEYS,
   computeRiskScore,
 } from 'constants/analysis-indicators';
+import { formatIrrigationLabel } from 'constants/supply-analyzer';
 
 // Shared helpers for the analysis results screen, used by both the controls
 // (header) and the data table/charts (section below).
@@ -78,9 +79,13 @@ export function getResultColumns(rows, activeIndicatorKey) {
 }
 
 // Renders a value for a results-table cell. Numbers get a sensible decimal
-// truncation; nullish values get an em-dash placeholder.
-export function formatResultCell(value) {
+// truncation; nullish values get an em-dash placeholder. Pass `columnKey` so
+// irrigation values are normalised to Irrigated / Rainfed / All/Unknown.
+export function formatResultCell(value, columnKey) {
   if (value === null || value === undefined || value === '') return '—';
+  if (columnKey === 'irrigation') {
+    return formatIrrigationLabel(value) || '—';
+  }
   if (typeof value === 'number') {
     if (!Number.isFinite(value)) return String(value);
     if (Number.isInteger(value)) return value.toLocaleString();

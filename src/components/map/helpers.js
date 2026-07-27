@@ -15,6 +15,7 @@ import { bwsCatColor, AQUEDUCT_NO_DATA_COLOR } from 'utils/analysis-widgets';
 
 // constants
 import { CROP_OPTIONS } from 'constants/crops';
+import { formatIrrigationLabel } from 'constants/supply-analyzer';
 import { ZOOM_DISPLAYS_TOP } from './constants';
 
 export const getBuckets = (layer = {}, filters = {}) => {
@@ -177,7 +178,7 @@ const buildLocationPopup = (properties = {}) => {
   const cropLabel = CROP_OPTIONS.find(c => c.value === properties.crop)?.label
     || properties.crop;
   const irrigation = properties.irrigation
-    ? capitalize(properties.irrigation)
+    ? formatIrrigationLabel(properties.irrigation)
     : null;
 
   const rows = [
@@ -353,7 +354,11 @@ const buildBasinPopup = (properties = {}) => {
 
   const rows = [...orderedKeys, ...extraKeys].map((key) => {
     const label = BASIN_POPUP_LABELS[key] || key;
-    return `<div class="dc"><span class="dt">${escapeHTML(label)}</span><span class="dd">${formatBasinValue(popupProps[key])}</span></div>`;
+    const raw = popupProps[key];
+    const display = key === 'irrigation'
+      ? escapeHTML(formatIrrigationLabel(raw))
+      : formatBasinValue(raw);
+    return `<div class="dc"><span class="dt">${escapeHTML(label)}</span><span class="dd">${display}</span></div>`;
   }).join('');
 
   return `<div class="c-infowindow">

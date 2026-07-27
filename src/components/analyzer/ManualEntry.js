@@ -1,11 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { CustomSelect, RadioGroup, IRRIGATION_OPTIONS } from 'aqueduct-components';
+import { CustomSelect, RadioGroup } from 'aqueduct-components';
 import CountrySelect from 'components/country-select';
 import StateSelect from 'components/analyzer/StateSelect';
 import {
   ENTRY_MODES,
   SORTED_CROP_OPTIONS,
+  SUPPLY_CHAIN_IRRIGATION_OPTIONS,
 } from 'constants/supply-analyzer';
 
 // ─── Shared field-set renderers (no `this`) ──────────────────────────────────
@@ -93,7 +94,7 @@ export function renderLatlongFields(form, setField, errs, { lightSurface = false
           </span>
           <RadioGroup
             name={`irrigation-${form.latitude || 'new'}`}
-            items={IRRIGATION_OPTIONS}
+            items={SUPPLY_CHAIN_IRRIGATION_OPTIONS}
             selected={form.irrigation}
             onChange={({ value }) => setField('irrigation', value)}
             className={radioClass}
@@ -185,7 +186,7 @@ export function renderCountryFields(form, setField, errs, { lightSurface = false
           </span>
           <RadioGroup
             name={`country-irrigation-${form.country || 'new'}`}
-            items={IRRIGATION_OPTIONS}
+            items={SUPPLY_CHAIN_IRRIGATION_OPTIONS}
             selected={form.irrigation}
             onChange={({ value }) => setField('irrigation', value)}
             className={radioClass}
@@ -251,7 +252,7 @@ const ManualEntry = ({
         className="add-location-btn"
         onClick={onAddEntry}
       >
-        + Add Location
+        Add Location
       </button>
     </div>
   </div>

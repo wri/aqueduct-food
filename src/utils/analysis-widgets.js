@@ -5,6 +5,7 @@
 
 import { sum, rollups } from 'd3-array';
 import { format } from 'd3-format';
+import { formatIrrigationLabel } from 'constants/supply-analyzer';
 
 // ─── Risk bands ────────────────────────────────────────────────────────────
 // Official Aqueduct water-risk ramp (yellow → dark red), matching the
@@ -168,7 +169,7 @@ export const productionByCropAndRisk = (rows, indicatorKey) => productionByDimen
 );
 
 export const productionByIrrigationAndRisk = (rows, indicatorKey) => productionByDimensionAndRisk(
-  rows, indicatorKey, row => row.irrigation || '—',
+  rows, indicatorKey, row => formatIrrigationLabel(row.irrigation) || '—',
 );
 
 // Human-friendly label for a hotspot row. Prefers the business unit (which is

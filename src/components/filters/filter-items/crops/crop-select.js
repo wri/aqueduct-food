@@ -82,7 +82,11 @@ CropSelect.defaultProps = {
   cropOptions: CROP_OPTIONS,
   crop: null,
   onCropChange: () => {},
-  irrigationOptions: IRRIGATION_OPTIONS,
+  // "All" is shown as "All/Unknown" so irrigation labels stay consistent
+  // across the tool (no separate Both / Unknown options).
+  irrigationOptions: IRRIGATION_OPTIONS.map(opt => (
+    opt.value === 'all' ? { ...opt, label: 'All/Unknown' } : opt
+  )),
   irrigation: 'all',
   onIrrigationChange: () => {},
   className: ''
