@@ -330,7 +330,7 @@ const BASIN_POPUP_LABELS = {
   sbtn_qual_max: 'SBTN Quality',
   basin_production: 'Basin Production',
   summed_production: 'Summed Production',
-  production_sourced_from_basin: 'Sourced From Basin',
+  production_sourced_from_basin: 'Sourced From Basin (MT)',
 };
 
 // Keys handled in the popup header (title) so they aren't repeated in the body.

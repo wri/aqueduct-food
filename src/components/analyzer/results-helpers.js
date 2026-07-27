@@ -28,7 +28,7 @@ export const RESULT_COLUMN_LABELS = {
   sbtn_qual_max: 'SBTN Qual',
   basin_production: 'Basin Production',
   summed_production: 'Summed Production',
-  production_sourced_from_basin: 'Sourced From Basin',
+  production_sourced_from_basin: 'Sourced From Basin (MT)',
 };
 const RESULT_COLUMN_ORDER = Object.keys(RESULT_COLUMN_LABELS);
 
