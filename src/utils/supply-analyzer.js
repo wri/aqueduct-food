@@ -67,7 +67,7 @@ export function fillMissingBusinessUnits(entries) {
 // from `public/templates`. Filled copies are converted on upload (see
 // `parseTemplateRows` below and the input-panel upload handler).
 
-export const INPUT_TEMPLATE_FILENAME = 'AqueductFood_SupplyChain_Input_Template_All_Data_Levels.xlsm';
+export const INPUT_TEMPLATE_FILENAME = 'AqueductFood_SupplyChain_Input_Template_20260728.xlsm';
 // Relative so it works with production `publicPath: './'` (app is served from a
 // subdirectory). Webpack copies `public/templates` into `dist/templates`.
 export const INPUT_TEMPLATE_URL = `./templates/${INPUT_TEMPLATE_FILENAME}`;
