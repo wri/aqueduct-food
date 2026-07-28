@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Converts the "pretty" supply-chain input template
- * (AqueductFood_SupplyChain_Input_Template_All_Data_Levels.xlsm) into the flat
+ * (AqueductFood_SupplyChain_Input_Template_20260728.xlsm) into the flat
  * CSV that the in-tool bulk uploader understands (see `parseCSVText` in
  * `src/utils/supply-analyzer.js`).
  *
